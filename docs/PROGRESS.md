@@ -80,4 +80,5 @@ npm melaporkan 17 advisori pada dependency tree (6 low, 11 moderate) setelah ins
 
 - Tidak ada butir Tahap 1 yang tertinggal dari spesifikasi yang tersedia.
 - Tidak ada perintah yang menulis ke database; tidak ada skema yang diubah.
-- Belum dibuat commit lokal untuk perubahan Tahap 1. Tidak ada perubahan yang di-push.
+- Commit lokal Tahap 1: `42bf04b siapkan kerangka Tahap 1`. Tidak ada perubahan yang di-push.
+- `public/favicon.ico` masih berubah di working tree dan sengaja tidak dimasukkan ke commit karena tidak terkait Tahap 1.
