@@ -167,6 +167,7 @@ export const TEKS_UMUM = {
   gantiPetugas: 'Ganti petugas',
   aksesDitolak: 'Anda tidak memiliki akses ke halaman itu.',
   akunNonaktif: 'Akun Anda dinonaktifkan. Hubungi admin.',
+  terlaluBanyakPercobaan: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
   sesiBerakhir: 'Sesi berakhir, silakan masuk lagi.',
   keteranganPublik: 'Keterangan ini dapat dilihat oleh pelapor',
   modeUjiCoba: 'MODE UJI COBA',
@@ -175,4 +176,31 @@ export const TEKS_UMUM = {
   navigasiUtama: 'Navigasi utama',
   bukaMenu: 'Buka menu',
   tutup: 'Tutup'
+} as const
+
+export const LABEL_FORM = {
+  nama: 'Nama',
+  nip: 'NIP',
+  status: 'Status',
+  tanggal: 'Tanggal',
+  desa: 'Desa binaan',
+  petugas: 'Petugas',
+  jenisKegiatan: 'Jenis kegiatan',
+  jumlahPeserta: 'Jumlah peserta',
+  keterangan: 'Keterangan',
+  lampiran: 'Lampiran',
+  aksi: 'Aksi'
+} as const
+
+export const TEKS_LOGIN = {
+  judul: 'Masuk petugas',
+  pengantar: 'Gunakan akun yang diberikan oleh administrator.',
+  username: 'Username',
+  password: 'Kata sandi',
+  bantuan: 'Lupa password? Hubungi admin.',
+  tampilkan: 'Tampilkan kata sandi',
+  sembunyikan: 'Sembunyikan kata sandi',
+  memproses: 'Memeriksa akun…',
+  masuk: 'Masuk',
+  gagal: 'Login belum dapat diproses.'
 } as const

@@ -1,3 +1,4 @@
+import { toast } from 'vue-sonner'
 import type { PegawaiPilihan, ProfilAkun } from '~~/shared/types/auth'
 import { AUTH_EMAIL_DOMAIN } from '~~/shared/config/app'
 import { TEKS_UMUM } from '~~/shared/config/teks'
@@ -6,6 +7,7 @@ export function useAuth() {
   const api = useApi()
   const profil = useState<ProfilAkun | null>('profil-akun', () => null)
   const pegawaiBertugasId = useCookie<string | null>('sapa-bertugas-id', { path: '/', sameSite: 'lax' })
+  const akunImpersonasi = useCookie<string | null>('sapa-impersonasi', { path: '/', sameSite: 'lax' })
 
   async function masuk(username: string, password: string) {
     const namaAkun = username.trim().toLowerCase()
@@ -15,7 +17,11 @@ export function useAuth() {
       email: `${namaAkun}@${AUTH_EMAIL_DOMAIN}`,
       password
     })
-    if (error) throw new Error('Username atau kata sandi tidak sesuai.')
+    if (error) {
+      const kode = 'status' in error ? Number(error.status) : 0
+      if (kode === 429) throw new Error(TEKS_UMUM.terlaluBanyakPercobaan)
+      throw new Error('Username atau password salah.')
+    }
 
     try {
       profil.value = await api<ProfilAkun>('/api/auth/me')
@@ -25,10 +31,15 @@ export function useAuth() {
           ? await api<PegawaiPilihan[]>('/api/auth/pegawai-aktif')
           : []
       }
-    } catch {
+    } catch (galat) {
       await buatClientBrowser().auth.signOut()
       profil.value = null
-      throw new Error('Akun belum aktif atau profil belum dapat dimuat.')
+      const status = galat && typeof galat === 'object'
+        ? Number('statusCode' in galat ? galat.statusCode : 'status' in galat ? galat.status : 0)
+        : 0
+      if (status === 403) throw new Error(TEKS_UMUM.akunNonaktif, { cause: galat })
+      if (status === 429) throw new Error(TEKS_UMUM.terlaluBanyakPercobaan, { cause: galat })
+      throw new Error('Akun belum aktif atau profil belum dapat dimuat.', { cause: galat })
     }
   }
 
@@ -42,9 +53,9 @@ export function useAuth() {
       const galat = error as { statusCode?: number; status?: number; response?: { status?: number } }
       const status = galat.statusCode ?? galat.status ?? galat.response?.status
       if (status === 403) {
-        useState<string | null>('notifikasi-global', () => null).value = TEKS_UMUM.akunNonaktif
+        toast.error(TEKS_UMUM.akunNonaktif)
       } else if (status === 401 && adaSesiSebelumnya) {
-        useState<string | null>('notifikasi-global', () => null).value = TEKS_UMUM.sesiBerakhir
+        toast.error(TEKS_UMUM.sesiBerakhir)
       }
       return null
     }
@@ -54,10 +65,18 @@ export function useAuth() {
     return await api<PegawaiPilihan[]>('/api/auth/pegawai-aktif')
   }
 
+  async function gantiPassword(passwordSaatIni: string, passwordBaru: string) {
+    return await api<{ berhasil: true }>('/api/auth/password', {
+      method: 'PATCH',
+      body: { passwordSaatIni, passwordBaru }
+    })
+  }
+
   async function keluar() {
     await buatClientBrowser().auth.signOut()
     profil.value = null
     pegawaiBertugasId.value = null
+    akunImpersonasi.value = null
     await navigateTo('/masuk')
   }
 
@@ -65,5 +84,5 @@ export function useAuth() {
     pegawaiBertugasId.value = id
   }
 
-  return { profil, pegawaiBertugasId, masuk, muatProfil, daftarPegawai, keluar, pilihPegawai }
+  return { profil, pegawaiBertugasId, masuk, muatProfil, daftarPegawai, gantiPassword, keluar, pilihPegawai }
 }

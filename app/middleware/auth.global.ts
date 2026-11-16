@@ -1,3 +1,4 @@
+import { toast } from 'vue-sonner'
 import { TEKS_UMUM } from '~~/shared/config/teks'
 
 const RUTE_TERLINDUNGI = ['/upt', '/kanwil', '/admin', '/akun']
@@ -21,7 +22,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (!peranDiizinkan(to.path, profil.peran)) {
-    useState<string | null>('notifikasi-global', () => null).value = TEKS_UMUM.aksesDitolak
+    toast.error(TEKS_UMUM.aksesDitolak)
     const berandaPeran = profil.peran === 'upt' ? '/upt' : '/kanwil'
     return navigateTo(berandaPeran)
   }

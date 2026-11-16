@@ -1,79 +1,51 @@
 <script setup lang="ts">
-import { APP_NAME, MENU_PERAN } from '~~/shared/config/app'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar'
+import { Separator } from '~/components/ui/separator'
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '~/components/ui/breadcrumb'
+import { Button } from '~/components/ui/button'
+import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
+import { APP_NAME } from '~~/shared/config/app'
 import { PERAN_PENGGUNA, TEKS_UMUM } from '~~/shared/config/teks'
 
 const { profil, keluar, pegawaiBertugasId, daftarPegawai } = useAuth()
+const akunImpersonasi = useCookie<string | null>('sapa-impersonasi')
 const konfigurasi = useRuntimeConfig()
 const route = useRoute()
-const menu = computed(() => MENU_PERAN[profil.value?.peran ?? 'upt'])
-const labelPeran = computed(() => PERAN_PENGGUNA.find(peran => peran.value === profil.value?.peran)?.label ?? '')
+const { data: statusAdmin } = await useAsyncData('admin-status', () => profil.value?.peran === 'admin' ? useApi()< { validasi_lokasi_aktif: boolean; akun_admin: number; akun_kanwil: number; akun_upt: number; akun_nonaktif: number }>('/api/admin/status') : Promise.resolve(null), { watch: [() => profil.value?.peran], default: () => null })
 const namaPegawai = ref('')
-
+const lihatSebagaiUpt = computed(() => profil.value?.peran === 'kanwil' || profil.value?.peran === 'admin')
+const { data: opsiKantor } = await useAsyncData('kanwil-lihat-sebagai-upt', () => lihatSebagaiUpt.value ? useApi()< { id: string; nama_singkat: string }[]>('/api/kanwil/kantor') : Promise.resolve([] as { id: string; nama_singkat: string }[]), { watch: [lihatSebagaiUpt], default: () => [] })
+const kantorDipilih = ref('')
+watch(() => route.path, (path) => { kantorDipilih.value = path.match(/^\/kanwil\/upt\/([^/]+)/)?.[1] ?? '' }, { immediate: true })
+const router = useRouter()
+watch(kantorDipilih, (kantorId) => { if (kantorId && route.path !== `/kanwil/upt/${kantorId}`) router.push(`/kanwil/upt/${kantorId}`) })
+const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === profil.value?.peran)?.label ?? '')
 watchEffect(async () => {
-  const pegawaiId = pegawaiBertugasId.value
-  if (!pegawaiId || profil.value?.peran !== 'upt') {
-    namaPegawai.value = ''
-    return
-  }
-  const pegawai = await daftarPegawai().catch(() => [])
-  namaPegawai.value = pegawai.find(item => item.id === pegawaiId)?.nama ?? ''
+  if (!pegawaiBertugasId.value || profil.value?.peran !== 'upt') { namaPegawai.value = ''; return }
+  const daftar = await daftarPegawai().catch(() => [])
+  namaPegawai.value = daftar.find(item => item.id === pegawaiBertugasId.value)?.nama ?? ''
 })
-
-useHead({
-  meta: [{ name: 'robots', content: 'noindex, nofollow' }]
-})
+useHead({ titleTemplate: title => title ? `${title} · ${APP_NAME}` : APP_NAME, meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 </script>
 
 <template>
-  <div class="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[16rem_1fr]">
-    <aside class="bg-sidebar px-4 py-5 text-sidebar-foreground">
-      <NuxtLink class="mb-6 block px-3 text-lg font-extrabold text-sidebar-foreground no-underline" to="/">
-        {{ APP_NAME }}
-      </NuxtLink>
-      <nav class="grid gap-1" aria-label="Menu dashboard">
-        <NuxtLink
-          v-for="item in menu"
-          :key="item.href"
-          :to="item.href"
-          class="min-h-11 rounded-lg px-3 py-2 text-sm font-semibold no-underline transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          :class="route.path === item.href ? 'border-l-4 border-sidebar-primary bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground'"
-          :aria-current="route.path === item.href ? 'page' : undefined"
-        >
-          {{ item.label }}
-        </NuxtLink>
-      </nav>
-    </aside>
-
-    <div class="min-w-0">
-      <header class="flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card px-5 py-4 sm:px-8">
-        <div>
-          <h1 class="text-xl font-extrabold text-primary">{{ route.meta.title ?? menu[0]?.label }}</h1>
-          <nav class="mt-1 flex items-center gap-2 text-xs text-muted-foreground" aria-label="Breadcrumb">
-            <NuxtLink class="text-muted-foreground no-underline hover:text-primary" to="/">{{ TEKS_UMUM.beranda }}</NuxtLink>
-            <span aria-hidden="true">/</span>
-            <span>{{ route.meta.title ?? menu[0]?.label }}</span>
-          </nav>
-          <p class="mt-1 text-sm text-muted-foreground">{{ profil?.nama_tampil }}<span v-if="labelPeran"> · {{ labelPeran }}</span></p>
-          <p v-if="profil?.peran === 'upt' && namaPegawai" class="mt-1 text-sm font-semibold text-secondary-foreground">
-            Bertugas: {{ namaPegawai }}
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <NuxtLink class="text-sm font-semibold text-primary no-underline" to="/akun/password">{{ TEKS_UMUM.gantiPassword }}</NuxtLink>
-          <button class="min-h-11 rounded-lg border border-border px-4 text-sm font-semibold" type="button" @click="keluar">
-            {{ TEKS_UMUM.keluar }}
-          </button>
-        </div>
+  <SidebarProvider>
+    <AppSidebar variant="inset" />
+    <SidebarInset class="min-w-0">
+      <header class="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-3 border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <SidebarTrigger />
+        <Separator orientation="vertical" class="h-4" />
+        <Breadcrumb class="min-w-0 flex-1">
+          <BreadcrumbList><BreadcrumbItem><BreadcrumbPage class="truncate font-semibold">{{ route.meta.title ?? APP_NAME }}</BreadcrumbPage></BreadcrumbItem></BreadcrumbList>
+        </Breadcrumb>
+        <span class="hidden text-sm text-muted-foreground sm:block">{{ profil?.nama_tampil }}<template v-if="labelPeran"> · {{ labelPeran }}</template></span>
+        <label v-if="lihatSebagaiUpt" class="hidden items-center gap-2 text-xs text-muted-foreground md:flex">Lihat sebagai UPT<NativeSelect v-model="kantorDipilih" class="h-9 min-w-40"><NativeSelectOption value="">Pilih kantor</NativeSelectOption><NativeSelectOption v-for="kantor in opsiKantor" :key="kantor.id" :value="kantor.id">{{ kantor.nama_singkat }}</NativeSelectOption></NativeSelect></label>
+        <Button variant="outline" size="sm" @click="keluar">{{ TEKS_UMUM.keluar }}</Button>
       </header>
-
-      <div class="px-5 pt-5 sm:px-8">
-        <BannerGlobal :mode-uji="konfigurasi.public.appMode === 'test'" />
-        <slot name="banner" />
-      </div>
-
-      <main class="p-5 sm:p-8">
-        <slot />
-      </main>
-    </div>
-  </div>
+      <div class="space-y-3 px-4 pt-4 md:px-6"><BannerGlobal :mode-uji="konfigurasi.public.appMode === 'test'" /><div v-if="profil?.peran === 'admin' && statusAdmin && !statusAdmin.validasi_lokasi_aktif" class="rounded-lg border border-destructive bg-destructive px-4 py-3 font-semibold text-destructive-foreground" role="alert">Validasi lokasi dimatikan. Laporan dari luar Riau dapat masuk. Hidupkan kembali setelah pengujian.</div><slot name="banner" /></div>
+      <div v-if="akunImpersonasi" class="mx-4 mt-3 flex items-center justify-between gap-4 rounded-lg border border-destructive bg-destructive/10 px-4 py-3 text-sm font-semibold text-destructive md:mx-6" role="status"><span>Anda masuk sebagai {{ akunImpersonasi }}</span><Button size="sm" variant="outline" @click="keluar">Keluar</Button></div>
+      <p v-if="profil?.peran === 'upt'" class="mx-4 mt-3 rounded-lg border bg-card px-4 py-2 text-sm text-muted-foreground md:mx-6">Bertugas atas nama <strong class="text-foreground">{{ namaPegawai || 'Pilih petugas' }}</strong><NuxtLink class="ml-2 font-medium text-primary underline underline-offset-4" to="/upt/pilih-petugas">{{ TEKS_UMUM.gantiPetugas }}</NuxtLink></p>
+      <main class="min-w-0 flex-1 p-4 md:p-6"><slot /></main>
+    </SidebarInset>
+  </SidebarProvider>
 </template>

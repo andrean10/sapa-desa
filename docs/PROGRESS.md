@@ -1,5 +1,33 @@
 # Progress SAPA DESA
 
+## Tahap 5 — Admin dan penutup (berjalan)
+
+### Pekerjaan tahap 5
+
+| Bagian | Hasil saat ini |
+|---|---|
+| Status sistem | `/admin/status` membaca `dashboard_admin_status`, menampilkan status validasi lokasi dan hitungan akun. Saklar shadcn-vue mengirim perubahan melalui sesi admin/RLS dan meminta konfirmasi saat mematikan validasi. Layout admin menampilkan banner merah ketika validasi mati. |
+| Kelola akun | `/admin/akun` menampilkan akun dan nama kantor (termasuk kantor nonaktif), membuat akun melalui Admin API, reset password, aktivasi/nonaktif, serta impersonasi magic link. Form hanya menawarkan kantor aktif dan server menolak akun UPT kedua di kantor yang sama. Reset password dan aktivasi/nonaktif memakai dialog konfirmasi. Password tidak dikembalikan atau disimpan aplikasi. Operasi Admin API dibatasi setelah sesi diverifikasi sebagai admin. |
+| Impersonasi | Magic link diarahkan ke `/auth/confirm`; callback memverifikasi token hash, memuat profil, dan menampilkan banner “Anda masuk sebagai {akun}” dengan tombol Keluar. Logout membersihkan cookie banner. Tab impersonasi dibuka langsung dari klik agar tidak diblokir browser. |
+| Navigasi admin | Status sistem dan akun berada pada kelompok “Admin” terpisah; menu log tetap tersembunyi sampai diaktifkan di production. |
+| Log | Belum dibuat/diaktifkan. PRD dan SCHEMA menyatakan trigger log nonaktif sampai production dan halaman/menu dibuat setelah log diaktifkan; karena itu menu log tetap disembunyikan. |
+
+### Pemeriksaan tahap 5 yang sudah dijalankan
+
+| Pemeriksaan | Hasil |
+|---|---|
+| `npm run typecheck` | Lulus setelah perubahan status, akun, callback, dan layout. |
+| `npm run lint` | Lulus, 35 warning `vue/require-default-prop` pada komponen UI; tidak ada error. Lint terarah berkas tahap 5 juga lulus tanpa error. |
+| `npm run build` | Lulus; build Nuxt/Nitro selesai. |
+| Uji alur browser akun/impersonasi | Belum dilakukan. |
+| Pemeriksaan kriteria penerimaan semua halaman | Belum dilakukan; menunggu sesi finishing desain dan pengujian alur seluruh halaman. |
+| Perubahan skema database | Tidak ada. |
+
+### Masih tersisa tahap 5
+
+- Sesi finishing untuk desain dan uji alur seluruh halaman sesuai rencana pemilik project.
+- Aktivasi trigger log saat production; setelah itu baru buat menu dan halaman `/admin/log` sesuai PRD.
+
 ## Tahap 2 — Masyarakat (mulai)
 
 ### Kondisi awal Tahap 2

@@ -4,7 +4,7 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-    <NotifikasiGlobal />
+    <Toaster rich-colors position="bottom-right" />
   </div>
 </template>
 

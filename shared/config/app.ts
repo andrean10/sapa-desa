@@ -49,7 +49,6 @@ export const MENU_PERAN: Record<PeranAplikasi, readonly { label: string; href: s
     { label: LABEL_MENU.faq, href: '/kanwil/faq' },
     { label: LABEL_MENU.pengaturan, href: '/kanwil/pengaturan' },
     { label: LABEL_MENU.statusSistem, href: '/admin/status' },
-    { label: LABEL_MENU.akun, href: '/admin/akun' },
-    { label: LABEL_MENU.log, href: '/admin/log' }
+    { label: LABEL_MENU.akun, href: '/admin/akun' }
   ]
 }

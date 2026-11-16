@@ -1,12 +1,10 @@
 <script setup lang="ts">
-definePageMeta({ layout: 'publik' })
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
+definePageMeta({ layout: false })
 useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 </script>
 
 <template>
-  <section class="mx-auto grid min-h-80 max-w-xl content-center gap-4 px-5 py-12 text-center">
-    <h1 class="text-3xl font-extrabold text-primary">404</h1>
-    <p class="text-muted-foreground">Halaman yang Anda cari tidak ditemukan.</p>
-    <NuxtLink class="font-semibold text-primary" to="/">Kembali ke beranda</NuxtLink>
-  </section>
+  <main class="grid min-h-svh place-items-center bg-muted/40 p-4"><Card class="w-full max-w-md"><CardHeader class="text-center"><CardTitle class="text-4xl">404</CardTitle><CardDescription>Halaman yang Anda cari tidak ditemukan.</CardDescription></CardHeader><CardContent class="flex justify-center"><Button as-child variant="outline"><NuxtLink to="/">Kembali ke beranda</NuxtLink></Button></CardContent></Card></main>
 </template>

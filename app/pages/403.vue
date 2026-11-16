@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { TEKS_UMUM } from '~~/shared/config/teks'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
+import { Button } from '~/components/ui/button'
 
-definePageMeta({ layout: 'publik' })
+definePageMeta({ layout: false })
 useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 </script>
 
 <template>
-  <section class="mx-auto grid min-h-80 max-w-xl content-center gap-4 px-5 py-12 text-center">
-    <h1 class="text-3xl font-extrabold text-primary">403</h1>
-    <p class="text-muted-foreground">{{ TEKS_UMUM.aksesDitolak }}</p>
-    <NuxtLink class="font-semibold text-primary" to="/">Kembali ke beranda</NuxtLink>
-  </section>
+  <main class="grid min-h-svh place-items-center bg-muted/40 p-4"><Card class="w-full max-w-md"><CardHeader class="text-center"><CardTitle class="text-4xl">403</CardTitle><CardDescription>{{ TEKS_UMUM.aksesDitolak }}</CardDescription></CardHeader><CardContent class="flex justify-center"><Button as-child variant="outline"><NuxtLink to="/">Kembali ke beranda</NuxtLink></Button></CardContent></Card></main>
 </template>
