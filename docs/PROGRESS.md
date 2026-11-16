@@ -1,5 +1,31 @@
 # Progress SAPA DESA
 
+## Status terkini — 17 November 2026
+
+Commit terakhir: `57abc67 feat: implement UPT dashboard and report management functions in upt.model.ts`.
+
+### Yang sudah tersedia di repo
+
+| Area | Keadaan saat ini |
+|---|---|
+| Masyarakat | Alur `/`, `/informasi`, `/lapor`, `/lacak`, dan `/privasi` sudah tersedia. Form laporan memakai GPS, wilayah bertingkat, unggah foto terkompresi, dialog kode pelacakan, dan lacak publik dengan data yang dibatasi untuk privasi. |
+| UPT | Halaman `/upt`, `/upt/laporan`, `/upt/laporan/[id]`, `/upt/kegiatan`, `/upt/kegiatan/baru`, `/upt/kegiatan/[id]`, `/upt/pegawai`, `/upt/profil`, dan `/upt/pilih-petugas` sudah tersedia. Endpoint, controller, model, dan composable untuk dashboard, laporan/status, kegiatan PIMPASA, pegawai, profil, unggah file, serta penghapusan sesuai jendela waktu sudah ditambahkan. |
+| Kanwil | Halaman dashboard, laporan baca, detail UPT, pantauan, peringkat, desa binaan, penugasan, wilayah kerja, FAQ, kegiatan baca, dan pengaturan sudah tersedia beserta endpoint/controller/model terkait. Admin memakai sebagian jalur Kanwil sesuai hak database. |
+| Admin | `/admin/status`, `/admin/akun`, impersonasi melalui `/auth/confirm`, reset password, aktivasi akun, pembuatan akun, dan banner status validasi lokasi sudah tersedia. |
+| Keamanan dan struktur | Pemisahan client Supabase, route-controller-model, middleware peran, rate limit publik, konfigurasi global, serta tipe turunan sudah tersedia tanpa perubahan skema database. |
+
+### Yang belum diverifikasi atau masih terbuka
+
+- Uji alur browser end-to-end untuk login, pemilihan petugas UPT, impersonasi, perubahan status, unggah kegiatan, dan seluruh alur Kanwil/Admin belum dilakukan.
+- Pemeriksaan acceptance dan finishing visual untuk semua halaman belum dilakukan.
+- `docs/PROGRESS.md` belum menjadi bukti bahwa seluruh kriteria PRD sudah lulus; implementasi halaman/endpoint perlu tetap diuji terhadap staging Supabase.
+- Teks final `/privasi` masih menunggu materi resmi Kanwil.
+- Log aktivitas belum dibuat karena trigger log memang belum diaktifkan untuk production. Setelah trigger aktif, baru buat menu dan halaman `/admin/log`.
+
+### Fitur yang sengaja ditunda sesuai spesifikasi
+
+Persetujuan Kanwil atas penugasan PIMPASA, pemindahan laporan antar-UPT, UI hari libur, akun Rudenim, akhir pekan khusus UPT, peta titik laporan, dan pemaksaan ganti password pada login pertama belum dibuat sesuai keputusan di `AGENTS.md` dan `PRD.md`.
+
 ## Tahap 5 — Admin dan penutup (berjalan)
 
 ### Pekerjaan tahap 5
