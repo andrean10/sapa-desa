@@ -1,8 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import type { Tables, TablesInsert } from '../../shared/types/database.types'
 import type { LaporanBaru } from '../../shared/types/laporan'
-import { buatClientAnonimo } from '../utils/supabase'
-import { buatClientServiceRole } from '../utils/supabase'
+import { buatClientAnonimo, buatClientServiceRole } from '../utils/supabase'
 
 export type KabupatenPublik = Pick<Tables<'kabupaten'>, 'id' | 'nama' | 'jenis' | 'kantor_id'>
 export type KecamatanPublik = Pick<Tables<'kecamatan'>, 'id' | 'nama'>

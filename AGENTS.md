@@ -30,7 +30,7 @@ Dependency dipasang oleh Codex. Pilih versi stabil yang kompatibel dengan Nuxt d
 | masyarakat | tidak ada (anonim) | HyperUI | kirim laporan, lacak laporan dengan kode, baca FAQ |
 | `upt` | username + password | shadcn | laporan kantornya sendiri, ubah status, laporan kegiatan PIMPASA, kelola pegawai kantornya, profil kantor |
 | `kanwil` | username + password | shadcn | baca semua, dashboard dan peringkat, kelola desa binaan/penugasan/wilayah kerja/FAQ/jenis kegiatan/hari libur/pengaturan (kecuali saklar lokasi). **Tidak bisa** mengubah status laporan |
-| `admin` | username + password | shadcn | semua hak Kanwil + saklar lokasi, mutasi pegawai, hapus laporan kegiatan, lihat log, status sistem |
+| `admin` | username + password | shadcn | semua hak Kanwil + **ubah status laporan** (database mengizinkan; `p_pegawai_id` boleh kosong untuk admin), saklar lokasi, mutasi pegawai, hapus laporan kegiatan, lihat log, status sistem |
 
 Alur login:
 1. Form login meminta **username** saja. Email dibentuk `${username}@${AUTH_EMAIL_DOMAIN}` (nilai dari konfigurasi global, jangan ditulis di banyak tempat). Tidak ada email asli yang terkirim dan tidak ada "lupa password" mandiri.
@@ -54,10 +54,12 @@ server/
   models/                    ← MODEL: satu-satunya tempat query/rpc Supabase
   utils/supabase.ts          pembuat client Supabase (lihat bagian 6)
 shared/
-  config/app.ts              ← KONFIGURASI GLOBAL (bagian 5)
+  config/                    ← KONFIGURASI GLOBAL (bagian 5): app.ts, tema.ts, teks.ts, batas-file.ts
   types/database.types.ts    tipe hasil generate (jangan diedit manual)
   types/                     tipe turunan (LaporanBaru, dst.)
-docs/database/               SCHEMA.md dan KONTRAK_API.md
+docs/
+  PRD.md                     spesifikasi tampilan dan perilaku tiap halaman
+  database/                  SCHEMA.md dan KONTRAK_API.md
 ```
 
 Aturan:
@@ -67,16 +69,14 @@ Aturan:
 
 ## 5. Konfigurasi global (satu sumber kebenaran)
 
-Semua nilai yang dipakai di lebih dari satu file ditaruh di `shared/config/app.ts`, **bukan** ditulis ulang. Minimal:
+Semua nilai yang dipakai di lebih dari satu file ditaruh di folder `shared/config/`, **bukan** ditulis ulang. Satu folder, empat file:
 
-- `APP_NAME = 'SAPA DESA'` dan teks identitas lain (tagline, nama instansi).
-- Tema warna (token warna dipetakan ke CSS variable Tailwind/shadcn). Nilai warna belum ditentukan; buat dengan placeholder yang jelas dan satu tempat untuk mengubahnya.
-- `AUTH_EMAIL_DOMAIN = 'sapadesa.com'`.
-- `TIMEZONE = 'Asia/Jakarta'`.
-- Daftar status laporan beserta label tampilan, warna badge, dan urutan timeline (nilai harus sama dengan enum `status_laporan`).
-- Label `jenis_terlapor` (WNA/WNI), `peran_pengguna`, `jenis_wilayah_desa`.
-- Batas file: foto 3 MB (`image/jpeg`, `image/png`, `image/webp`), PDF 8 MB (`application/pdf`). Angka ini sama dengan batas bucket di database.
-- Pola kode pelacakan: `SD-XXXX-XXXX`, regex `^SD-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$`.
+| File | Isi |
+|---|---|
+| `app.ts` | `APP_NAME = 'SAPA DESA'`, tagline, nama instansi, `AUTH_EMAIL_DOMAIN = 'sapadesa.com'`, `TIMEZONE = 'Asia/Jakarta'`, pola kode pelacakan `SD-XXXX-XXXX` (regex `^SD-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$`), `AMBANG_DESA_LAMA_HARI` |
+| `tema.ts` | **Satu-satunya tempat kode warna** (palet, pemetaan variabel shadcn, warna status laporan). Nilainya ada di `docs/PRD.md` bagian 2. Komponen dan CSS tidak boleh menulis ulang hex |
+| `teks.ts` | Label status laporan beserta penjelasan ramah dan urutan timeline (kunci harus sama dengan enum `status_laporan`), label `jenis_terlapor` (WNA/WNI), `peran_pengguna`, `jenis_wilayah_desa`, `alasan_berakhir_penugasan`, pesan galat umum |
+| `batas-file.ts` | Foto 3 MB (`image/jpeg`, `image/png`, `image/webp`), PDF 8 MB (`application/pdf`). Angka ini sama dengan batas bucket di database |
 
 Konfigurasi rahasia hanya lewat environment, dan `.env` sudah ada di `.gitignore`.
 
@@ -115,18 +115,19 @@ Aturan:
 - Kode rapi dan mudah di-debug: fungsi kecil, nama jelas dalam Bahasa Indonesia untuk istilah domain (`laporan`, `kantor`, `desa`) sesuai nama di database, komentar singkat hanya untuk alasan non-obvious.
 - TypeScript ketat. Pakai tipe dari `database.types.ts` (`Tables<'laporan'>`, `Enums<'status_laporan'>`, dst.), jangan membuat tipe tandingan.
 - Tangani error dengan tipe yang jelas. Pesan error dari database sudah berbahasa Indonesia dan aman ditampilkan (lihat KONTRAK_API.md).
-- Jangan menulis string yang sama di banyak file (nama project, label status, batas file, dll). Ambil dari `shared/config/app.ts`.
+- Jangan menulis string yang sama di banyak file (nama project, label status, batas file, dll). Ambil dari `shared/config/`.
 - Selalu tampilkan status loading, kosong, dan error di UI.
 
 ## 9. Dokumen acuan
 
 | File | Isi |
 |---|---|
+| `docs/PRD.md` | Halaman, rute, komponen, teks, dan perilaku di setiap halaman. Jawaban untuk "apa yang dilihat dan dilakukan pengguna" |
 | `docs/database/SCHEMA.md` | Semua tabel, kolom, relasi, constraint, trigger, dan hak akses per peran |
 | `docs/database/KONTRAK_API.md` | Setiap rpc/insert/storage yang dipakai UI: parameter, hasil, siapa yang boleh, dan di sisi mana dipanggil. Termasuk usulan route server |
 | `shared/types/database.types.ts` | Tipe TypeScript hasil generate dari database |
 
-Jika dokumen dan database berbeda, **database yang benar**. Laporkan selisihnya ke pemilik project.
+Jika dokumen dan database berbeda, **database yang benar**. Laporkan selisihnya ke pemilik project. Urutan baca untuk fitur baru: `PRD.md` (apa yang dibangun), lalu `KONTRAK_API.md` (panggilan databasenya), lalu `SCHEMA.md` bila butuh detail tabel.
 
 ## 10. Cara kerja
 

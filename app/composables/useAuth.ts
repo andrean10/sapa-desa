@@ -1,5 +1,6 @@
 import type { PegawaiPilihan, ProfilAkun } from '~~/shared/types/auth'
 import { AUTH_EMAIL_DOMAIN } from '~~/shared/config/app'
+import { TEKS_UMUM } from '~~/shared/config/teks'
 
 export function useAuth() {
   const api = useApi()
@@ -32,11 +33,19 @@ export function useAuth() {
   }
 
   async function muatProfil() {
+    const adaSesiSebelumnya = profil.value !== null
     try {
       profil.value = await api<ProfilAkun>('/api/auth/me')
       return profil.value
-    } catch {
+    } catch (error) {
       profil.value = null
+      const galat = error as { statusCode?: number; status?: number; response?: { status?: number } }
+      const status = galat.statusCode ?? galat.status ?? galat.response?.status
+      if (status === 403) {
+        useState<string | null>('notifikasi-global', () => null).value = TEKS_UMUM.akunNonaktif
+      } else if (status === 401 && adaSesiSebelumnya) {
+        useState<string | null>('notifikasi-global', () => null).value = TEKS_UMUM.sesiBerakhir
+      }
       return null
     }
   }
@@ -49,7 +58,7 @@ export function useAuth() {
     await buatClientBrowser().auth.signOut()
     profil.value = null
     pegawaiBertugasId.value = null
-    await navigateTo('/login')
+    await navigateTo('/masuk')
   }
 
   function pilihPegawai(id: string) {

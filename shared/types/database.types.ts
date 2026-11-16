@@ -1,4 +1,4 @@
-// FILE DIBUAT DARI KATALOG DATABASE (project SAPA DESA, schema public).
+// FILE DIBUAT DARI KATALOG DATABASE (schema public).
 // Sumber: pg_catalog pada kondisi migrasi 001-021 + perbaikan terbaru.
 // Format mengikuti output `supabase gen types typescript`.
 // JANGAN DIEDIT MANUAL. Generate ulang setelah ada perubahan skema.

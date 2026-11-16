@@ -20,12 +20,12 @@
           <div><dt class="text-sm text-muted">Kode</dt><dd class="mt-1 font-bold tracking-wider text-primary">{{ hasil.kode_pelacakan }}</dd></div>
           <div><dt class="text-sm text-muted">Status saat ini</dt><dd class="mt-1 font-bold text-primary">{{ labelStatus(hasil.status) }}</dd></div>
           <div><dt class="text-sm text-muted">Kantor penanganan</dt><dd class="mt-1 font-semibold">{{ hasil.kantor }}</dd></div>
-          <div><dt class="text-sm text-muted">Dikirim</dt><dd class="mt-1 font-semibold">{{ formatWaktu(hasil.dikirim_pada) }}</dd></div>
+          <div><dt class="text-sm text-muted">Dikirim</dt><dd class="mt-1 font-semibold">{{ formatTanggalWaktuWib(hasil.dikirim_pada) }}</dd></div>
         </dl>
         <h2 class="mt-9 text-xl font-extrabold text-primary">Riwayat laporan</h2>
         <ol class="mt-4">
           <li v-for="(item, index) in hasil.timeline" :key="`${item.waktu}-${item.status}-${index}`" class="grid gap-1 border-t border-border py-4 sm:grid-cols-[170px_1fr] sm:gap-5">
-            <time class="text-sm text-muted" :datetime="item.waktu">{{ formatWaktu(item.waktu) }}</time>
+            <time class="text-sm text-muted" :datetime="item.waktu">{{ formatTanggalWaktuWib(item.waktu) }}</time>
             <div><strong class="text-primary">{{ labelStatus(item.status) }}</strong><p v-if="item.keterangan" class="mt-1 whitespace-pre-wrap leading-6 text-muted">{{ item.keterangan }}</p></div>
           </li>
         </ol>
@@ -36,8 +36,10 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { APP_NAME, FORMAT_KODE_PELACAKAN, STATUS_LAPORAN, TIMEZONE } from '~~/shared/config/app'
+import { APP_NAME, FORMAT_KODE_PELACAKAN } from '~~/shared/config/app'
+import { STATUS_LAPORAN } from '~~/shared/config/teks'
 import type { Enums } from '~~/shared/types/database.types'
+import { formatTanggalWaktuWib } from '~~/shared/utils/waktu'
 
 const { lacak } = useLacakLaporan()
 const kode = ref('')
@@ -47,10 +49,6 @@ const pesanError = ref('')
 
 function labelStatus(status: Enums<'status_laporan'>) {
   return STATUS_LAPORAN.find(item => item.value === status)?.label ?? status
-}
-
-function formatWaktu(waktu: string) {
-  return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: TIMEZONE }).format(new Date(waktu))
 }
 
 async function cari() {

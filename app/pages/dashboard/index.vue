@@ -16,7 +16,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { APP_NAME, PERAN_PENGGUNA } from '~~/shared/config/app'
+import { APP_NAME } from '~~/shared/config/app'
+import { PERAN_PENGGUNA } from '~~/shared/config/teks'
 
 const { profil, keluar, pegawaiBertugasId, daftarPegawai } = useAuth()
 const namaPegawai = ref('')

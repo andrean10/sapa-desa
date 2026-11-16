@@ -1,15 +1,19 @@
 <template>
-  <div :style="themeStyle">
+  <div>
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <NotifikasiGlobal />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { CSSProperties } from 'vue'
-import { THEME_CSS_VARIABLES } from '~~/shared/config/app'
+import { buatGayaTema } from '~~/shared/config/tema'
 
-const themeStyle = THEME_CSS_VARIABLES as CSSProperties
+useHead({
+  htmlAttrs: {
+    style: buatGayaTema()
+  }
+})
 </script>

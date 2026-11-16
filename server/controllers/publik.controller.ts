@@ -1,6 +1,8 @@
 import { createError, getQuery, getRequestHeader, readBody, readMultipartFormData, type H3Event } from 'h3'
 import { z } from 'zod'
-import { BATAS_FILE, JENIS_TERLAPOR, REGEX_KODE_PELACAKAN, STATUS_LAPORAN } from '../../shared/config/app'
+import { REGEX_KODE_PELACAKAN } from '../../shared/config/app'
+import { BATAS_FILE } from '../../shared/config/batas-file'
+import { JENIS_TERLAPOR, STATUS_LAPORAN } from '../../shared/config/teks'
 import type { LaporanBaru } from '../../shared/types/laporan'
 import type { Enums } from '../../shared/types/database.types'
 import {

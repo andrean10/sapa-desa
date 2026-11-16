@@ -1,4 +1,5 @@
 import { createError, type H3Event } from 'h3'
+import { APP_NAME } from '../../shared/config/app'
 import { buatClientSesiUser } from '../utils/supabase'
 import { ambilPegawaiAktif, ambilProfilSesi, type ProfilSesi } from '../models/auth.model'
 
@@ -14,7 +15,7 @@ export async function profilSesi(event: H3Event): Promise<ProfilSesi> {
     throw createError({ statusCode: 503, statusMessage: 'Profil akun belum dapat dimuat.' })
   }
   if (!data || !data.aktif) {
-    throw createError({ statusCode: 403, statusMessage: 'Akun tidak aktif atau tidak memiliki profil SAPA DESA.' })
+    throw createError({ statusCode: 403, statusMessage: `Akun tidak aktif atau tidak memiliki profil ${APP_NAME}.` })
   }
 
   return data

@@ -4,7 +4,7 @@
       <NuxtLink class="font-extrabold text-primary no-underline" to="/">← {{ APP_NAME }}</NuxtLink>
       <section class="mt-8 rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
         <p class="text-xs font-extrabold uppercase tracking-[.14em] text-secondary">{{ REGIONAL_OFFICE_NAME }}</p>
-        <h1 class="mt-2 text-3xl font-black text-primary">{{ daftarPegawai ? 'Pilih petugas' : 'Masuk ke SAPA DESA' }}</h1>
+        <h1 class="mt-2 text-3xl font-black text-primary">{{ daftarPegawai ? 'Pilih petugas' : judulMasuk }}</h1>
 
         <form v-if="!daftarPegawai" class="mt-6 grid gap-3" @submit.prevent="submitLogin">
           <label class="mt-2 font-semibold" for="username">Username</label>
@@ -40,7 +40,8 @@ import { onMounted, ref } from 'vue'
 import type { PegawaiPilihan } from '~~/shared/types/auth'
 import { APP_NAME, REGIONAL_OFFICE_NAME } from '~~/shared/config/app'
 
-const { masuk, daftarPegawai: muatPegawai, keluar, muatProfil, profil, pegawaiBertugasId, pilihPegawai } = useAuth()
+const { masuk, daftarPegawai: muatPegawai, keluar, muatProfil, pegawaiBertugasId, pilihPegawai } = useAuth()
+const judulMasuk = `Masuk ke ${APP_NAME}`
 const route = useRoute()
 const username = ref('')
 const password = ref('')

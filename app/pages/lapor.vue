@@ -93,7 +93,8 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
-import { APP_NAME, FORMAT_KODE_PELACAKAN, JENIS_TERLAPOR, JENIS_WILAYAH_DESA, REGIONAL_OFFICE_NAME } from '~~/shared/config/app'
+import { APP_NAME, FORMAT_KODE_PELACAKAN, REGIONAL_OFFICE_NAME } from '~~/shared/config/app'
+import { JENIS_TERLAPOR, JENIS_WILAYAH_DESA } from '~~/shared/config/teks'
 import type { Enums } from '~~/shared/types/database.types'
 
 const { kabupaten: dataKabupaten, kecamatan: ambilKecamatan, desa: ambilDesa } = useWilayah()
