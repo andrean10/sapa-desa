@@ -35,12 +35,15 @@
 | Smoke test production server | `GET /`, `/informasi`, `/lapor`, `/lacak`, `/privasi` semuanya 200. Server lokal tidak memiliki URL/kunci Supabase staging, jadi fetch FAQ/wilayah menampilkan state error; pengujian data live memerlukan `.env` staging. Tidak ada kredensial yang dibuat atau dicatat. |
 | `git diff --check` | Lulus, hanya peringatan normal Git untuk konversi LF/CRLF pada Windows. |
 | `rg` untuk `v-html` dan `supabase` pada halaman/komponen publik | Tidak ada hasil; akses database publik tetap melewati composable dan endpoint server. |
+| Uji baca staging | FAQ merespons 200 (0 baris saat diuji), kabupaten/kota 12 baris; cascade Pekanbaru → Binawidya → Binawidya berhasil. Endpoint nama kantor awalnya menolak UUID; validasi diperbaiki dan nama Kantor Imigrasi Kelas I TPI Pekanbaru berhasil dibaca. |
+| Uji kirim + lacak staging | Satu laporan sintetis berlabel `DATA UJI STAGING SAPA DESA` dibuat di Pekanbaru; submit berhasil dan baris timeline awal `diterima` ditemukan. Record ini adalah data uji permanen di project staging. Kode pelacakan diberikan kepada pemilik project lewat sesi kerja, tidak disimpan di dokumen. |
+| Privasi endpoint lacak | `GET` lacak untuk kode yang tidak ada merespons 404. Lacak record uji merespons 200 dan hanya memiliki `kode_pelacakan`, `status`, `kantor`, `dikirim_pada`, `timeline`; tidak ada nama/alamat/isi laporan/pegawai. |
 | Database | Tidak ada perintah tulis atau perubahan skema. |
 
 ### Sisa Tahap 2
 
 - Teks final kebijakan privasi masih menunggu materi resmi Kanwil sebagaimana PRD.
-- Pengujian dengan data FAQ/wilayah dan pengiriman laporan staging belum bisa dilakukan karena tidak ada kredensial Supabase di lingkungan lokal. Alur server dibangun dan rute halaman berhasil dirender.
+- Kredensial staging sudah menggunakan Publishable key (`sb_publishable_…`) dan Secret key (`sb_secret_…`); anon dan server secret berhasil diuji. Key hanya tersimpan di `.env` lokal dan tidak pernah ditampilkan di log.
 - Commit lokal dicatat setelah pemeriksaan; tidak ada push.
 
 ## Kondisi awal

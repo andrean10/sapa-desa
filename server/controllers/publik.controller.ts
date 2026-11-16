@@ -63,7 +63,9 @@ export async function daftarFaqPublik() {
 }
 
 export async function namaKantorPublik(kantorId: string) {
-  if (!POLA_ID_WILAYAH.test(kantorId)) throw createError({ statusCode: 400, statusMessage: 'Parameter kantor tidak valid.' })
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(kantorId)) {
+    throw createError({ statusCode: 400, statusMessage: 'Parameter kantor tidak valid.' })
+  }
   const hasil = await ambilKantorPublik(kantorId)
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: PESAN_GAGAL_MEMUAT })
   return hasil.data
