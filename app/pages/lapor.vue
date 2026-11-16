@@ -1,191 +1,151 @@
-<template>
-  <main class="min-h-screen bg-background px-5 py-8 text-foreground sm:px-8 sm:py-12">
-    <div class="mx-auto max-w-3xl">
-    <header class="mb-6">
-      <NuxtLink class="font-extrabold text-primary no-underline" to="/">← {{ APP_NAME }}</NuxtLink>
-      <h1 class="mt-8 text-4xl font-black tracking-tight text-primary">Kirim laporan pengaduan</h1>
-      <p class="mt-2 text-muted">{{ REGIONAL_OFFICE_NAME }}</p>
-    </header>
-
-    <section class="rounded-2xl border border-border bg-white p-5 shadow-card sm:p-7" aria-labelledby="judul-lokasi">
-      <h2 id="judul-lokasi" class="text-xl font-extrabold text-primary">{{ koordinat ? 'Lokasi berhasil didapat' : 'Mengaktifkan lokasi GPS' }}</h2>
-      <p class="mt-2 leading-6 text-muted">Lokasi diperlukan agar laporan diteruskan ke kantor imigrasi yang menangani wilayah Anda.</p>
-      <button v-if="!koordinat || pesanLokasi" type="button" class="mt-4 min-h-11 rounded-lg bg-secondary px-4 font-bold text-white hover:bg-primary disabled:cursor-wait disabled:opacity-60" :disabled="sedangMencariLokasi" @click="dapatkanLokasi">
-        {{ sedangMencariLokasi ? 'Mencari lokasi…' : 'Coba GPS lagi' }}
-      </button>
-      <p v-if="pesanLokasi" class="mt-3 rounded-lg bg-background p-3 text-destructive" role="status">{{ pesanLokasi }}</p>
-      <p v-else-if="sedangMencariLokasi" class="mt-3 text-sm text-muted" role="status">Izinkan akses lokasi pada dialog browser untuk melanjutkan.</p>
-      <p v-else-if="koordinat" class="mt-3 font-semibold text-secondary" role="status">Formulir dapat diisi.</p>
-    </section>
-
-    <form class="mt-6 rounded-2xl border border-border bg-white p-5 shadow-card sm:p-8" @submit.prevent="kirim">
-      <fieldset class="grid gap-3 disabled:opacity-60" :disabled="!koordinat || sedangMengirim">
-        <legend class="mb-3 text-xl font-extrabold text-primary">Informasi laporan</legend>
-
-        <label class="mt-2 font-semibold" for="nama">Nama pelapor</label>
-        <input id="nama" v-model="isian.nama_pelapor" class="min-h-11 rounded-lg border border-border px-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary" maxlength="150" required autocomplete="name">
-
-        <label class="mt-2 font-semibold" for="alamat">Alamat pelapor</label>
-        <textarea id="alamat" v-model="isian.alamat_pelapor" class="rounded-lg border border-border px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary" maxlength="500" required rows="3" />
-
-        <div class="grid gap-4 sm:grid-cols-2">
-          <div class="grid content-start gap-3">
-            <label class="mt-2 font-semibold" for="kabupaten">Kabupaten/kota</label>
-            <select id="kabupaten" v-model="kabupatenId" class="min-h-11 rounded-lg border border-border bg-white px-3" required>
-              <option value="">Pilih kabupaten/kota</option>
-              <option v-for="item in kabupaten.data.value" :key="item.id" :value="item.id">{{ item.nama }}</option>
-            </select>
-            <small v-if="kabupaten.pending.value" class="text-sm text-muted">Memuat kabupaten/kota…</small>
-            <small v-else-if="kabupaten.error.value" class="text-sm text-destructive">Kabupaten/kota belum dapat dimuat.</small>
-            <small v-else-if="!kabupaten.data.value?.length" class="text-sm text-muted">Data kabupaten/kota belum tersedia.</small>
-          </div>
-          <div class="grid content-start gap-3">
-            <label class="mt-2 font-semibold" for="kecamatan">Kecamatan</label>
-            <select id="kecamatan" v-model="kecamatanId" class="min-h-11 rounded-lg border border-border bg-white px-3" required :disabled="!kabupatenId">
-              <option value="">Pilih kecamatan</option>
-              <option v-for="item in kecamatan.data.value" :key="item.id" :value="item.id">{{ item.nama }}</option>
-            </select>
-            <small v-if="kecamatan.pending.value" class="text-sm text-muted">Memuat kecamatan…</small>
-            <small v-else-if="kecamatan.error.value" class="text-sm text-destructive">Kecamatan belum dapat dimuat.</small>
-            <small v-else-if="kabupatenId && !kecamatan.data.value?.length" class="text-sm text-muted">Data kecamatan belum tersedia.</small>
-          </div>
-        </div>
-
-        <label class="mt-2 font-semibold" for="desa">Desa/kelurahan</label>
-        <select id="desa" v-model="isian.desa_kelurahan_id" class="min-h-11 rounded-lg border border-border bg-white px-3" required :disabled="!kecamatanId">
-          <option value="">Pilih desa/kelurahan</option>
-          <option v-for="item in desa.data.value" :key="item.id" :value="item.id">{{ item.nama }} ({{ labelWilayah(item.jenis_wilayah) }})</option>
-        </select>
-        <small v-if="desa.pending.value" class="text-sm text-muted">Memuat desa/kelurahan…</small>
-        <small v-else-if="desa.error.value" class="text-sm text-destructive">Desa/kelurahan belum dapat dimuat.</small>
-        <small v-else-if="kecamatanId && !desa.data.value?.length" class="text-sm text-muted">Data desa/kelurahan belum tersedia.</small>
-
-        <label class="mt-2 font-semibold" for="jenis">Jenis terlapor</label>
-        <select id="jenis" v-model="isian.jenis_terlapor" class="min-h-11 rounded-lg border border-border bg-white px-3" required>
-          <option value="">Pilih jenis terlapor</option>
-          <option v-for="jenis in JENIS_TERLAPOR" :key="jenis.value" :value="jenis.value">{{ jenis.label }}</option>
-        </select>
-
-        <label class="mt-2 font-semibold" for="isi">Isi laporan</label>
-        <textarea id="isi" v-model="isian.isi_laporan" class="rounded-lg border border-border px-3 py-2 outline-none focus:border-primary focus:ring-2 focus:ring-primary" minlength="10" maxlength="5000" required rows="6" />
-
-        <label class="mt-2 font-semibold" for="kode-sebelumnya">Kode laporan sebelumnya (opsional)</label>
-        <input id="kode-sebelumnya" v-model="isian.kode_laporan_sebelumnya" class="min-h-11 rounded-lg border border-border px-3" :placeholder="FORMAT_KODE_PELACAKAN" autocomplete="off">
-
-        <label class="mt-2 font-semibold" for="foto">Foto pendukung (opsional, maks. 3 MB)</label>
-        <input id="foto" class="rounded-lg border border-border p-2 file:mr-3 file:rounded-md file:border-0 file:bg-background file:px-3 file:py-2" type="file" accept="image/jpeg,image/png,image/webp" @change="pilihFoto">
-
-        <button class="mt-3 min-h-12 rounded-lg bg-primary px-5 font-bold text-white hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50" type="submit" :disabled="sedangMengirim || !koordinat">
-          {{ sedangMengirim ? 'Mengirim laporan…' : 'Kirim laporan' }}
-        </button>
-      </fieldset>
-      <p v-if="pesanError" class="mt-4 rounded-lg bg-background p-3 text-destructive" role="alert">{{ pesanError }}</p>
-      <section v-if="kodePelacakan" class="mt-5 rounded-xl bg-background p-5" aria-live="polite">
-        <h2 class="text-xl font-extrabold text-primary">Laporan berhasil dikirim</h2>
-        <p class="mt-2 text-muted">Simpan kode ini untuk melacak laporan Anda:</p>
-        <strong class="mt-2 block text-xl tracking-wider text-primary">{{ kodePelacakan }}</strong>
-        <NuxtLink class="mt-4 inline-block font-bold text-secondary underline" to="/lacak">Lacak laporan</NuxtLink>
-      </section>
-    </form>
-    </div>
-  </main>
-</template>
-
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
-import { APP_NAME, FORMAT_KODE_PELACAKAN, REGIONAL_OFFICE_NAME } from '~~/shared/config/app'
-import { JENIS_TERLAPOR, JENIS_WILAYAH_DESA } from '~~/shared/config/teks'
+import { BATAS_WAKTU_GPS_MS, FORMAT_KODE_PELACAKAN, REGIONAL_OFFICE_NAME } from '~~/shared/config/app'
+import { BATAS_FILE } from '~~/shared/config/batas-file'
+import { JENIS_TERLAPOR, JENIS_WILAYAH_DESA, TEKS_LAPORAN_PUBLIK } from '~~/shared/config/teks'
 import type { Enums } from '~~/shared/types/database.types'
 
-const { kabupaten: dataKabupaten, kecamatan: ambilKecamatan, desa: ambilDesa } = useWilayah()
+definePageMeta({ layout: 'publik' })
+useHead({ title: TEKS_LAPORAN_PUBLIK.judul })
+const { kabupaten, kecamatan: ambilKecamatan, desa: ambilDesa, kantor: ambilKantor } = useWilayah()
 const { kirimLaporan } = useLaporan()
-const kabupaten = dataKabupaten
 const kabupatenId = ref('')
 const kecamatanId = ref('')
 const kecamatan = ambilKecamatan(kabupatenId)
 const desa = ambilDesa(kecamatanId)
+const kabupatenTerpilih = computed(() => kabupaten.data.value?.find(item => item.id === kabupatenId.value))
+const kantor = ambilKantor(computed(() => kabupatenTerpilih.value?.kantor_id ?? undefined))
 const koordinat = ref<{ lintang: number; bujur: number; akurasi: number }>()
-const sedangMencariLokasi = ref(false)
+const keadaanLokasi = ref<'menunggu' | 'meminta' | 'berhasil' | 'ditolak' | 'gps-mati' | 'timeout' | 'tidak-didukung'>('menunggu')
 const sedangMengirim = ref(false)
-const pesanLokasi = ref('')
 const pesanError = ref('')
-const kodePelacakan = ref('')
 const foto = ref<File>()
-const isian = reactive({
-  nama_pelapor: '',
-  alamat_pelapor: '',
-  desa_kelurahan_id: '',
-  jenis_terlapor: '',
-  isi_laporan: '',
-  kode_laporan_sebelumnya: ''
-})
+const pratinjauFoto = ref('')
+const kodePelacakan = ref('')
+const waktuDiterima = ref('')
+const sudahDisalin = ref(false)
+const dialogSukses = ref<HTMLDialogElement>()
+const isian = reactive({ nama_pelapor: '', alamat_pelapor: '', desa_kelurahan_id: '', jenis_terlapor: '' as string, isi_laporan: '', kode_laporan_sebelumnya: '' })
+const aktifkanForm = computed(() => keadaanLokasi.value === 'berhasil' && Boolean(koordinat.value) && !sedangMengirim.value)
+const valid = computed(() => isian.nama_pelapor.trim().length > 0 && isian.nama_pelapor.length <= 150 && isian.alamat_pelapor.trim().length > 0 && isian.alamat_pelapor.length <= 500 && Boolean(kabupatenId.value && kecamatanId.value && isian.desa_kelurahan_id && isian.jenis_terlapor) && isian.isi_laporan.trim().length >= 10 && isian.isi_laporan.length <= 5000)
 
-watch(kabupatenId, () => {
-  kecamatanId.value = ''
-  isian.desa_kelurahan_id = ''
-})
+watch(kabupatenId, () => { kecamatanId.value = ''; isian.desa_kelurahan_id = '' })
 watch(kecamatanId, () => { isian.desa_kelurahan_id = '' })
-
-onMounted(dapatkanLokasi)
-
-function labelWilayah(value: Enums<'jenis_wilayah_desa'>) {
-  return JENIS_WILAYAH_DESA.find(item => item.value === value)?.label ?? value
-}
-
-function dapatkanLokasi() {
-  pesanLokasi.value = ''
-  if (!navigator.geolocation) {
-    pesanLokasi.value = 'GPS tidak tersedia di perangkat atau browser ini.'
+onMounted(async () => {
+  if (!window.isSecureContext || !navigator.geolocation) {
+    keadaanLokasi.value = 'tidak-didukung'
     return
   }
+  try {
+    const izin = await navigator.permissions?.query({ name: 'geolocation' })
+    if (izin?.state === 'granted') await dapatkanLokasi()
+  } catch {
+    // Browser tanpa Permissions API meminta lokasi hanya setelah tombol ditekan.
+  }
+})
+onBeforeUnmount(() => { if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value) })
 
-  sedangMencariLokasi.value = true
-  navigator.geolocation.getCurrentPosition(
-    (posisi) => {
-      koordinat.value = {
-        lintang: posisi.coords.latitude,
-        bujur: posisi.coords.longitude,
-        akurasi: posisi.coords.accuracy
-      }
-      sedangMencariLokasi.value = false
-    },
-    (error) => {
-      sedangMencariLokasi.value = false
-      pesanLokasi.value = error.code === error.PERMISSION_DENIED
-        ? 'Izin lokasi ditolak. Aktifkan izin lokasi di pengaturan browser untuk mengisi formulir.'
-        : 'GPS tidak aktif atau lokasi belum tersedia. Periksa GPS perangkat lalu coba lagi.'
-    },
-    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-  )
+function labelWilayah(value: Enums<'jenis_wilayah_desa'>) { return JENIS_WILAYAH_DESA.find(item => item.value === value)?.label ?? value }
+function dapatkanLokasi() {
+  keadaanLokasi.value = 'meminta'
+  navigator.geolocation.getCurrentPosition((posisi) => {
+    koordinat.value = { lintang: posisi.coords.latitude, bujur: posisi.coords.longitude, akurasi: posisi.coords.accuracy }
+    keadaanLokasi.value = 'berhasil'
+  }, (galat) => {
+    keadaanLokasi.value = galat.code === galat.PERMISSION_DENIED ? 'ditolak' : galat.code === galat.POSITION_UNAVAILABLE ? 'gps-mati' : 'timeout'
+  }, { enableHighAccuracy: true, timeout: BATAS_WAKTU_GPS_MS, maximumAge: 0 })
 }
 
-function pilihFoto(event: Event) {
-  foto.value = (event.target as HTMLInputElement).files?.[0]
+async function kompresFoto(file: File): Promise<File> {
+  if (!BATAS_FILE.foto.tipeDiizinkan.includes(file.type as typeof BATAS_FILE.foto.tipeDiizinkan[number])) throw new Error(TEKS_LAPORAN_PUBLIK.fotoDitolak)
+  const gambar = await createImageBitmap(file)
+  if (file.size <= BATAS_FILE.foto.ukuranMaksimumByte && Math.max(gambar.width, gambar.height) <= 1600) {
+    gambar.close()
+    return file
+  }
+  const skala = Math.min(1, 1600 / Math.max(gambar.width, gambar.height))
+  const kanvas = document.createElement('canvas')
+  kanvas.width = Math.round(gambar.width * skala); kanvas.height = Math.round(gambar.height * skala)
+  const konteks = kanvas.getContext('2d')
+  if (!konteks) { gambar.close(); throw new Error(TEKS_LAPORAN_PUBLIK.fotoDitolak) }
+  konteks.drawImage(gambar, 0, 0, kanvas.width, kanvas.height)
+  gambar.close()
+  const tipeKompresi = file.type === 'image/png' ? 'image/webp' : file.type
+  for (const kualitas of [0.88, 0.78, 0.68, 0.58, 0.48]) {
+    const hasil = await new Promise<Blob | null>(resolve => kanvas.toBlob(resolve, tipeKompresi, kualitas))
+    if (hasil && hasil.size <= BATAS_FILE.foto.ukuranMaksimumByte) return new File([hasil], file.name, { type: tipeKompresi, lastModified: Date.now() })
+  }
+  throw new Error(TEKS_LAPORAN_PUBLIK.fotoDitolak)
 }
+
+async function pilihFoto(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+  try {
+    foto.value = await kompresFoto(file)
+    if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value)
+    pratinjauFoto.value = URL.createObjectURL(foto.value)
+    pesanError.value = ''
+  } catch (galat) { foto.value = undefined; pesanError.value = galat instanceof Error ? galat.message : TEKS_LAPORAN_PUBLIK.fotoDitolak; input.value = '' }
+}
+function hapusFoto() { foto.value = undefined; if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value); pratinjauFoto.value = '' }
 
 async function kirim() {
-  if (!koordinat.value) return
-  sedangMengirim.value = true
-  pesanError.value = ''
-  kodePelacakan.value = ''
-
+  if (!aktifkanForm.value || !valid.value || !koordinat.value) return
+  sedangMengirim.value = true; pesanError.value = ''
   const form = new FormData()
   for (const [kunci, nilai] of Object.entries(isian)) form.append(kunci, nilai)
-  form.append('lintang', String(koordinat.value.lintang))
-  form.append('bujur', String(koordinat.value.bujur))
-  form.append('akurasi_meter', String(koordinat.value.akurasi))
+  form.append('lintang', String(koordinat.value.lintang)); form.append('bujur', String(koordinat.value.bujur)); form.append('akurasi_meter', String(koordinat.value.akurasi))
   if (foto.value) form.append('foto', foto.value)
-
   try {
     const hasil = await kirimLaporan(form)
-    kodePelacakan.value = hasil.kode_pelacakan
-  } catch (error) {
-    pesanError.value = error && typeof error === 'object' && 'data' in error
-      ? String((error as { data?: { statusMessage?: string } }).data?.statusMessage ?? 'Laporan belum dapat dikirim.')
-      : 'Laporan belum dapat dikirim. Periksa koneksi lalu coba lagi.'
-  } finally {
-    sedangMengirim.value = false
-  }
+    kodePelacakan.value = hasil.kode_pelacakan; waktuDiterima.value = new Date().toISOString(); sudahDisalin.value = false; dialogSukses.value?.showModal()
+  } catch (galat) {
+    const status = galat && typeof galat === 'object' && 'statusCode' in galat ? Number((galat as { statusCode?: number }).statusCode) : 0
+    const message = galat && typeof galat === 'object' && 'data' in galat ? String((galat as { data?: { statusMessage?: string } }).data?.statusMessage ?? '') : ''
+    pesanError.value = status === 422 ? TEKS_LAPORAN_PUBLIK.lokasiDiLuarRiau : status === 429 ? TEKS_LAPORAN_PUBLIK.terlaluBanyak : status === 404 ? TEKS_LAPORAN_PUBLIK.kodeSebelumnyaTidakAda : message.includes('foto') || message.includes('Foto') ? TEKS_LAPORAN_PUBLIK.fotoDitolak : message.includes('Desa') || message.includes('desa') ? TEKS_LAPORAN_PUBLIK.desaTidakValid : TEKS_LAPORAN_PUBLIK.gagalKirim
+  } finally { sedangMengirim.value = false }
+}
+async function salinKode() { try { await navigator.clipboard.writeText(kodePelacakan.value); sudahDisalin.value = true } catch { sudahDisalin.value = false } }
+function tutupSukses(event?: Event) {
+  if (event) event.preventDefault()
+  if (!sudahDisalin.value && !window.confirm(TEKS_LAPORAN_PUBLIK.konfirmasiTutup)) return
+  dialogSukses.value?.close(); kodePelacakan.value = ''; Object.assign(isian, { nama_pelapor: '', alamat_pelapor: '', desa_kelurahan_id: '', jenis_terlapor: '', isi_laporan: '', kode_laporan_sebelumnya: '' }); kabupatenId.value = ''; kecamatanId.value = ''; hapusFoto()
 }
 </script>
 
+<template>
+  <main class="mx-auto min-h-[70vh] max-w-3xl px-5 py-8 sm:px-8 sm:py-12">
+    <header class="mb-6"><h1 class="text-4xl font-black tracking-tight text-primary">{{ TEKS_LAPORAN_PUBLIK.judul }}</h1><p class="mt-2 text-muted-foreground">{{ REGIONAL_OFFICE_NAME }}</p></header>
+    <section class="rounded-2xl border border-border bg-card p-5 shadow-card sm:p-7" aria-labelledby="judul-lokasi">
+      <h2 id="judul-lokasi" class="text-xl font-extrabold text-primary">{{ keadaanLokasi === 'berhasil' ? TEKS_LAPORAN_PUBLIK.lokasiTerdeteksi : TEKS_LAPORAN_PUBLIK.tungguLokasi }}</h2>
+      <p v-if="keadaanLokasi === 'berhasil'" class="mt-2 font-semibold text-green-700" role="status">{{ TEKS_LAPORAN_PUBLIK.lokasiTerdeteksi }}</p>
+      <p v-else-if="keadaanLokasi === 'meminta'" class="mt-2 text-muted-foreground" role="status">{{ TEKS_LAPORAN_PUBLIK.memintaLokasi }}</p>
+      <p v-else-if="keadaanLokasi !== 'menunggu'" class="mt-2 text-destructive" role="alert">{{ keadaanLokasi === 'ditolak' ? TEKS_LAPORAN_PUBLIK.izinDitolak : keadaanLokasi === 'gps-mati' ? TEKS_LAPORAN_PUBLIK.gpsMati : keadaanLokasi === 'timeout' ? TEKS_LAPORAN_PUBLIK.gpsTimeout : TEKS_LAPORAN_PUBLIK.gpsTidakDidukung }}</p>
+      <button v-if="keadaanLokasi !== 'berhasil' && keadaanLokasi !== 'tidak-didukung'" class="mt-4 min-h-11 rounded-lg bg-secondary px-4 font-bold text-white disabled:opacity-60" type="button" :disabled="keadaanLokasi === 'meminta'" @click="dapatkanLokasi">{{ keadaanLokasi === 'ditolak' || keadaanLokasi === 'gps-mati' || keadaanLokasi === 'timeout' ? TEKS_LAPORAN_PUBLIK.cobaLagi : keadaanLokasi === 'meminta' ? TEKS_LAPORAN_PUBLIK.memintaLokasi : TEKS_LAPORAN_PUBLIK.izinkanLokasi }}</button>
+    </section>
+    <form class="mt-6 rounded-2xl border border-border bg-card p-5 shadow-card sm:p-8" @submit.prevent="kirim">
+      <fieldset class="grid gap-3 disabled:opacity-60" :disabled="!aktifkanForm">
+        <legend class="mb-3 text-xl font-extrabold text-primary">Informasi laporan</legend>
+        <label class="mt-2 font-semibold" for="nama">{{ TEKS_LAPORAN_PUBLIK.nama }}</label><input id="nama" v-model="isian.nama_pelapor" class="min-h-11 rounded-lg border border-border bg-background px-3 text-base" maxlength="150" required autocomplete="name">
+        <label class="mt-2 font-semibold" for="kabupaten">{{ TEKS_LAPORAN_PUBLIK.kabupaten }}</label><select id="kabupaten" v-model="kabupatenId" class="min-h-11 rounded-lg border border-border bg-background px-3 text-base" required><option value="">Pilih kabupaten/kota</option><option v-for="item in kabupaten.data.value" :key="item.id" :value="item.id">{{ item.nama }}</option></select>
+        <p v-if="kabupaten.pending.value" class="text-sm text-muted-foreground" role="status">Memuat kabupaten/kota...</p><p v-else-if="kabupaten.error.value" class="text-sm text-destructive" role="alert">Kabupaten/kota belum dapat dimuat.</p><p v-else-if="!kabupaten.data.value?.length" class="text-sm text-muted-foreground">Data kabupaten/kota belum tersedia.</p>
+        <label class="mt-2 font-semibold" for="kecamatan">{{ TEKS_LAPORAN_PUBLIK.kecamatan }}</label><select id="kecamatan" v-model="kecamatanId" class="min-h-11 rounded-lg border border-border bg-background px-3 text-base" required :disabled="!kabupatenId"><option value="">Pilih kecamatan</option><option v-for="item in kecamatan.data.value" :key="item.id" :value="item.id">{{ item.nama }}</option></select>
+        <p v-if="kecamatan.pending.value" class="text-sm text-muted-foreground" role="status">Memuat kecamatan...</p><p v-else-if="kecamatan.error.value" class="text-sm text-destructive" role="alert">Kecamatan belum dapat dimuat.</p>
+        <label class="mt-2 font-semibold" for="desa">{{ TEKS_LAPORAN_PUBLIK.desa }}</label><select id="desa" v-model="isian.desa_kelurahan_id" class="min-h-11 rounded-lg border border-border bg-background px-3 text-base" required :disabled="!kecamatanId"><option value="">Pilih desa/kelurahan</option><option v-for="item in desa.data.value" :key="item.id" :value="item.id">{{ item.nama }} ({{ labelWilayah(item.jenis_wilayah) }})</option></select><p v-if="desa.pending.value" class="text-sm text-muted-foreground" role="status">Memuat desa/kelurahan...</p><p v-else-if="desa.error.value" class="text-sm text-destructive" role="alert">Desa/kelurahan belum dapat dimuat.</p>
+        <p v-if="kantor.data.value?.nama" class="rounded-lg bg-muted p-3 text-sm">{{ TEKS_LAPORAN_PUBLIK.kantor }} <strong>{{ kantor.data.value.nama.toLocaleUpperCase('id') }}</strong></p>
+        <label class="mt-2 font-semibold" for="alamat">{{ TEKS_LAPORAN_PUBLIK.alamat }}</label><textarea id="alamat" v-model="isian.alamat_pelapor" class="rounded-lg border border-border bg-background px-3 py-2 text-base" maxlength="500" required rows="3" />
+        <label class="mt-2 font-semibold" for="jenis">{{ TEKS_LAPORAN_PUBLIK.jenisTerlapor }}</label><select id="jenis" v-model="isian.jenis_terlapor" class="min-h-11 rounded-lg border border-border bg-background px-3 text-base" required><option value="">Pilih jenis terlapor</option><option v-for="item in JENIS_TERLAPOR" :key="item.value" :value="item.value">{{ item.label }}</option></select>
+        <label class="mt-2 font-semibold" for="isi">{{ TEKS_LAPORAN_PUBLIK.isi }}</label><textarea id="isi" v-model="isian.isi_laporan" class="rounded-lg border border-border bg-background px-3 py-2 text-base" minlength="10" maxlength="5000" required rows="8" /><p class="text-right text-sm text-muted-foreground">{{ isian.isi_laporan.length }}/5000</p>
+        <label class="mt-2 font-semibold" for="foto">{{ TEKS_LAPORAN_PUBLIK.foto }}</label><input id="foto" class="rounded-lg border border-border p-2 text-base file:mr-3 file:rounded-md file:border-0 file:bg-muted file:px-3 file:py-2" type="file" accept="image/jpeg,image/png,image/webp" @change="pilihFoto"><div v-if="pratinjauFoto" class="flex items-center gap-4"><img class="size-20 rounded-lg object-cover" :src="pratinjauFoto" alt="Pratinjau foto pendukung"><button class="min-h-10 text-sm font-bold text-destructive underline" type="button" @click="hapusFoto">{{ TEKS_LAPORAN_PUBLIK.hapusFoto }}</button></div>
+        <details class="mt-3 rounded-lg border border-border p-4"><summary class="cursor-pointer font-semibold">{{ TEKS_LAPORAN_PUBLIK.tindakLanjut }}</summary><label class="mt-4 grid gap-2 font-semibold" for="kode-sebelumnya">{{ TEKS_LAPORAN_PUBLIK.kodeSebelumnya }}<input id="kode-sebelumnya" v-model="isian.kode_laporan_sebelumnya" class="min-h-11 rounded-lg border border-border bg-background px-3 font-mono text-base" :placeholder="FORMAT_KODE_PELACAKAN" autocomplete="off"></label></details>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">{{ TEKS_LAPORAN_PUBLIK.bantuanPrivasi }} <NuxtLink class="font-semibold text-primary underline" to="/privasi">Privasi</NuxtLink></p>
+        <button class="mt-3 min-h-12 rounded-lg bg-primary px-5 font-bold text-white hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50" type="submit" :disabled="!aktifkanForm || !valid">{{ sedangMengirim ? TEKS_LAPORAN_PUBLIK.mengirim : TEKS_LAPORAN_PUBLIK.kirim }}</button>
+      </fieldset>
+      <p v-if="pesanError" class="mt-4 rounded-lg bg-background p-3 text-destructive" role="alert">{{ pesanError }}</p>
+    </form>
+    <dialog ref="dialogSukses" class="w-[min(42rem,calc(100%-2rem))] rounded-2xl border border-border bg-card p-0 text-foreground shadow-card backdrop:bg-black/50" @cancel="tutupSukses">
+      <section class="p-6 sm:p-8"><h2 class="text-2xl font-black text-primary">{{ TEKS_LAPORAN_PUBLIK.sukses }}</h2><p class="mt-2 text-muted-foreground">{{ TEKS_LAPORAN_PUBLIK.simpanKode }}</p><div class="mt-4 flex flex-wrap items-center gap-3"><strong class="rounded-lg bg-muted px-4 py-3 font-mono text-xl tracking-wider text-primary">{{ kodePelacakan }}</strong><button class="min-h-11 rounded-lg border border-border px-4 font-bold text-primary" type="button" @click="salinKode">{{ sudahDisalin ? TEKS_LAPORAN_PUBLIK.tersalin : TEKS_LAPORAN_PUBLIK.salinKode }}</button></div><h3 class="mt-7 font-bold text-primary">Riwayat status</h3><TimelineStatus class="mt-4" :timeline="[{ status: 'diterima', waktu: waktuDiterima }]" /><div class="mt-6 flex flex-wrap gap-3"><NuxtLink class="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 font-bold text-accent-foreground no-underline" :to="`/lacak?kode=${encodeURIComponent(kodePelacakan)}`">{{ TEKS_LAPORAN_PUBLIK.cekStatus }}</NuxtLink><button class="min-h-11 rounded-lg border border-border px-4 font-bold" type="button" @click="tutupSukses()">{{ TEKS_LAPORAN_PUBLIK.tutup }}</button></div></section>
+    </dialog>
+  </main>
+</template>

@@ -30,5 +30,13 @@ export function useWilayah() {
     })
   }
 
-  return { kabupaten, kecamatan, desa }
+  function kantor(kantorId: MaybeRefOrGetter<string | undefined>) {
+    return useFetch<{ id: string; nama: string } | null>(() => `/api/publik/kantor/${toValue(kantorId) ?? ''}`, {
+      key: `publik-kantor-${toValue(kantorId) ?? 'kosong'}`,
+      immediate: Boolean(toValue(kantorId)),
+      watch: [() => toValue(kantorId)]
+    })
+  }
+
+  return { kabupaten, kecamatan, desa, kantor }
 }

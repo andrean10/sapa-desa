@@ -1,6 +1,4 @@
-import type { Tables } from '~~/shared/types/database.types'
-
-type FaqPublik = Pick<Tables<'faq'>, 'id' | 'pertanyaan' | 'jawaban'>
+import type { FaqPublik } from '~~/shared/types/publik'
 
 export function useFaq() {
   return useFetch<FaqPublik[]>('/api/publik/faq', {

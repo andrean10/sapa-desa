@@ -7,12 +7,21 @@ export type KabupatenPublik = Pick<Tables<'kabupaten'>, 'id' | 'nama' | 'jenis' 
 export type KecamatanPublik = Pick<Tables<'kecamatan'>, 'id' | 'nama'>
 export type DesaPublik = Pick<Tables<'desa_kelurahan'>, 'id' | 'nama' | 'jenis_wilayah'>
 export type FaqPublik = Pick<Tables<'faq'>, 'id' | 'pertanyaan' | 'jawaban'>
+export type KantorPublik = Pick<Tables<'kantor_imigrasi'>, 'id' | 'nama'>
 
 export async function ambilKabupatenPublik() {
   return buatClientAnonimo()
     .from('kabupaten')
     .select('id, nama, jenis, kantor_id')
     .order('nama')
+}
+
+export async function ambilKantorPublik(kantorId: string) {
+  return buatClientAnonimo()
+    .from('kantor_imigrasi')
+    .select('id, nama')
+    .eq('id', kantorId)
+    .maybeSingle()
 }
 
 export async function ambilKecamatanPublik(kabupatenId: string) {

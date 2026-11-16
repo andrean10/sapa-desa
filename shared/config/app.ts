@@ -9,6 +9,7 @@ export const REGIONAL_OFFICE_NAME = 'Kantor Wilayah Direktorat Jenderal Imigrasi
 export const AUTH_EMAIL_DOMAIN = 'sapadesa.com'
 export const TIMEZONE = 'Asia/Jakarta'
 export const AMBANG_DESA_LAMA_HARI = 30
+export const BATAS_WAKTU_GPS_MS = 15_000
 
 export const FORMAT_KODE_PELACAKAN = 'SD-XXXX-XXXX'
 export const POLA_KODE_PELACAKAN = '^SD-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'

@@ -69,6 +69,93 @@ export const NAVIGASI_PUBLIK = [
   { label: 'Cek Status', href: '/lacak' }
 ] as const
 
+export const TEKS_LANDING = {
+  judul: 'Lihat sesuatu yang mencurigakan di desa Anda?',
+  pengantar: 'Sampaikan laporan keimigrasian dari wilayah Riau dan pantau tindak lanjutnya dengan kode laporan.',
+  langkah: [
+    { judul: 'Isi laporan di HP Anda', keterangan: 'Pilih wilayah dan ceritakan hal yang ingin Anda laporkan.' },
+    { judul: 'Petugas setempat menindaklanjuti', keterangan: 'Laporan diteruskan ke kantor imigrasi yang menangani wilayah tersebut.' },
+    { judul: 'Pantau dengan kode laporan', keterangan: 'Gunakan kode pelacakan untuk melihat status laporan.' }
+  ],
+  catatanPrivasi: 'Laporan hanya dapat dikirim dari wilayah Provinsi Riau. Lokasi perangkat Anda dipakai untuk memastikan hal itu.',
+  faqJudul: 'Informasi keimigrasian',
+  faqLihatSemua: 'Lihat semua informasi',
+  cekStatus: 'Cek Status Laporan'
+} as const
+
+export const TEKS_PRIVASI = {
+  judul: 'Ketentuan Penggunaan Data',
+  isi: 'Akan diisi oleh Kanwil.'
+} as const
+
+export const TEKS_FAQ = {
+  judul: 'Pertanyaan yang Sering Diajukan',
+  label: 'FAQ',
+  ajakanJudul: 'Ingin melapor?',
+  ajakanIsi: 'Laporkan langsung dan pantau dengan kode laporan.',
+  kosong: 'Informasi belum tersedia. Anda tetap dapat membuat laporan.',
+  gagal: 'Informasi gagal dimuat.',
+  cari: 'Cari pertanyaan atau jawaban',
+  ulang: 'Coba lagi'
+} as const
+
+export const TEKS_LAPORAN_PUBLIK = {
+  judul: 'Kirim laporan pengaduan',
+  tungguLokasi: 'Aktifkan lokasi untuk melanjutkan. Laporan hanya dapat dikirim dari wilayah Provinsi Riau.',
+  lokasiTerdeteksi: 'Lokasi terdeteksi',
+  izinDitolak: 'Izin lokasi ditolak. Aktifkan izin lokasi untuk situs ini di pengaturan browser, lalu coba lagi.',
+  gpsMati: 'Lokasi perangkat tidak tersedia. Nyalakan GPS atau layanan lokasi di HP Anda, lalu coba lagi.',
+  gpsTimeout: 'Lokasi belum berhasil dideteksi. Pastikan sinyal dan GPS aktif, lalu coba lagi.',
+  gpsTidakDidukung: 'Browser atau koneksi Anda tidak mendukung deteksi lokasi. Buka tautan ini lewat browser terbaru.',
+  izinkanLokasi: 'Izinkan Lokasi',
+  cobaLagi: 'Coba lagi',
+  memintaLokasi: 'Mendeteksi lokasi…',
+  nama: 'Nama lengkap',
+  alamat: 'Alamat Anda',
+  kabupaten: 'Kabupaten/Kota',
+  kecamatan: 'Kecamatan',
+  desa: 'Desa/Kelurahan',
+  kantor: 'Laporan Anda akan dilayani oleh:',
+  jenisTerlapor: 'Siapa yang Anda laporkan?',
+  isi: 'Apa yang ingin Anda laporkan?',
+  foto: 'Foto pendukung (opsional)',
+  pilihFoto: 'Pilih foto atau ambil dengan kamera',
+  hapusFoto: 'Hapus foto',
+  tindakLanjut: 'Ini tindak lanjut laporan sebelumnya?',
+  kodeSebelumnya: 'Kode laporan sebelumnya',
+  bantuanPrivasi: 'Lokasi perangkat Anda hanya dipakai untuk memastikan laporan berasal dari Provinsi Riau. Jangan menuliskan data yang tidak diperlukan.',
+  kirim: 'Kirim Laporan',
+  mengirim: 'Mengirim…',
+  gagalKirim: 'Laporan belum terkirim. Periksa koneksi Anda lalu coba lagi.',
+  lokasiDiLuarRiau: 'Lokasi Anda terdeteksi di luar Provinsi Riau. Laporan hanya dapat dikirim dari wilayah Riau.',
+  terlaluBanyak: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
+  kodeSebelumnyaTidakAda: 'Kode laporan sebelumnya tidak ditemukan. Periksa penulisannya atau kosongkan kolom itu.',
+  fotoDitolak: 'Foto harus berformat JPEG, PNG, atau WebP dan berukuran maksimal 3 MB.',
+  desaTidakValid: 'Desa atau kelurahan yang dipilih tidak valid. Pilih ulang dari daftar.',
+  sukses: 'Laporan berhasil dikirim',
+  simpanKode: 'Simpan kode ini. Anda memerlukannya untuk memantau laporan.',
+  salinKode: 'Salin kode',
+  tersalin: 'Tersalin',
+  cekStatus: 'Cek status',
+  tutup: 'Tutup',
+  konfirmasiTutup: 'Pastikan kode sudah Anda simpan. Kode tidak dapat ditampilkan lagi.'
+} as const
+
+export const TEKS_LACAK_PUBLIK = {
+  judul: 'Cek status laporan',
+  petunjuk: 'Masukkan kode pelacakan yang diberikan setelah laporan dikirim.',
+  labelKode: 'Kode laporan',
+  contohKode: 'SD-7KQ2-M9XP',
+  cek: 'Cek Status',
+  muatUlang: 'Muat ulang',
+  statusKini: 'Status saat ini',
+  tidakDitemukan: 'Kode tidak ditemukan. Periksa kembali penulisan kode Anda.',
+  terlaluBanyak: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
+  gagal: 'Status laporan belum dapat dimuat. Periksa koneksi Anda lalu coba lagi.',
+  mengirim: 'Memeriksa status…',
+  riwayat: 'Riwayat laporan'
+} as const
+
 export const TEKS_UMUM = {
   beranda: 'Beranda',
   galatUmum: 'Terjadi kendala. Silakan coba lagi.',

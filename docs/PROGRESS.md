@@ -1,4 +1,47 @@
-# Progress Tahap 1 — Kerangka SAPA DESA
+# Progress SAPA DESA
+
+## Tahap 2 — Masyarakat (mulai)
+
+### Kondisi awal Tahap 2
+
+- Repo bersih kecuali riwayat commit, pada `master` (`17561f3 chore: update favicon.ico`, `1329e33 catat verifikasi Tahap 1`, `42bf04b siapkan kerangka Tahap 1`).
+- `docs/PRD.md` bagian 4.1–4.7 dan 11–12 serta `docs/database/KONTRAK_API.md` bagian 1–3 dan 9 dibaca. Tidak ada skema yang perlu diubah.
+- Yang sudah ada: landing, form lapor dengan GPS dasar, lacak via endpoint server, useFaq/useWilayah, controller/model publik, rate limit per IP, unggah foto server-side, tracking result privacy shape.
+- Kekurangan terhadap PRD: `/informasi` dan `/privasi` belum ada; layout publik belum dipakai; FAQ landing tidak disembunyikan saat kosong dan belum ada pencarian/accordion terkontrol; form masih meminta GPS otomatis tanpa pemeriksaan HTTPS/izin, tidak memisahkan error GPS, belum kompres/pratinjau foto, belum menampilkan kantor/penghitung karakter/validasi pesan, dan sukses hanya teks tanpa dialog/timeline/copy; lacak belum membaca query, memformat input, menunjukkan warna/penjelasan/tombol muat ulang, dan masih menghapus hasil saat mencari ulang.
+- Scope pekerjaan: menyelesaikan rute masyarakat `/`, `/informasi`, `/lapor`, `/lacak`, `/privasi`, komponen FAQ/timeline, serta UX dan error mapping. Halaman login/dashboard bukan bagian Tahap 2.
+
+### Pekerjaan dan bukti Tahap 2
+
+| Bagian | Hasil |
+|---|---|
+| Layout publik dan landing | Semua halaman masyarakat memakai layout bersama. Landing memuat hero, alur tiga langkah, FAQ pintas (disembunyikan saat FAQ kosong), CTA dan privasi, serta metadata sosial. |
+| Informasi | Dibuat `/informasi` dengan akordeon satu-buka, butir pertama terbuka, teks FAQ di-escape dan mempertahankan baris baru, pencarian saat FAQ > 8, keadaan loading/kosong/error, dan CTA responsif. |
+| Privasi | Dibuat `/privasi` dengan kerangka PRD “Ketentuan Penggunaan Data” dan teks “Akan diisi oleh Kanwil”; tidak menambah klaim kebijakan yang belum disediakan. |
+| Form masyarakat | GPS meminta izin hanya setelah tombol kecuali izin sudah diberikan, mengecek HTTPS/dukungan browser, memisahkan penolakan/GPS mati/timeout, menonaktifkan seluruh form sampai lokasi diperoleh dan selama kirim, validasi batas input, penghitung karakter, wilayah bertingkat, nama kantor, follow-up opsional, dan bantuan privasi. |
+| Foto | Validasi MIME, kompresi sisi panjang 1600 px dan kualitas bertahap sampai batas 3 MB, pratinjau, hapus, dan lepaskan object URL. Server tetap memvalidasi file. |
+| Hasil kirim | Dialog kode pelacakan, tombol salin dengan umpan balik, timeline status Diterima, tautan cek status, konfirmasi menutup sebelum kode disalin, lalu reset form. Error lokasi di luar Riau, rate limit, kode sebelumnya, file, dan desa dipetakan ke pesan masyarakat. |
+| Lacak | Mask input uppercase/hyphen, dukungan `?kode=`, status badge dan penjelasan, kantor/waktu kirim dalam WIB, timeline publik, muat ulang. Pesan 404 dan 429 umum; hasil tidak memuat PII/petugas. |
+| Server | Nama kantor publik dibaca lewat endpoint/model; kode FK desa tidak valid dipetakan sebagai 422. Client anonim tetap dipakai untuk baca publik, service role tetap pada server untuk jalur laporan. Tidak ada perubahan skema. |
+| Berbagi dan aksesibilitas | Teks pengguna tetap teks biasa, target kontrol minimal 44 px di bagian utama, label terhubung, pesan loading/error memiliki status ARIA. |
+
+### Pemeriksaan Tahap 2
+
+| Pemeriksaan | Hasil |
+|---|---|
+| `npm run typecheck` | Lulus, exit code 0. |
+| `npm run lint` | Lulus, exit code 0. |
+| `npm run test` | Lulus: 3 test files, 7 tests. Termasuk normalisasi kode pelacakan (uppercase, hapus spasi, pemisah, karakter yang dilarang) dan utilitas Tahap 1. |
+| `npm run build` | Lulus; Nuxt 4.6.4 / Nitro production build. |
+| Smoke test production server | `GET /`, `/informasi`, `/lapor`, `/lacak`, `/privasi` semuanya 200. Server lokal tidak memiliki URL/kunci Supabase staging, jadi fetch FAQ/wilayah menampilkan state error; pengujian data live memerlukan `.env` staging. Tidak ada kredensial yang dibuat atau dicatat. |
+| `git diff --check` | Lulus, hanya peringatan normal Git untuk konversi LF/CRLF pada Windows. |
+| `rg` untuk `v-html` dan `supabase` pada halaman/komponen publik | Tidak ada hasil; akses database publik tetap melewati composable dan endpoint server. |
+| Database | Tidak ada perintah tulis atau perubahan skema. |
+
+### Sisa Tahap 2
+
+- Teks final kebijakan privasi masih menunggu materi resmi Kanwil sebagaimana PRD.
+- Pengujian dengan data FAQ/wilayah dan pengiriman laporan staging belum bisa dilakukan karena tidak ada kredensial Supabase di lingkungan lokal. Alur server dibangun dan rute halaman berhasil dirender.
+- Commit lokal dicatat setelah pemeriksaan; tidak ada push.
 
 ## Kondisi awal
 

@@ -9,6 +9,7 @@ import {
   ambilDesaPublik,
   ambilFaqPublik,
   ambilKabupatenPublik,
+  ambilKantorPublik,
   ambilKecamatanPublik,
   cariLaporanSebelumnya,
   hapusFotoLaporan,
@@ -58,6 +59,13 @@ export async function daftarFaqPublik() {
     throw createError({ statusCode: 503, statusMessage: PESAN_GAGAL_MEMUAT })
   }
 
+  return hasil.data
+}
+
+export async function namaKantorPublik(kantorId: string) {
+  if (!POLA_ID_WILAYAH.test(kantorId)) throw createError({ statusCode: 400, statusMessage: 'Parameter kantor tidak valid.' })
+  const hasil = await ambilKantorPublik(kantorId)
+  if (hasil.error) throw createError({ statusCode: 503, statusMessage: PESAN_GAGAL_MEMUAT })
   return hasil.data
 }
 
@@ -177,6 +185,9 @@ export async function kirimLaporanPublik(event: H3Event) {
     if (hasil.error || !hasil.data) {
       if (hasil.error?.code === '22023') {
         throw createError({ statusCode: 422, statusMessage: 'Lokasi pelapor berada di luar Provinsi Riau.' })
+      }
+      if (hasil.error?.code === '23503') {
+        throw createError({ statusCode: 422, statusMessage: 'Desa/kelurahan tidak valid.' })
       }
       throw createError({ statusCode: 503, statusMessage: 'Laporan belum dapat dikirim. Silakan coba lagi.' })
     }
