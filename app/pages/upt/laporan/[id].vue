@@ -41,7 +41,7 @@ async function simpanStatus() {
   if (['ditolak', 'selesai'].includes(tujuan.value) && !keterangan.value.trim()) { pesan.value = 'Keterangan wajib diisi untuk status ini.'; return }
   menyimpan.value = true; pesan.value = ''
   try { await ubahStatus(String(route.params.id), tujuan.value, keterangan.value); await refresh(); tujuan.value = ''; keterangan.value = ''; pesan.value = 'Status diperbarui.' }
-  catch (galat) { pesan.value = galat instanceof Error ? galat.message : 'Status belum dapat diperbarui.' }
+  catch (galat) { pesan.value = pesanGalat(galat, 'Status belum dapat diperbarui.') }
   finally { menyimpan.value = false }
 }
 function simpan() {

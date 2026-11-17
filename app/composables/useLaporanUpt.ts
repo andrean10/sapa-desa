@@ -11,11 +11,13 @@ type LaporanUptDetail = Omit<Tables<'laporan'>, 'foto_path'> & {
 
 export function useLaporanUpt() {
   const api = useApi()
+  // filter bisa berupa objek reactive yang sama; JSON.stringify membuat watcher membaca semua field
+  // dan mendeteksi perubahan isinya (getter yang mengembalikan objek reactive itu sendiri tidak memicu refetch).
   function daftar(halaman: MaybeRefOrGetter<number>, filter: MaybeRefOrGetter<{ status: string[]; kelompok: string; terlambat: boolean; jenis: string; dari: string; sampai: string; cari: string; urut: string }>) {
     return useAsyncData<{ data: LaporanUptRingkas[]; total: number; halaman: number }>(`upt-laporan-${toValue(halaman)}`, () => api('/api/upt/laporan', {
       query: { halaman: toValue(halaman), ...Object.fromEntries(Object.entries(toValue(filter)).filter(entry => entry[1] !== '' && entry[1] !== false)) }
     }), {
-      watch: [() => toValue(halaman), () => toValue(filter)],
+      watch: [() => toValue(halaman), () => JSON.stringify(toValue(filter))],
       default: () => ({ data: [] as LaporanUptRingkas[], total: 0, halaman: 1 })
     })
   }

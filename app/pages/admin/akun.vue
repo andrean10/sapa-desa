@@ -37,7 +37,7 @@ async function buat() {
 async function setAktif(akun: Akun) {
   busy.value = akun.id
   try { await api(`/api/admin/akun/${akun.id}/aktif`, { method:'PATCH', body:{aktif:!akun.aktif} }); const baris = data.value?.akun.find(item => item.id === akun.id); if (baris) baris.aktif = !akun.aktif; toast.success('Status akun diperbarui.') }
-  catch { toast.error('Status akun gagal diperbarui.') } finally { busy.value = false }
+  catch (galat) { toast.error(pesanGalat(galat, 'Status akun gagal diperbarui.')) } finally { busy.value = false }
 }
 async function reset(akun: Akun) {
   busy.value = akun.id

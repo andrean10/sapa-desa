@@ -35,7 +35,7 @@ const filterPegawai = computed(() => kantorId.value ? opsi.value?.pegawai.filter
 function mulaiTambah() { inputBaru.desa_id = ''; inputBaru.pegawai_id = ''; inputBaru.tanggal_mulai = tanggalHariIniWib(); pesan.value = ''; tambahTerbuka.value = true }
 watch(() => inputBaru.desa_id, () => { if (!pegawaiTersaring.value.some(item => item.id === inputBaru.pegawai_id)) inputBaru.pegawai_id = '' })
 function mulaiUbah(item: (typeof data.value.data)[number], mode: 'koreksi' | 'akhiri') {
-  editItem.value = item; modeEdit.value = mode; inputTanggal.tanggal_mulai = item.tanggal_mulai; inputTanggal.tanggal_selesai = tanggalHariIniWib(); inputTanggal.alasan_berakhir = 'rotasi'; pesan.value = ''; simpanDialog.value = true
+  editItem.value = item; modeEdit.value = mode; inputTanggal.tanggal_mulai = item.tanggal_mulai; inputTanggal.tanggal_selesai = mode === 'koreksi' ? item.tanggal_selesai ?? tanggalHariIniWib() : tanggalHariIniWib(); inputTanggal.alasan_berakhir = 'rotasi'; pesan.value = ''; simpanDialog.value = true
 }
 async function simpanBaru() {
   pesan.value = ''; sedangSimpan.value = true

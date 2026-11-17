@@ -27,6 +27,7 @@ const waktuDiterima = ref('')
 const sudahDisalin = ref(false)
 const dialogSukses = ref<HTMLDialogElement>()
 const dialogLokasi = ref<HTMLDialogElement>()
+const inputFoto = ref<HTMLInputElement>()
 const isian = reactive({ nama_pelapor: '', alamat_pelapor: '', desa_kelurahan_id: '', jenis_terlapor: '' as string, isi_laporan: '', kode_laporan_sebelumnya: '' })
 const aktifkanForm = computed(() => keadaanLokasi.value === 'berhasil' && Boolean(koordinat.value) && !sedangMengirim.value)
 const valid = computed(() => isian.nama_pelapor.trim().length > 0 && isian.nama_pelapor.length <= 150 && isian.alamat_pelapor.trim().length > 0 && isian.alamat_pelapor.length <= 500 && Boolean(kabupatenId.value && kecamatanId.value && isian.desa_kelurahan_id && isian.jenis_terlapor) && isian.isi_laporan.trim().length >= 10 && isian.isi_laporan.length <= 5000)
@@ -75,7 +76,13 @@ async function pilihFoto(event: Event) {
     pesanError.value = ''
   } catch (galat) { foto.value = undefined; pesanError.value = galat instanceof Error ? galat.message : TEKS_LAPORAN_PUBLIK.fotoDitolak; input.value = '' }
 }
-function hapusFoto() { foto.value = undefined; if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value); pratinjauFoto.value = '' }
+function hapusFoto() {
+  foto.value = undefined
+  if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value)
+  pratinjauFoto.value = ''
+  // Kosongkan input agar memilih file yang sama lagi tetap memicu event change.
+  if (inputFoto.value) inputFoto.value.value = ''
+}
 function ukuranFoto(byte = 0) {
   if (byte < 1024 * 1024) return `${Math.max(1, Math.round(byte / 1024))} KB`
   return `${(byte / 1024 / 1024).toFixed(1)} MB`
@@ -92,10 +99,21 @@ async function kirim() {
     const hasil = await kirimLaporan(form)
     kodePelacakan.value = hasil.kode_pelacakan; waktuDiterima.value = new Date().toISOString(); sudahDisalin.value = false; dialogSukses.value?.showModal()
   } catch (galat) {
-    const status = galat && typeof galat === 'object' && 'statusCode' in galat ? Number((galat as { statusCode?: number }).statusCode) : 0
-    const message = galat && typeof galat === 'object' && 'data' in galat ? String((galat as { data?: { statusMessage?: string } }).data?.statusMessage ?? '') : ''
-    pesanError.value = status === 422 ? TEKS_LAPORAN_PUBLIK.lokasiDiLuarRiau : status === 429 ? TEKS_LAPORAN_PUBLIK.terlaluBanyak : status === 404 ? TEKS_LAPORAN_PUBLIK.kodeSebelumnyaTidakAda : message.includes('foto') || message.includes('Foto') ? TEKS_LAPORAN_PUBLIK.fotoDitolak : message.includes('Desa') || message.includes('desa') ? TEKS_LAPORAN_PUBLIK.desaTidakValid : TEKS_LAPORAN_PUBLIK.gagalKirim
+    pesanError.value = pesanKirimGagal(galat)
   } finally { sedangMengirim.value = false }
+}
+/** Menerjemahkan error dari /api/publik/laporan menjadi teks ramah untuk pelapor. */
+function pesanKirimGagal(galat: unknown) {
+  const status = Number((galat as { statusCode?: number } | null)?.statusCode ?? 0)
+  const pesanServer = pesanGalat(galat, '')
+  if (status === 429) return TEKS_LAPORAN_PUBLIK.terlaluBanyak
+  if (status === 404) return TEKS_LAPORAN_PUBLIK.kodeSebelumnyaTidakAda
+  // Cek desa lebih dulu: server memakai status 422 untuk "desa tidak valid" DAN "lokasi di luar Riau".
+  if (pesanServer.includes('Desa/kelurahan')) return TEKS_LAPORAN_PUBLIK.desaTidakValid
+  if (status === 422) return TEKS_LAPORAN_PUBLIK.lokasiDiLuarRiau
+  if (status === 413 || status === 415 || /foto/i.test(pesanServer)) return TEKS_LAPORAN_PUBLIK.fotoDitolak
+  if (pesanServer.includes('Kode laporan sebelumnya')) return TEKS_LAPORAN_PUBLIK.kodeSebelumnyaTidakAda
+  return TEKS_LAPORAN_PUBLIK.gagalKirim
 }
 async function salinKode() { try { await navigator.clipboard.writeText(kodePelacakan.value); sudahDisalin.value = true } catch { sudahDisalin.value = false } }
 function tutupSukses(event?: Event) {
@@ -104,6 +122,7 @@ function tutupSukses(event?: Event) {
   dialogSukses.value?.close(); kodePelacakan.value = ''; Object.assign(isian, { nama_pelapor: '', alamat_pelapor: '', desa_kelurahan_id: '', jenis_terlapor: '', isi_laporan: '', kode_laporan_sebelumnya: '' }); kabupatenId.value = ''; kecamatanId.value = ''; hapusFoto()
 }
 function tutupLokasi() { dialogLokasi.value?.close() }
+function bukaLokasi() { if (!dialogLokasi.value?.open) dialogLokasi.value?.showModal() }
 </script>
 
 <template>
@@ -118,6 +137,10 @@ function tutupLokasi() { dialogLokasi.value?.close() }
     <section class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-20">
       <div class="mx-auto max-w-3xl">
         <form class="min-w-0 w-full bg-card p-6 shadow-card sm:p-10" @submit.prevent="kirim">
+          <div v-if="keadaanLokasi !== 'berhasil'" class="mb-6 flex flex-wrap items-center gap-3 bg-muted p-4 text-sm" role="status">
+            <span class="min-w-0 flex-1 font-semibold text-primary">{{ TEKS_LAPORAN_PUBLIK.formulirMenungguLokasi }}</span>
+            <button class="min-h-10 rounded-xl bg-primary px-4 font-bold text-primary-foreground transition hover:bg-secondary" type="button" @click="bukaLokasi">{{ TEKS_LAPORAN_PUBLIK.bukaPengaturanLokasi }}</button>
+          </div>
           <fieldset class="grid min-w-0 w-full gap-6 disabled:opacity-60" :disabled="!aktifkanForm">
             <legend class="text-2xl font-extrabold text-primary">Informasi laporan</legend>
             <div class="grid min-w-0 w-full gap-6 sm:grid-cols-2">
@@ -131,7 +154,7 @@ function tutupLokasi() { dialogLokasi.value?.close() }
               <label class="grid min-w-0 gap-2 text-sm font-bold text-primary sm:col-span-2" for="alamat"><span>{{ TEKS_LAPORAN_PUBLIK.alamat }}</span><textarea id="alamat" v-model="isian.alamat_pelapor" class="w-full min-w-0 rounded-xl border border-input bg-background px-4 py-3 text-base font-normal text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary" maxlength="500" required rows="3" /></label>
               <label class="grid min-w-0 gap-2 text-sm font-bold text-primary sm:col-span-2" for="jenis"><span>{{ TEKS_LAPORAN_PUBLIK.jenisTerlapor }}</span><PublicSelect id="jenis" v-model="isian.jenis_terlapor" placeholder="Pilih jenis terlapor" :options="opsiJenisTerlapor" :disabled="!aktifkanForm" /></label>
               <label class="grid min-w-0 gap-2 text-sm font-bold text-primary sm:col-span-2" for="isi"><span>{{ TEKS_LAPORAN_PUBLIK.isi }}</span><textarea id="isi" v-model="isian.isi_laporan" class="w-full min-w-0 rounded-xl border border-input bg-background px-4 py-3 text-base font-normal text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary" minlength="10" maxlength="5000" required rows="8" /><span class="text-right text-xs font-medium text-muted-foreground">{{ isian.isi_laporan.length }}/5000</span></label>
-              <label class="grid min-w-0 gap-2 text-sm font-bold text-primary sm:col-span-2" for="foto"><span>{{ TEKS_LAPORAN_PUBLIK.foto }}</span><span class="-mt-1 text-xs font-normal leading-5 text-muted-foreground">JPG, PNG, atau WebP · maksimal 1 foto · ukuran maksimal 3 MB</span><input id="foto" class="w-full min-w-0 rounded-xl border border-input bg-background p-2 text-base font-normal text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-2 file:font-semibold" type="file" :accept="BATAS_FILE.foto.tipeDiizinkan.join(',')" @change="pilihFoto"></label>
+              <label class="grid min-w-0 gap-2 text-sm font-bold text-primary sm:col-span-2" for="foto"><span>{{ TEKS_LAPORAN_PUBLIK.foto }}</span><span class="-mt-1 text-xs font-normal leading-5 text-muted-foreground">JPG, PNG, atau WebP · maksimal 1 foto · ukuran maksimal 3 MB</span><input id="foto" class="w-full min-w-0 rounded-xl border border-input bg-background p-2 text-base font-normal text-foreground file:mr-3 file:rounded-lg file:border-0 file:bg-muted file:px-3 file:py-2 file:font-semibold" ref="inputFoto" type="file" :accept="BATAS_FILE.foto.tipeDiizinkan.join(',')" @change="pilihFoto"></label>
               <div v-if="pratinjauFoto" class="flex min-w-0 items-center gap-4 rounded-2xl bg-muted p-3 sm:p-4 sm:col-span-2"><img class="size-24 shrink-0 rounded-xl object-cover ring-2 ring-card sm:size-28" :src="pratinjauFoto" alt="Pratinjau foto pendukung"><div class="min-w-0 flex-1"><p class="truncate font-bold text-primary">{{ foto?.name }}</p><p class="mt-1 text-sm text-muted-foreground">{{ ukuranFoto(foto?.size) }} · Siap diunggah</p><button class="mt-3 min-h-10 font-bold text-destructive underline underline-offset-4" type="button" @click="hapusFoto">{{ TEKS_LAPORAN_PUBLIK.hapusFoto }}</button></div></div>
               <details class="bg-muted p-5 sm:col-span-2"><summary class="cursor-pointer font-bold text-primary">{{ TEKS_LAPORAN_PUBLIK.tindakLanjut }}</summary><label class="mt-5 grid gap-2 text-sm font-bold text-primary" for="kode-sebelumnya"><span>{{ TEKS_LAPORAN_PUBLIK.kodeSebelumnya }}</span><input id="kode-sebelumnya" v-model="isian.kode_laporan_sebelumnya" class="min-h-12 rounded-xl border border-input bg-background px-4 font-mono text-base font-normal tracking-wider text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary" :placeholder="FORMAT_KODE_PELACAKAN" autocomplete="off"></label></details>
             </div>

@@ -7,8 +7,10 @@ const JENDELA_MS = 15 * 60 * 1000
 const MAKSIMUM_KUNCI = 10000
 
 function batasi(event: H3Event, jalur: string, batas: number) {
-  // Pakai alamat dari adapter/socket; jangan percaya X-Forwarded-For dari klien langsung.
-  const ip = getRequestIP(event) ?? 'ip-tidak-diketahui'
+  // Aplikasi berjalan di belakang reverse proxy (Coolify/Traefik), jadi IP socket adalah IP proxy.
+  // Ambil IP klien dari X-Forwarded-For yang diisi proxy. Syaratnya: server Nuxt tidak boleh
+  // bisa diakses langsung dari internet tanpa melewati proxy, kalau tidak header ini bisa dipalsukan.
+  const ip = getRequestIP(event, { xForwardedFor: true }) ?? 'ip-tidak-diketahui'
   const kunci = `${jalur}:${ip}`
   const sekarang = Date.now()
 

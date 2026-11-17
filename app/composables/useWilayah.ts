@@ -10,32 +10,27 @@ export function useWilayah() {
     default: () => []
   })
 
+  // Pakai useAsyncData + guard (bukan useFetch + watch): saat induk dikosongkan (mis. kabupaten direset),
+  // useFetch tetap memanggil API dengan parameter kosong dan menghasilkan error 400 / data yang salah.
   function kecamatan(kabupatenId: MaybeRefOrGetter<string | undefined>) {
-    return useFetch<KecamatanPublik[]>('/api/publik/wilayah', {
-      key: `publik-wilayah-kecamatan-${toValue(kabupatenId) ?? 'kosong'}`,
-      query: computed(() => ({ kabupaten_id: toValue(kabupatenId) })),
-      immediate: Boolean(toValue(kabupatenId)),
-      watch: [() => toValue(kabupatenId)],
-      default: () => []
-    })
+    return useAsyncData<KecamatanPublik[]>('publik-wilayah-kecamatan', () => {
+      const id = toValue(kabupatenId)
+      return id ? $fetch<KecamatanPublik[]>('/api/publik/wilayah', { query: { kabupaten_id: id } }) : Promise.resolve([])
+    }, { watch: [() => toValue(kabupatenId)], default: () => [] })
   }
 
   function desa(kecamatanId: MaybeRefOrGetter<string | undefined>) {
-    return useFetch<DesaPublik[]>('/api/publik/wilayah', {
-      key: `publik-wilayah-desa-${toValue(kecamatanId) ?? 'kosong'}`,
-      query: computed(() => ({ kecamatan_id: toValue(kecamatanId) })),
-      immediate: Boolean(toValue(kecamatanId)),
-      watch: [() => toValue(kecamatanId)],
-      default: () => []
-    })
+    return useAsyncData<DesaPublik[]>('publik-wilayah-desa', () => {
+      const id = toValue(kecamatanId)
+      return id ? $fetch<DesaPublik[]>('/api/publik/wilayah', { query: { kecamatan_id: id } }) : Promise.resolve([])
+    }, { watch: [() => toValue(kecamatanId)], default: () => [] })
   }
 
   function kantor(kantorId: MaybeRefOrGetter<string | undefined>) {
-    return useFetch<{ id: string; nama: string } | null>(() => `/api/publik/kantor/${toValue(kantorId) ?? ''}`, {
-      key: `publik-kantor-${toValue(kantorId) ?? 'kosong'}`,
-      immediate: Boolean(toValue(kantorId)),
-      watch: [() => toValue(kantorId)]
-    })
+    return useAsyncData<{ id: string; nama: string } | null>('publik-kantor', () => {
+      const id = toValue(kantorId)
+      return id ? $fetch<{ id: string; nama: string } | null>(`/api/publik/kantor/${encodeURIComponent(id)}`) : Promise.resolve(null)
+    }, { watch: [() => toValue(kantorId)], default: () => null })
   }
 
   return { kabupaten, kecamatan, desa, kantor }

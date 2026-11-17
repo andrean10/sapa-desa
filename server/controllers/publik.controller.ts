@@ -17,6 +17,7 @@ import {
   simpanFotoLaporan,
   simpanLaporan
 } from '../models/publik.model'
+import { deteksiTipeFoto } from '../utils/deteksi-foto'
 import { batasiKirimLaporan, batasiLacakLaporan } from '../utils/rate-limit'
 
 const PESAN_GAGAL_MEMUAT = 'Data publik belum dapat dimuat. Silakan coba lagi.'
@@ -124,6 +125,39 @@ function formatFormData(parts: Awaited<ReturnType<typeof readMultipartFormData>>
   return { nilai, foto }
 }
 
+/** Memeriksa foto sebelum disimpan: ukuran, tipe yang diizinkan, dan isi file benar-benar gambar. */
+function periksaFoto(foto: { data: Buffer; type: string }) {
+  if (!BATAS_FILE.foto.tipeDiizinkan.includes(foto.type as typeof BATAS_FILE.foto.tipeDiizinkan[number])) {
+    throw createError({ statusCode: 415, statusMessage: 'Foto harus berformat JPEG, PNG, atau WebP.' })
+  }
+  if (foto.data.byteLength > BATAS_FILE.foto.ukuranMaksimumByte) {
+    throw createError({ statusCode: 413, statusMessage: 'Ukuran foto maksimal 3 MB.' })
+  }
+  // Content-Type dari klien tidak dipercaya: cocokkan dengan isi file sebenarnya.
+  const tipeAsli = deteksiTipeFoto(foto.data)
+  if (!tipeAsli || tipeAsli !== foto.type) {
+    throw createError({ statusCode: 415, statusMessage: 'Berkas bukan foto JPEG, PNG, atau WebP yang valid.' })
+  }
+  return { tipe: tipeAsli, ekstensi: EKSTENSI_FOTO[tipeAsli]! }
+}
+
+/** Mengubah kode laporan sebelumnya (opsional) menjadi id laporan, atau melempar 400/404/503. */
+async function cariIdLaporanSebelumnya(kodeMentah: string | undefined) {
+  const kode = kodeMentah?.replace(/\s+/g, '').toUpperCase()
+  if (!kode) return undefined
+  if (!REGEX_KODE_PELACAKAN.test(kode)) {
+    throw createError({ statusCode: 400, statusMessage: 'Kode laporan sebelumnya tidak valid.' })
+  }
+  const hasil = await cariLaporanSebelumnya(kode)
+  if (hasil.error) {
+    throw createError({ statusCode: 503, statusMessage: 'Laporan belum dapat dikirim. Silakan coba lagi.' })
+  }
+  if (!hasil.data) {
+    throw createError({ statusCode: 404, statusMessage: 'Laporan sebelumnya tidak ditemukan.' })
+  }
+  return hasil.data.id
+}
+
 export async function kirimLaporanPublik(event: H3Event) {
   batasiKirimLaporan(event)
 
@@ -133,41 +167,29 @@ export async function kirimLaporanPublik(event: H3Event) {
   }
 
   const parts = await readMultipartFormData(event)
+  // Cadangan bila content-length tidak ada (mis. permintaan chunked): hitung ukuran isi sebenarnya.
+  const totalByte = (parts ?? []).reduce((jumlah, part) => jumlah + part.data.byteLength, 0)
+  if (totalByte > BATAS_FILE.foto.ukuranMaksimumPermintaanByte) {
+    throw createError({ statusCode: 413, statusMessage: 'Ukuran data laporan melebihi batas.' })
+  }
+
   const { nilai, foto } = formatFormData(parts)
   const validasi = skemaLaporan.safeParse(nilai)
   if (!validasi.success) {
     throw createError({ statusCode: 400, statusMessage: 'Periksa kembali isian laporan Anda.' })
   }
 
-  let fotoPath: string | undefined
-  if (foto) {
-    const ekstensi = EKSTENSI_FOTO[foto.type]
-    if (!ekstensi || !BATAS_FILE.foto.tipeDiizinkan.includes(foto.type as typeof BATAS_FILE.foto.tipeDiizinkan[number])) {
-      throw createError({ statusCode: 415, statusMessage: 'Foto harus berformat JPEG, PNG, atau WebP.' })
-    }
-    if (foto.data.byteLength > BATAS_FILE.foto.ukuranMaksimumByte) {
-      throw createError({ statusCode: 413, statusMessage: 'Ukuran foto maksimal 3 MB.' })
-    }
+  // Semua validasi murah dilakukan SEBELUM menulis apa pun ke Storage.
+  const fotoValid = foto ? periksaFoto(foto) : undefined
+  const laporanSebelumnyaId = await cariIdLaporanSebelumnya(validasi.data.kode_laporan_sebelumnya)
 
-    const hasilFoto = await simpanFotoLaporan(foto.data, foto.type, ekstensi)
+  let fotoPath: string | undefined
+  if (foto && fotoValid) {
+    const hasilFoto = await simpanFotoLaporan(foto.data, fotoValid.tipe, fotoValid.ekstensi)
     if (hasilFoto.error) {
       throw createError({ statusCode: 503, statusMessage: 'Foto belum dapat diunggah. Silakan coba lagi.' })
     }
     fotoPath = hasilFoto.path
-  }
-
-  try {
-  let laporanSebelumnyaId: string | undefined
-  const kodeSebelumnya = validasi.data.kode_laporan_sebelumnya?.replace(/\s+/g, '').toUpperCase()
-  if (kodeSebelumnya) {
-    if (!REGEX_KODE_PELACAKAN.test(kodeSebelumnya)) {
-      throw createError({ statusCode: 400, statusMessage: 'Kode laporan sebelumnya tidak valid.' })
-    }
-    const hasilCari = await cariLaporanSebelumnya(kodeSebelumnya)
-    if (hasilCari.error || !hasilCari.data) {
-      throw createError({ statusCode: 404, statusMessage: 'Laporan sebelumnya tidak ditemukan.' })
-    }
-    laporanSebelumnyaId = hasilCari.data.id
   }
 
   const input: LaporanBaru = {
@@ -183,23 +205,38 @@ export async function kirimLaporanPublik(event: H3Event) {
     ...(laporanSebelumnyaId && { laporan_sebelumnya_id: laporanSebelumnyaId })
   }
 
+  try {
     const hasil = await simpanLaporan(input)
     if (hasil.error || !hasil.data) {
-      if (hasil.error?.code === '22023') {
-        throw createError({ statusCode: 422, statusMessage: 'Lokasi pelapor berada di luar Provinsi Riau.' })
-      }
-      if (hasil.error?.code === '23503') {
-        throw createError({ statusCode: 422, statusMessage: 'Desa/kelurahan tidak valid.' })
-      }
-      throw createError({ statusCode: 503, statusMessage: 'Laporan belum dapat dikirim. Silakan coba lagi.' })
+      throw pesanGalatSimpanLaporan(hasil.error)
     }
-
     return { kode_pelacakan: hasil.data.kode_pelacakan }
   } catch (error) {
+    // Laporan gagal tersimpan: hapus foto yang sudah terunggah agar tidak yatim.
     if (fotoPath) await hapusFotoLaporan(fotoPath)
     if (error && typeof error === 'object' && 'statusCode' in error) throw error
     throw createError({ statusCode: 503, statusMessage: 'Laporan belum dapat dikirim. Silakan coba lagi.' })
   }
+}
+
+/**
+ * Memetakan error Postgres dari trigger/constraint ke pesan yang ramah.
+ * - 22023: trigger menolak lokasi di luar Riau
+ * - P0001 "Desa/kelurahan tidak valid": trigger laporan_sebelum_insert (dijalankan sebelum cek FK,
+ *   jadi kode 23503 untuk desa tidak pernah muncul)
+ * - 23514: constraint CHECK (mis. panjang teks) tidak terpenuhi
+ */
+function pesanGalatSimpanLaporan(galat: { code?: string; message?: string } | null) {
+  if (galat?.code === '22023') {
+    return createError({ statusCode: 422, statusMessage: 'Lokasi pelapor berada di luar Provinsi Riau.' })
+  }
+  if ((galat?.code === 'P0001' && galat.message?.includes('Desa/kelurahan tidak valid')) || galat?.code === '23503') {
+    return createError({ statusCode: 422, statusMessage: 'Desa/kelurahan tidak valid.' })
+  }
+  if (galat?.code === '23514') {
+    return createError({ statusCode: 400, statusMessage: 'Periksa kembali isian laporan Anda.' })
+  }
+  return createError({ statusCode: 503, statusMessage: 'Laporan belum dapat dikirim. Silakan coba lagi.' })
 }
 
 const skemaKodePelacakan = z.object({ kode_pelacakan: z.string().min(1).max(64) })

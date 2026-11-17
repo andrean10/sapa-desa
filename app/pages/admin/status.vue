@@ -15,7 +15,7 @@ const proses = ref(false)
 async function ubahLokasi(aktif: boolean) {
   proses.value = true
   try { await api('/api/admin/status', { method: 'PATCH', body: { aktif } }); await refresh(); toast.success('Status validasi lokasi diperbarui.') }
-  catch (e) { toast.error(e instanceof Error ? e.message : 'Status lokasi gagal diperbarui.') }
+  catch (galat) { toast.error(pesanGalat(galat, 'Status lokasi gagal diperbarui.')) }
   finally { proses.value = false; konfirmasi.value = false }
 }
 </script>

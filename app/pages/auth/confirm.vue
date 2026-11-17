@@ -12,9 +12,13 @@ onMounted(async () => {
   const { error } = await buatClientBrowser().auth.verifyOtp({ token_hash: hash, type: jenis })
   if (error) { status.value = 'Tautan masuk tidak valid atau sudah kedaluwarsa.'; return }
   impersonasi.value = typeof route.query.impersonasi === 'string' ? route.query.impersonasi : null
-  const api = useApi()
-  const profil = await api<{ peran: 'admin'|'kanwil'|'upt' }>('/api/auth/me')
-  await navigateTo(profil.peran === 'upt' ? '/upt/pilih-petugas' : '/kanwil')
+  try {
+    const profil = await useApi()<{ peran: 'admin'|'kanwil'|'upt' }>('/api/auth/me')
+    await navigateTo(profil.peran === 'upt' ? '/upt/pilih-petugas' : '/kanwil')
+  } catch (galat) {
+    impersonasi.value = null
+    status.value = (galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Profil akun belum dapat dimuat. Silakan masuk kembali.'
+  }
 })
 </script>
 

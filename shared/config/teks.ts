@@ -102,6 +102,8 @@ export const TEKS_LAPORAN_PUBLIK = {
   gpsTimeout: 'Lokasi belum berhasil dideteksi. Pastikan sinyal dan GPS aktif, lalu coba lagi.',
   gpsTidakDidukung: 'Browser atau koneksi Anda tidak mendukung deteksi lokasi. Buka tautan ini lewat browser terbaru.',
   izinkanLokasi: 'Izinkan Lokasi',
+  formulirMenungguLokasi: 'Formulir aktif setelah lokasi perangkat Anda terdeteksi.',
+  bukaPengaturanLokasi: 'Aktifkan lokasi',
   cobaLagi: 'Coba lagi',
   memintaLokasi: 'Mendeteksi lokasi…',
   nama: 'Nama lengkap',

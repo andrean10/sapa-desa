@@ -46,3 +46,17 @@ export async function ubahAkunAktifAdmin(service: SupabaseClient<Database>, id: 
 export async function linkImpersonasiAdmin(service: SupabaseClient<Database>, email: string, redirectTo: string) {
   return service.auth.admin.generateLink({ type: 'magiclink', email, options: { redirectTo } })
 }
+
+/** True bila akun ini adalah admin aktif terakhir. Gagal aman: jika query error, anggap terakhir. */
+export async function apakahAdminAktifTerakhir(service: SupabaseClient<Database>, id: string) {
+  const { data } = await service.from('profiles').select('peran, aktif').eq('id', id).maybeSingle()
+  if (data?.peran !== 'admin' || !data.aktif) return false
+  const { count, error } = await service
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('peran', 'admin')
+    .eq('aktif', true)
+    .neq('id', id)
+  if (error) return true
+  return (count ?? 0) === 0
+}
