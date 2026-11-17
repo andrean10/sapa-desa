@@ -22,7 +22,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   if (!peranDiizinkan(to.path, profil.peran)) {
-    toast.error(TEKS_UMUM.aksesDitolak)
+    if (import.meta.client) toast.error(TEKS_UMUM.aksesDitolak)
     const berandaPeran = profil.peran === 'upt' ? '/upt' : '/kanwil'
     return navigateTo(berandaPeran)
   }

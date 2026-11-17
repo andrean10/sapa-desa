@@ -55,7 +55,7 @@ const pegawaiPengganti = computed(() => isian.desa_id && isian.pegawai_id && !pi
 onMounted(async () => {
   try {
     pilihan.value = await opsi()
-    isian.pegawai_id = pilihan.value.pegawai.find(item => item.id === pegawaiBertugasId.value)?.id ?? pilihan.value.pegawai[0]?.id ?? ''
+    isian.pegawai_id = pilihan.value.pegawai.find(item => item.id === pegawaiBertugasId.value)?.id ?? ''
     if (props.id) {
       const kegiatan = await detail(props.id)
       Object.assign(isian, kegiatan)

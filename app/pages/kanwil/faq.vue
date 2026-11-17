@@ -36,12 +36,11 @@ async function geser(index: number, arah: -1 | 1) {
   const tujuan = index + arah
   if (tujuan < 0 || tujuan >= items.length) return
   try {
-    await Promise.all([
-      kelola.ubahUrutanFaq(items[index]!.id, items[tujuan]!.urutan),
-      kelola.ubahUrutanFaq(items[tujuan]!.id, items[index]!.urutan)
-    ])
-    await refresh()
+    // Berurutan (bukan Promise.all) agar bila langkah kedua gagal, kegagalan terdeteksi jelas.
+    await kelola.ubahUrutanFaq(items[index]!.id, items[tujuan]!.urutan)
+    await kelola.ubahUrutanFaq(items[tujuan]!.id, items[index]!.urutan)
   } catch (galat) { toast.error((galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Urutan FAQ belum dapat diubah.') }
+  finally { await refresh() }
 }
 </script>
 

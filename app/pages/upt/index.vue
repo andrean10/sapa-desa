@@ -2,7 +2,7 @@
 import { VisAxis, VisDonut, VisSingleContainer, VisStackedBar, VisXYContainer } from '@unovis/vue'
 import { AMBANG_DESA_LAMA_HARI } from '~~/shared/config/app'
 import { TEKS_UMUM } from '~~/shared/config/teks'
-import { formatTanggalWib, tanggalHariIniWib } from '~~/shared/utils/waktu'
+import { awalEnamBulanWib, formatBulanSingkatWib, formatTanggalWib, tanggalHariIniWib } from '~~/shared/utils/waktu'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
 import { Skeleton } from '~/components/ui/skeleton'
 import { Progress } from '~/components/ui/progress'
@@ -15,9 +15,7 @@ const periode = computed(() => {
   const hariIni = tanggalHariIniWib()
   if (modePeriode.value === 'kustom') return { mulai: mulaiKustom.value, selesai: selesaiKustom.value }
   if (modePeriode.value === 'bulan_ini') return { mulai: `${hariIni.slice(0, 7)}-01`, selesai: hariIni }
-  const tahun = Number(hariIni.slice(0, 4))
-  const bulan = Number(hariIni.slice(5, 7))
-  return { mulai: new Date(Date.UTC(tahun, bulan - 6, 1)).toISOString().slice(0, 10), selesai: hariIni }
+  return { mulai: awalEnamBulanWib(hariIni), selesai: hariIni }
 })
 const { data, pending, error, refresh } = await useDashboardUpt(periode)
 const kartu = computed(() => {
@@ -49,7 +47,7 @@ const kandidatDbi = computed(() => tren.value?.kandidat_dbi ?? [])
 const proporsiWna = computed(() => tren.value?.proporsi?.wna ?? 0)
 const proporsiWni = computed(() => tren.value?.proporsi?.wni ?? 0)
 const dataDonat = computed(() => [{ jenis: 'WNA', jumlah: proporsiWna.value, warna: 'var(--chart-1)' }, { jenis: 'WNI', jumlah: proporsiWni.value, warna: 'var(--chart-3)' }])
-const formatBulanGrafik = (nilai: number) => new Intl.DateTimeFormat('id-ID', { month: 'short', timeZone: 'Asia/Jakarta' }).format(new Date(nilai))
+const formatBulanGrafik = formatBulanSingkatWib
 const ambilTanggalGrafik = (item: TitikLaporan) => item.tanggal
 const ambilWna = (item: TitikLaporan) => item.wna
 const ambilWni = (item: TitikLaporan) => item.wni

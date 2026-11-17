@@ -15,7 +15,14 @@ const tab = ref<'umum' | 'jenis'>('umum')
 const nilai = reactive<Record<string, string>>({})
 const sedangSimpan = ref('')
 const pesan = reactive<Record<string, string>>({})
-watch(data, (hasil) => { for (const item of hasil?.pengaturan ?? []) nilai[item.kunci] = item.nilai }, { immediate: true })
+// Isian yang sedang diedit (beda dari nilai server sebelumnya) tidak ditimpa saat data dimuat ulang.
+const nilaiServer: Record<string, string> = {}
+watch(data, (hasil) => {
+  for (const item of hasil?.pengaturan ?? []) {
+    if (nilai[item.kunci] === undefined || nilai[item.kunci] === nilaiServer[item.kunci]) nilai[item.kunci] = item.nilai
+    nilaiServer[item.kunci] = item.nilai
+  }
+}, { immediate: true })
 const aturan = [
   { kunci: 'batas_hari_tanggap', judul: 'Batas hari laporan belum ditanggapi', bantuan: 'Berlaku untuk pantauan Kanwil dan penanda terlambat di dashboard UPT. Tidak termasuk hari libur.', min: 1, max: 999 },
   { kunci: 'batas_menit_hapus_laporan', judul: 'Waktu hapus laporan kegiatan (menit)', bantuan: 'Lama UPT boleh menghapus laporan kegiatan setelah dibuat.', min: 1, max: 999 },

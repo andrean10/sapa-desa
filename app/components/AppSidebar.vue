@@ -6,7 +6,7 @@ import { LABEL_MENU } from '~~/shared/config/teks'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from '~/components/ui/sidebar'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 
-const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset' }>(), { collapsible: 'icon' })
+const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset' }>(), { collapsible: 'icon', side: 'left', variant: 'sidebar' })
 const { profil } = useAuth()
 const route = useRoute()
 const icons: Record<string, LucideIcon> = { Dashboard: LayoutDashboard, 'Laporan Masyarakat': FileText, 'Laporan Kegiatan': ClipboardList, Pegawai: Users, 'Profil Kantor': Building2, Peringkat: ChartNoAxesCombined, Pantauan: Activity, 'Desa Binaan': MapPinned, 'Penugasan PIMPASA': ClipboardList, 'Wilayah Kerja': MapPinned, FAQ: BookOpenText, Pengaturan: Settings, 'Status sistem': ShieldCheck, Akun: Users }

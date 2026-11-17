@@ -31,6 +31,11 @@ else if (profil.peran !== "upt") await navigateTo("/kanwil");
 onMounted(async () => {
   try {
     pegawai.value = await daftarPegawai();
+    // Pilihan dari cookie yang sudah tidak ada di daftar aktif (nonaktif/pindah kantor) dibuang.
+    if (terpilih.value && !pegawai.value.some((item) => item.id === terpilih.value)) {
+      terpilih.value = "";
+      pegawaiBertugasId.value = null;
+    }
   } catch {
     galat.value = "Daftar pegawai belum dapat dimuat.";
   } finally {

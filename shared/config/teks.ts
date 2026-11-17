@@ -142,13 +142,18 @@ export const TEKS_LACAK_PUBLIK = {
   labelKode: 'Kode laporan',
   contohKode: 'SD-7KQ2-M9XP',
   cek: 'Cek Status',
-  muatUlang: 'Muat ulang',
   statusKini: 'Status saat ini',
   tidakDitemukan: 'Kode tidak ditemukan. Periksa kembali penulisan kode Anda.',
   terlaluBanyak: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
   gagal: 'Status laporan belum dapat dimuat. Periksa koneksi Anda lalu coba lagi.',
   mengirim: 'Memeriksa status…',
-  riwayat: 'Riwayat laporan'
+  riwayat: 'Riwayat laporan',
+  kodeLaporan: 'Kode laporan',
+  dikirim: 'Dikirim',
+  kantorPenanganan: 'Kantor penanganan',
+  pembaruanTerakhir: 'Pembaruan terakhir',
+  progres: 'Progres penanganan',
+  bantuanKode: 'Kode ada di layar setelah laporan terkirim, formatnya SD-XXXX-XXXX.'
 } as const
 
 export const TEKS_UMUM = {

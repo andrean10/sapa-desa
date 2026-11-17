@@ -43,3 +43,15 @@ export function tanggalHariIniWib(sekarang: Date = new Date()): string {
   const nilai = Object.fromEntries(bagianNumerik.map(item => [item.type, item.value]))
   return `${nilai.year}-${nilai.month}-${nilai.day}`
 }
+
+/** Tanggal awal rentang "6 bulan" (bulan berjalan + 5 bulan sebelumnya), format YYYY-MM-DD, memakai kalender WIB. */
+export function awalEnamBulanWib(hariIni: string = tanggalHariIniWib()): string {
+  const tahun = Number(hariIni.slice(0, 4))
+  const bulan = Number(hariIni.slice(5, 7))
+  return new Date(Date.UTC(tahun, bulan - 6, 1)).toISOString().slice(0, 10)
+}
+
+/** Nama bulan singkat (mis. "Nov") untuk sumbu grafik; nilai berupa epoch milidetik. */
+export function formatBulanSingkatWib(nilai: number): string {
+  return new Intl.DateTimeFormat('id-ID', { month: 'short', timeZone: TIMEZONE }).format(new Date(nilai))
+}

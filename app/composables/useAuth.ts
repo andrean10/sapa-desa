@@ -23,6 +23,8 @@ export function useAuth() {
       throw new Error('Username atau password salah.')
     }
 
+    // Petugas bertugas milik sesi sebelumnya tidak boleh terbawa ke akun baru di browser yang sama.
+    pegawaiBertugasId.value = null
     try {
       profil.value = await api<ProfilAkun>('/api/auth/me')
       return {
@@ -52,6 +54,7 @@ export function useAuth() {
       profil.value = null
       const galat = error as { statusCode?: number; status?: number; response?: { status?: number } }
       const status = galat.statusCode ?? galat.status ?? galat.response?.status
+      if (!import.meta.client) return null
       if (status === 403) {
         toast.error(TEKS_UMUM.akunNonaktif)
       } else if (status === 401 && adaSesiSebelumnya) {

@@ -4,7 +4,6 @@ import { PUBLIC_BRAND_NAME } from '~~/shared/config/app'
 import type { PeranAplikasi } from '~~/shared/config/app'
 import { TEKS_LOGIN } from '~~/shared/config/teks'
 import { Button } from '~/components/ui/button'
-import { CardTitle } from '~/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
 

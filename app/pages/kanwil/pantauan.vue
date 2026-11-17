@@ -10,7 +10,7 @@ definePageMeta({ layout: 'dashboard', title: 'Pantauan laporan' })
 const route = useRoute()
 const kantorDipilih = ref(typeof route.query.kantorId === 'string' ? route.query.kantorId : '')
 const { data, pending, error, refresh } = await usePantauanKanwil(kantorDipilih)
-const terlambat = (hari: number | null, batas: number | null) => Math.max(0, (hari ?? 0) - (batas ?? data.value.batasHari))
+const terlambat = (hari: number | null, batas: number | null) => Math.max(0, (hari ?? 0) - (batas ?? data.value?.batasHari ?? 0))
 </script>
 
 <template>

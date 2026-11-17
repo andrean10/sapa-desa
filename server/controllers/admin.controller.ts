@@ -13,7 +13,7 @@ async function pastikanAdmin(event: H3Event) {
 
 export async function buatAkun(event: H3Event) {
   await pastikanAdmin(event)
-  const parsed = z.object({ username: z.string().regex(/^[a-z0-9._-]+$/), nama_tampil: z.string().trim().min(1).max(100), peran: z.enum(['admin','kanwil','upt']), kantor_id: z.string().uuid().nullable(), password: z.string().min(8).max(72) }).strict().safeParse(await readBody(event))
+  const parsed = z.object({ username: z.string().min(3).max(50).regex(/^[a-z0-9._-]+$/), nama_tampil: z.string().trim().min(1).max(100), peran: z.enum(['admin','kanwil','upt']), kantor_id: z.string().uuid().nullable(), password: z.string().min(8).max(72) }).strict().safeParse(await readBody(event))
   if (!parsed.success || (parsed.data.peran === 'upt') !== Boolean(parsed.data.kantor_id)) throw createError({ statusCode: 400, statusMessage: 'Data akun tidak valid.' })
   const hasil = await buatAkunAdmin(buatClientServiceRole(), parsed.data, AUTH_EMAIL_DOMAIN)
   if (hasil.error) throw createError({ statusCode: 422, statusMessage: hasil.error.message === 'Akun UPT untuk kantor tersebut sudah tersedia.' ? hasil.error.message : 'Akun gagal dibuat. Periksa username dan data kantor.' })

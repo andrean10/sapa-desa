@@ -2,6 +2,7 @@
 import { STATUS_LAPORAN } from '~~/shared/config/teks'
 import type { Enums } from '~~/shared/types/database.types'
 import { formatTanggalWaktuWib } from '~~/shared/utils/waktu'
+import TimelineStatus from '~/components/public/TimelineStatus.vue'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
 import { Textarea } from '~/components/ui/textarea'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '~/components/ui/alert-dialog'
@@ -17,6 +18,7 @@ const menyimpan = ref(false)
 const pesan = ref('')
 const pesanSalin = ref('')
 const namaPetugas = ref('')
+const timelineRiwayat = computed(() => (data.value?.riwayat_status ?? []).map(item => ({ status: item.status, keterangan: item.keterangan, waktu: item.created_at, petugas: item.nama_pegawai })))
 const statusKini = computed(() => data.value?.status)
 const final = computed(() => statusKini.value === 'selesai' || statusKini.value === 'ditolak')
 const pilihan = computed<Enums<'status_laporan'>[]>(() => statusKini.value === 'diterima' ? ['diverifikasi', 'ditolak'] : statusKini.value === 'diverifikasi' ? ['ditindaklanjuti', 'ditolak'] : statusKini.value === 'ditindaklanjuti' ? ['selesai'] : [])
@@ -65,7 +67,7 @@ function konfirmasiFinal() {
         <div v-if="data.foto_url"><h3 class="font-bold text-primary">Foto pendukung</h3><a class="mt-2 inline-block" :href="data.foto_url" target="_blank" rel="noopener noreferrer"><img class="max-h-72 rounded-lg border border-border object-contain" :src="data.foto_url" alt="Foto pendukung laporan"></a></div>
       </section>
       <div class="grid content-start gap-6">
-        <section class="rounded-xl border border-border bg-card p-5 shadow-card sm:p-7"><h2 class="text-xl font-extrabold text-primary">Riwayat status</h2><ol class="mt-5 grid gap-4"><li v-for="item in data.riwayat_status" :key="item.id" class="rounded-lg bg-muted p-4"><TimelineStatus :timeline="[{ status: item.status, keterangan: item.keterangan, waktu: item.created_at }]" /><p v-if="item.nama_pegawai" class="mt-2 text-sm text-muted-foreground">Oleh {{ item.nama_pegawai }}</p></li></ol></section>
+        <section class="rounded-xl border border-border bg-card p-5 shadow-card sm:p-7"><h2 class="text-xl font-extrabold text-primary">Riwayat status</h2><TimelineStatus class="mt-6" :timeline="timelineRiwayat" /></section>
         <section class="rounded-xl border border-border bg-card p-5 shadow-card sm:p-7"><h2 class="text-xl font-extrabold text-primary">Ubah status</h2><p v-if="final" class="mt-3 text-muted-foreground">Laporan sudah final dan tidak dapat diubah.</p><form v-else class="mt-4 grid gap-3" @submit.prevent="simpan"><label class="grid gap-2 font-semibold" for="status-baru">Status baru<NativeSelect id="status-baru" v-model="tujuan" required><NativeSelectOption value="">Pilih status</NativeSelectOption><NativeSelectOption v-for="status in pilihan" :key="status" :value="status">{{ STATUS_LAPORAN.find(item => item.value === status)?.label }}</NativeSelectOption></NativeSelect></label><label class="grid gap-2 font-semibold" for="keterangan">Keterangan <span class="font-normal text-muted-foreground">(dapat dilihat oleh pelapor)</span><Textarea id="keterangan" v-model="keterangan" :required="['ditolak', 'selesai'].includes(tujuan)" maxlength="1000" rows="4" /></label><p class="text-right text-sm text-muted-foreground">{{ keterangan.length }}/1000</p><p class="text-xs text-muted-foreground">Jangan menuliskan identitas orang asing atau data sensitif.</p><p v-if="tujuan" class="text-sm text-muted-foreground">{{ STATUS_LAPORAN.find(item => item.value === tujuan)?.penjelasan }}</p><p v-if="namaPetugas" class="text-sm text-muted-foreground">Bertugas atas nama: <strong>{{ namaPetugas }}</strong> · <NuxtLink class="font-semibold text-primary underline" to="/upt/pilih-petugas">Ganti petugas</NuxtLink></p><Button v-if="tujuan !== 'ditolak' && tujuan !== 'selesai'" type="submit" :disabled="!tujuan || menyimpan">{{ menyimpan ? 'Menyimpan...' : 'Simpan status' }}</Button><AlertDialog v-else><AlertDialogTrigger as-child><Button type="button" variant="destructive" :disabled="menyimpan">Konfirmasi status final</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Konfirmasi status final</AlertDialogTitle><AlertDialogDescription>Status ini final dan tidak dapat diubah lagi. Lanjutkan?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction @click="konfirmasiFinal">Lanjutkan</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></form><p v-if="pesan" class="mt-3 text-sm" role="status">{{ pesan }}</p></section>
       </div>
     </template>

@@ -2,6 +2,7 @@
 import { CalendarDays, ChevronRight, FileText, Image, Plus, SlidersHorizontal } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { formatTanggalWib, tanggalHariIniWib } from '~~/shared/utils/waktu'
+import KegiatanForm from '~/components/upt/KegiatanForm.vue'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'

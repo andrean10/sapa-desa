@@ -2,7 +2,7 @@
 import { VisAxis, VisStackedBar, VisXYContainer } from '@unovis/vue'
 import { ArrowDown, ArrowUp, ArrowUpDown, CalendarDays, ChevronRight } from '@lucide/vue'
 import type { BarisUptKanwil, TrenKanwil } from '~/composables/useKanwil'
-import { formatTanggalWib, tanggalHariIniWib } from '~~/shared/utils/waktu'
+import { formatBulanSingkatWib, formatTanggalWib, tanggalHariIniWib } from '~~/shared/utils/waktu'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
@@ -61,7 +61,7 @@ const yWna = (item: NonNullable<TrenKanwil['laporan_per_bulan']>[number]) => ite
 const yWni = (item: NonNullable<TrenKanwil['laporan_per_bulan']>[number]) => item.wni
 const xKegiatan = (item: NonNullable<TrenKanwil['kegiatan_per_bulan']>[number]) => tanggalBulan(item.bulan)
 const yKegiatan = (item: NonNullable<TrenKanwil['kegiatan_per_bulan']>[number]) => item.total
-const labelBulan = (nilai: number) => new Intl.DateTimeFormat('id-ID', { month: 'short', timeZone: 'Asia/Jakarta' }).format(new Date(nilai))
+const labelBulan = formatBulanSingkatWib
 const periodeLabel = computed(() => `${formatTanggalWib(`${periode.value.mulai}T00:00:00+07:00`)} – ${formatTanggalWib(`${periode.value.selesai}T00:00:00+07:00`)}`)
 </script>
 

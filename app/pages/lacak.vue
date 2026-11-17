@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { FORMAT_KODE_PELACAKAN, REGEX_KODE_PELACAKAN } from '~~/shared/config/app'
-import { STATUS_LAPORAN, TEKS_LACAK_PUBLIK } from '~~/shared/config/teks'
+import { STATUS_LAPORAN, STATUS_LAPORAN_TAMPILAN, TEKS_LACAK_PUBLIK } from '~~/shared/config/teks'
 import { formatInputKodePelacakan } from '~~/shared/utils/kode-pelacakan'
-import { formatTanggalWib } from '~~/shared/utils/waktu'
+import { formatTanggalWaktuWib } from '~~/shared/utils/waktu'
+import StatusBadge from '~/components/StatusBadge.vue'
+import TimelineStatus from '~/components/public/TimelineStatus.vue'
 
 definePageMeta({ layout: 'publik' })
 useHead({ title: TEKS_LACAK_PUBLIK.judul })
@@ -13,7 +15,15 @@ const kode = ref('')
 const hasil = ref<Awaited<ReturnType<typeof lacak>>>()
 const sedangMemuat = ref(false)
 const pesanError = ref('')
-const statusKini = computed(() => STATUS_LAPORAN.find(item => item.value === hasil.value?.status))
+const statusKini = computed(() => STATUS_LAPORAN_TAMPILAN.find(item => item.value === hasil.value?.status))
+// Langkah progres: alur normal tanpa 'ditolak'. Bila ditolak, tampilkan hanya tahap yang benar-benar dilalui + ditolak.
+const langkah = computed(() => {
+  if (hasil.value?.status !== 'ditolak') return STATUS_LAPORAN.filter(item => item.value !== 'ditolak')
+  const dilalui = new Set(hasil.value.timeline.map(butir => butir.status))
+  return STATUS_LAPORAN.filter(item => dilalui.has(item.value))
+})
+const indeksKini = computed(() => langkah.value.findIndex(item => item.value === hasil.value?.status))
+const pembaruanTerakhir = computed(() => hasil.value?.timeline.at(-1)?.waktu)
 
 watch(kode, nilai => { kode.value = formatInputKodePelacakan(nilai) })
 onMounted(() => {
@@ -60,19 +70,44 @@ async function cari() {
             <input id="kode" v-model="kode" class="min-h-14 flex-1 rounded-xl border border-input bg-background px-4 font-mono text-base tracking-wider text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary" :placeholder="FORMAT_KODE_PELACAKAN" autocomplete="off" required>
             <button class="min-h-14 rounded-xl bg-primary px-7 font-bold text-primary-foreground transition hover:-translate-y-0.5 hover:bg-secondary disabled:cursor-wait disabled:opacity-60" type="submit" :disabled="sedangMemuat">{{ sedangMemuat ? TEKS_LACAK_PUBLIK.mengirim : TEKS_LACAK_PUBLIK.cek }}</button>
           </div>
-          <p v-if="pesanError" class="mt-4 bg-destructive/10 p-4 text-sm font-medium text-destructive" role="alert">{{ pesanError }}</p>
+          <p v-if="pesanError" class="mt-4 border-s-4 border-destructive bg-destructive/10 p-4 text-sm font-medium text-destructive" role="alert">{{ pesanError }}</p>
+          <p v-else class="mt-3 text-sm text-muted-foreground">{{ TEKS_LACAK_PUBLIK.bantuanKode }}</p>
         </form>
-        <section v-if="hasil" class="mt-10 bg-card p-6 shadow-card sm:p-10" aria-live="polite">
-          <div class="flex flex-wrap items-start justify-between gap-5 border-b border-border pb-7">
-            <div><p class="text-xs font-extrabold uppercase tracking-[.16em] text-muted-foreground">{{ TEKS_LACAK_PUBLIK.statusKini }}</p><div class="mt-3"><StatusBadge :status="hasil.status" /></div><p class="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">{{ statusKini?.penjelasan }}</p></div>
-            <button class="min-h-11 font-bold text-primary underline decoration-accent decoration-2 underline-offset-4 transition hover:-translate-y-0.5 disabled:opacity-60" type="button" :disabled="sedangMemuat" @click="cari">{{ TEKS_LACAK_PUBLIK.muatUlang }}</button>
+        <div v-if="sedangMemuat && !hasil" class="mt-10 animate-pulse space-y-5 bg-card p-6 shadow-card sm:p-10" role="status" aria-label="Memuat status laporan">
+          <div class="h-5 w-1/3 bg-muted" /><div class="h-9 w-2/3 bg-muted" /><div class="h-2 w-full bg-muted" /><div class="h-24 w-full bg-muted" />
+        </div>
+        <section v-if="hasil" class="mt-10 bg-card shadow-card transition-opacity" :class="sedangMemuat ? 'opacity-60' : ''" aria-live="polite">
+          <div class="p-6 sm:p-10">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p class="text-xs font-extrabold uppercase tracking-[.16em] text-muted-foreground">{{ TEKS_LACAK_PUBLIK.kodeLaporan }}</p>
+                <p class="mt-2 font-mono text-2xl font-black tracking-wider text-primary sm:text-3xl">{{ hasil.kode_pelacakan }}</p>
+              </div>
+              <StatusBadge class="px-4 py-1.5 text-sm" :status="hasil.status" />
+            </div>
+            <div class="mt-6 border-s-4 bg-muted p-4" :style="{ borderColor: statusKini?.warna.teks }" role="status">
+              <p class="text-xs font-extrabold uppercase tracking-[.14em] text-muted-foreground">{{ TEKS_LACAK_PUBLIK.statusKini }}</p>
+              <p class="mt-1 text-base font-semibold leading-7 text-foreground">{{ statusKini?.penjelasan }}</p>
+            </div>
+            <div class="mt-8">
+              <h2 class="sr-only">{{ TEKS_LACAK_PUBLIK.progres }}</h2>
+              <ol class="grid gap-2 sm:gap-3" :style="{ gridTemplateColumns: `repeat(${langkah.length}, minmax(0, 1fr))` }">
+                <li v-for="(item, index) in langkah" :key="item.value" :aria-current="index === indeksKini ? 'step' : undefined">
+                  <div class="h-2 rounded-full" :class="index <= indeksKini ? '' : 'bg-border'" :style="index <= indeksKini ? { backgroundColor: statusKini?.warna.teks } : undefined" />
+                  <p class="mt-2 text-xs font-bold sm:text-sm" :class="index <= indeksKini ? 'text-primary' : 'text-muted-foreground'">{{ item.label }}</p>
+                </li>
+              </ol>
+            </div>
           </div>
-          <dl class="grid gap-x-8 gap-y-6 py-7 sm:grid-cols-2">
-            <div><dt class="text-sm text-muted-foreground">Kode laporan</dt><dd class="mt-1 font-mono font-bold tracking-wider text-primary">{{ hasil.kode_pelacakan }}</dd></div>
-            <div><dt class="text-sm text-muted-foreground">Dikirim</dt><dd class="mt-1 font-semibold text-foreground">{{ formatTanggalWib(hasil.dikirim_pada) }}</dd></div>
-            <div class="sm:col-span-2"><dt class="text-sm text-muted-foreground">Kantor penanganan</dt><dd class="mt-1 font-semibold text-foreground">{{ hasil.kantor }}</dd></div>
+          <dl class="divide-y divide-border border-t border-border px-6 sm:px-10">
+            <div class="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4"><dt class="text-sm text-muted-foreground">{{ TEKS_LACAK_PUBLIK.dikirim }}</dt><dd class="font-semibold text-foreground sm:col-span-2">{{ formatTanggalWaktuWib(hasil.dikirim_pada) }}</dd></div>
+            <div class="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4"><dt class="text-sm text-muted-foreground">{{ TEKS_LACAK_PUBLIK.kantorPenanganan }}</dt><dd class="font-semibold text-foreground sm:col-span-2">{{ hasil.kantor }}</dd></div>
+            <div v-if="pembaruanTerakhir" class="grid gap-1 py-4 sm:grid-cols-3 sm:gap-4"><dt class="text-sm text-muted-foreground">{{ TEKS_LACAK_PUBLIK.pembaruanTerakhir }}</dt><dd class="font-semibold text-foreground sm:col-span-2">{{ formatTanggalWaktuWib(pembaruanTerakhir) }}</dd></div>
           </dl>
-          <div class="border-t border-border pt-7"><h2 class="text-2xl font-extrabold text-primary">{{ TEKS_LACAK_PUBLIK.riwayat }}</h2><TimelineStatus class="mt-7" :timeline="hasil.timeline" /></div>
+          <div class="border-t border-border p-6 sm:p-10">
+            <h2 class="text-2xl font-extrabold text-primary">{{ TEKS_LACAK_PUBLIK.riwayat }}</h2>
+            <TimelineStatus class="mt-7" :timeline="hasil.timeline" />
+          </div>
         </section>
       </div>
     </section>
