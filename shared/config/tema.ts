@@ -65,10 +65,37 @@ export const VARIABEL_TEMA = {
   '--sidebar-accent-foreground': WARNA.permukaan,
   '--sidebar-border': WARNA.biru,
   '--sidebar-ring': WARNA.emas,
+  '--emas': WARNA.emas,
+  '--emas-foreground': WARNA.teksDiAtasEmas,
+  '--sukses': WARNA.teksSelesai,
+  '--sukses-muda': WARNA.latarSelesai,
+  '--peringatan': WARNA.teksPeringatan,
+  '--peringatan-muda': WARNA.latarPeringatan,
+  '--info': WARNA.biru,
+  '--info-muda': WARNA.latarDitindaklanjuti,
+  '--bahaya-muda': WARNA.latarBahaya,
   '--radius': '0.75rem',
   '--radius-control': '0.5rem'
 } as const
 
+/**
+ * Penyesuaian khusus area dashboard (dipasang di <body> oleh layout dashboard, sehingga
+ * dialog/dropdown yang di-teleport ke body ikut terpengaruh). Di dashboard, `accent`
+ * mengikuti makna shadcn (latar hover netral); warna emas dipakai lewat token `--emas`.
+ */
+export const VARIABEL_TEMA_DASHBOARD = {
+  '--accent': WARNA.redam,
+  '--accent-foreground': WARNA.biruTua
+} as const
+
+function jadikanGaya(variabel: Record<string, string>): string {
+  return Object.entries(variabel).map(([nama, nilai]) => `${nama}: ${nilai}`).join('; ')
+}
+
 export function buatGayaTema(): string {
-  return Object.entries(VARIABEL_TEMA).map(([nama, nilai]) => `${nama}: ${nilai}`).join('; ')
+  return jadikanGaya(VARIABEL_TEMA)
+}
+
+export function buatGayaTemaDashboard(): string {
+  return jadikanGaya(VARIABEL_TEMA_DASHBOARD)
 }

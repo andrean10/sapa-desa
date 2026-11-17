@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { STATUS_LAPORAN, JENIS_TERLAPOR } from '~~/shared/config/teks'
-import { formatTanggalWaktuWib } from '~~/shared/utils/waktu'
+import { ChevronRight, FileSearch, Inbox } from '@lucide/vue'
+import { Button } from '~/components/ui/button'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import type { ItemSegmen } from '~/components/dashboard/SegmenTab.vue'
 
 definePageMeta({ layout: 'dashboard', title: 'Laporan Masyarakat' })
 const route = useRoute()
+const router = useRouter()
+
+const bacaStatus = (nilai: unknown) => Array.isArray(nilai) ? nilai.filter((item): item is string => typeof item === 'string') : typeof nilai === 'string' ? [nilai] : []
 const halaman = ref(Math.max(1, Number(route.query.halaman) || 1))
 const filter = reactive({
-  status: Array.isArray(route.query.status) ? route.query.status.filter((item): item is string => typeof item === 'string') : typeof route.query.status === 'string' ? [route.query.status] : [],
+  status: bacaStatus(route.query.status),
   kelompok: typeof route.query.kelompok === 'string' ? route.query.kelompok : '',
   terlambat: route.query.terlambat === 'true',
   jenis: '',
@@ -17,46 +22,87 @@ const filter = reactive({
 })
 const { daftar } = useLaporanUpt()
 const { data, pending, error, refresh } = await daftar(halaman, filter)
-const totalHalaman = computed(() => Math.max(1, Math.ceil((data.value?.total ?? 0) / 20)))
 watch(filter, () => { halaman.value = 1 }, { deep: true })
 watch(() => route.query, (query) => {
-  filter.status = Array.isArray(query.status) ? query.status.filter((item): item is string => typeof item === 'string') : typeof query.status === 'string' ? [query.status] : []
+  filter.status = bacaStatus(query.status)
   filter.kelompok = typeof query.kelompok === 'string' ? query.kelompok : ''
   filter.terlambat = query.terlambat === 'true'
 }, { deep: true })
 watch(() => filter.status, (status) => { if (status.length) { filter.kelompok = ''; filter.terlambat = false } })
+
+// Tab cepat (PRD 7.2) memakai parameter URL yang sama dengan kartu dashboard.
+const TAB: (ItemSegmen & { query: Record<string, string> })[] = [
+  { value: 'semua', label: 'Semua', query: {} },
+  { value: 'perlu', label: 'Perlu ditanggapi', query: { status: 'diterima' } },
+  { value: 'ditangani', label: 'Sedang ditangani', query: { kelompok: 'ditangani' } },
+  { value: 'final', label: 'Selesai & ditolak', query: { kelompok: 'final' } },
+  { value: 'terlambat', label: 'Terlambat', query: { terlambat: 'true' } }
+]
+const tabAktif = computed(() => {
+  if (filter.terlambat) return 'terlambat'
+  if (filter.kelompok === 'ditangani' || filter.kelompok === 'final') return filter.kelompok
+  if (filter.status.length === 1 && filter.status[0] === 'diterima') return 'perlu'
+  return filter.status.length ? '' : 'semua'
+})
+function pilihTab(value: string) {
+  const tab = TAB.find(item => item.value === value)
+  if (!tab) return
+  // Diterapkan langsung juga, karena URL bisa sama dengan sebelumnya (mis. status dipilih lewat menu Status).
+  Object.assign(filter, { status: tab.query.status ? [tab.query.status] : [], kelompok: tab.query.kelompok ?? '', terlambat: tab.query.terlambat === 'true' })
+  void router.replace({ query: tab.query })
+}
+
+const adaFilter = computed(() => Boolean(filter.status.length || filter.kelompok || filter.terlambat || filter.jenis || filter.dari || filter.sampai || filter.cari))
 function resetFilter() {
   Object.assign(filter, { status: [], kelompok: '', terlambat: false, jenis: '', dari: '', sampai: '', cari: '', urut: 'desc' })
+  if (Object.keys(route.query).length) void router.replace({ query: {} })
 }
-function ubahStatusFilter(status: string, aktif: boolean | 'indeterminate') {
-  if (aktif && !filter.status.includes(status)) filter.status.push(status)
-  if (!aktif) filter.status = filter.status.filter(item => item !== status)
-}
+const bukaDetail = (id: string) => navigateTo(`/upt/laporan/${id}`)
 </script>
 
 <template>
-  <section class="grid gap-5">
-    <header><h2 class="text-2xl font-extrabold text-primary">Laporan Masyarakat</h2><p class="mt-1 text-muted-foreground">Daftar laporan untuk kantor Anda. Nama dan alamat hanya tersedia di detail.</p></header>
-    <nav class="flex flex-wrap gap-2" aria-label="Filter cepat"><NuxtLink v-for="item in [{ label: 'Semua', href: '/upt/laporan' }, { label: 'Perlu ditanggapi', href: '/upt/laporan?status=diterima' }, { label: 'Sedang ditangani', href: '/upt/laporan?kelompok=ditangani' }, { label: 'Selesai dan ditolak', href: '/upt/laporan?kelompok=final' }, { label: 'Terlambat', href: '/upt/laporan?terlambat=true' }]" :key="item.href" class="rounded-full border border-border px-4 py-2 text-sm font-semibold no-underline" :class="route.fullPath === item.href ? 'bg-primary text-primary-foreground' : 'bg-card text-foreground'" :to="item.href">{{ item.label }}</NuxtLink></nav>
-    <div class="grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-2 xl:grid-cols-4">
-      <fieldset class="grid gap-2 text-sm font-semibold"><legend>Status (dapat pilih beberapa)</legend><div class="flex flex-wrap gap-x-3 gap-y-2"> <label v-for="item in STATUS_LAPORAN" :key="item.value" class="flex items-center gap-2 font-normal"><Checkbox :model-value="filter.status.includes(item.value)" @update:model-value="aktif => ubahStatusFilter(item.value, aktif)" />{{ item.label }}</label></div></fieldset>
-      <label class="grid gap-1 text-sm font-semibold">Jenis terlapor<NativeSelect v-model="filter.jenis" class="min-h-11 rounded-lg border border-border bg-background px-3"><option value="">WNA dan WNI</option><option v-for="item in JENIS_TERLAPOR" :key="item.value" :value="item.value">{{ item.label }}</option></NativeSelect></label>
-      <label class="grid gap-1 text-sm font-semibold">Dari tanggal<Input v-model="filter.dari" class="min-h-11 rounded-lg border border-border bg-background px-3" type="date" /></label>
-      <label class="grid gap-1 text-sm font-semibold">Sampai tanggal<Input v-model="filter.sampai" class="min-h-11 rounded-lg border border-border bg-background px-3" type="date" /></label>
-      <label class="grid gap-1 text-sm font-semibold sm:col-span-2">Cari kode, desa, atau kecamatan<Input v-model="filter.cari" class="min-h-11 rounded-lg border border-border bg-background px-3" type="search" maxlength="100" placeholder="Contoh: SD-7KQ2 atau Pekanbaru" @change="halaman = 1" /></label>
-      <label class="grid gap-1 text-sm font-semibold">Urut masuk<NativeSelect v-model="filter.urut" class="min-h-11 rounded-lg border border-border bg-background px-3"><option value="desc">Terbaru dulu</option><option value="asc">Terlama dulu</option></NativeSelect></label>
-      <label class="flex min-h-11 items-center gap-2 self-end rounded-lg border border-border bg-background px-3 text-sm font-semibold"><Checkbox v-model="filter.terlambat" :disabled="Boolean(filter.status.length || filter.kelompok)" />Terlambat saja</label>
-      <Button class="justify-self-start xl:col-start-4" variant="outline" type="button" @click="resetFilter">Reset filter</Button>
-    </div>
-    <p v-if="pending" class="rounded-xl border border-border bg-card p-5 text-muted-foreground" role="status">Memuat laporan...</p>
-    <div v-else-if="error" class="rounded-xl border border-border bg-card p-5" role="alert"><p>Daftar laporan belum dapat dimuat.</p><Button class="mt-3" variant="outline" type="button" @click="refresh()">Coba lagi</Button></div>
-    <div v-else-if="!data?.data.length" class="rounded-xl border border-border bg-card p-6 text-muted-foreground">{{ filter.status.length || filter.kelompok || filter.terlambat || filter.jenis || filter.dari || filter.sampai || filter.cari ? 'Tidak ada laporan yang cocok dengan filter.' : 'Belum ada laporan.' }}<Button v-if="filter.status.length || filter.kelompok || filter.terlambat || filter.jenis || filter.dari || filter.sampai || filter.cari" class="ml-3" variant="outline" type="button" @click="resetFilter">Reset filter</Button></div>
-    <template v-else>
-      <div class="hidden overflow-x-auto rounded-xl border border-border bg-card shadow-card md:block">
-        <Table class="w-full min-w-[900px] text-left text-sm"><TableHeader class="bg-muted text-foreground"><TableRow><TableHead class="p-4">Kode</TableHead><TableHead class="p-4">Masuk</TableHead><TableHead class="p-4">Desa</TableHead><TableHead class="p-4">Kecamatan</TableHead><TableHead class="p-4">Jenis</TableHead><TableHead class="p-4">Status</TableHead><TableHead class="p-4"><span class="sr-only">Aksi</span></TableHead></TableRow></TableHeader><TableBody><TableRow v-for="item in data.data" :key="item.id" class="border-t border-border"><TableCell class="p-4 font-bold tracking-wider text-primary">{{ item.kode_pelacakan }}</TableCell><TableCell class="p-4">{{ formatTanggalWaktuWib(item.created_at) }}</TableCell><TableCell class="p-4">{{ item.desa }}</TableCell><TableCell class="p-4">{{ item.kecamatan }}</TableCell><TableCell class="p-4">{{ item.jenis_terlapor.toUpperCase() }}</TableCell><TableCell class="p-4"><StatusBadge :status="item.status" /></TableCell><TableCell class="p-4"><NuxtLink class="font-semibold text-primary underline" :to="`/upt/laporan/${item.id}`">Buka detail</NuxtLink></TableCell></TableRow></TableBody></Table>
+  <div class="grid gap-5">
+    <DashboardKepalaHalaman judul="Laporan Masyarakat" deskripsi="Laporan untuk kantor Anda. Nama dan alamat pelapor hanya tampil di halaman detail." />
+    <DashboardSegmenTab :items="TAB" :aktif="tabAktif" label="Filter cepat laporan" @pilih="pilihTab" />
+
+    <DashboardBingkaiTabel>
+      <template #toolbar>
+        <DashboardBilahFilterLaporan v-model:filter="filter" :aktif="adaFilter" :terlambat-nonaktif="Boolean(filter.status.length || filter.kelompok)" @reset="resetFilter" />
+      </template>
+
+      <div v-if="pending" class="p-4"><DashboardStateMemuat :baris="8" /></div>
+      <div v-else-if="error" class="p-4"><DashboardStateGalat pesan="Daftar laporan belum dapat dimuat." @coba="refresh()" /></div>
+      <div v-else-if="!data?.data.length" class="p-4">
+        <DashboardStateKosong :judul="adaFilter ? 'Tidak ada laporan yang cocok dengan filter.' : 'Belum ada laporan.'" :deskripsi="adaFilter ? 'Ubah atau hapus filter untuk melihat laporan lain.' : 'Laporan dari masyarakat di wilayah kantor Anda akan tampil di sini.'" :ikon="adaFilter ? FileSearch : Inbox">
+          <Button v-if="adaFilter" variant="outline" @click="resetFilter">Reset filter</Button>
+        </DashboardStateKosong>
       </div>
-      <ul class="grid gap-3 md:hidden"><li v-for="item in data.data" :key="item.id" class="rounded-xl border border-border bg-card p-4 shadow-card"><div class="flex items-start justify-between gap-3"><strong class="font-mono tracking-wider text-primary">{{ item.kode_pelacakan }}</strong><StatusBadge :status="item.status" /></div><p class="mt-2 text-sm">{{ item.desa }}, {{ item.kecamatan }}</p><p class="mt-1 text-sm text-muted-foreground">{{ item.jenis_terlapor.toUpperCase() }} · {{ formatTanggalWaktuWib(item.created_at) }}</p><NuxtLink class="mt-3 inline-block font-semibold text-primary underline" :to="`/upt/laporan/${item.id}`">Buka detail</NuxtLink></li></ul>
-      <nav class="flex items-center justify-between" aria-label="Paginasi"><Button variant="outline" type="button" :disabled="halaman <= 1" @click="halaman--">Sebelumnya</Button><span class="text-sm text-muted-foreground">Halaman {{ halaman }} dari {{ totalHalaman }}</span><Button variant="outline" type="button" :disabled="halaman >= totalHalaman" @click="halaman++">Berikutnya</Button></nav>
-    </template>
-  </section>
+      <template v-else>
+        <Table class="hidden min-w-[820px] md:table">
+          <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>Masuk</TableHead><TableHead>Desa</TableHead><TableHead>Kecamatan</TableHead><TableHead>Jenis</TableHead><TableHead>Status</TableHead><TableHead class="w-10"><span class="sr-only">Buka</span></TableHead></TableRow></TableHeader>
+          <TableBody>
+            <TableRow v-for="item in data.data" :key="item.id" class="group cursor-pointer" @click="bukaDetail(item.id)">
+              <TableCell><NuxtLink :to="`/upt/laporan/${item.id}`" class="font-mono text-[0.8rem] font-semibold tracking-wide text-primary no-underline group-hover:underline" @click.stop>{{ item.kode_pelacakan }}</NuxtLink></TableCell>
+              <TableCell class="text-muted-foreground"><DashboardWaktuRelatif :waktu="item.created_at" /></TableCell>
+              <TableCell class="font-medium">{{ item.desa }}</TableCell>
+              <TableCell class="text-muted-foreground">{{ item.kecamatan }}</TableCell>
+              <TableCell><DashboardLencanaJenis :jenis="item.jenis_terlapor" /></TableCell>
+              <TableCell><DashboardLencanaStatus :status="item.status" /></TableCell>
+              <TableCell><ChevronRight class="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" /></TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+        <ul class="divide-y md:hidden">
+          <li v-for="item in data.data" :key="item.id">
+            <NuxtLink :to="`/upt/laporan/${item.id}`" class="grid gap-1.5 px-4 py-3.5 text-inherit no-underline active:bg-muted">
+              <span class="flex items-center justify-between gap-3"><span class="font-mono text-sm font-semibold text-primary">{{ item.kode_pelacakan }}</span><DashboardLencanaStatus :status="item.status" /></span>
+              <span class="text-sm">{{ item.desa }}, {{ item.kecamatan }}</span>
+              <span class="flex items-center justify-between text-xs text-muted-foreground"><DashboardWaktuRelatif :waktu="item.created_at" /><DashboardLencanaJenis :jenis="item.jenis_terlapor" /></span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </template>
+      <template v-if="!pending && !error && data?.data.length" #footer><DashboardPaginasiTabel v-model="halaman" :total="data.total" /></template>
+    </DashboardBingkaiTabel>
+  </div>
 </template>

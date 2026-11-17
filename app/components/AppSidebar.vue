@@ -1,79 +1,56 @@
 <script setup lang="ts">
-import { Activity, BookOpenText, Building2, ChartNoAxesCombined, ClipboardList, FileText, LayoutDashboard, MapPinned, Settings, ShieldCheck, Users } from '@lucide/vue'
+import { Activity, BookOpenText, Building2, ChartNoAxesCombined, ClipboardList, FileText, LayoutDashboard, Map as IkonPeta, MapPinned, Settings, ShieldCheck, UserRoundCog, Users } from '@lucide/vue'
 import type { LucideIcon } from '@lucide/vue'
-import { APP_NAME, MENU_PERAN } from '~~/shared/config/app'
-import { LABEL_MENU } from '~~/shared/config/teks'
+import { APP_NAME } from '~~/shared/config/app'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from '~/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 
-const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset' }>(), { collapsible: 'icon', side: 'left', variant: 'sidebar' })
+const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset'; namaPetugas?: string }>(), { collapsible: 'icon', side: 'left', variant: 'sidebar', namaPetugas: '' })
+defineEmits<{ keluar: [] }>()
 const { profil } = useAuth()
 const route = useRoute()
-const icons: Record<string, LucideIcon> = { Dashboard: LayoutDashboard, 'Laporan Masyarakat': FileText, 'Laporan Kegiatan': ClipboardList, Pegawai: Users, 'Profil Kantor': Building2, Peringkat: ChartNoAxesCombined, Pantauan: Activity, 'Desa Binaan': MapPinned, 'Penugasan PIMPASA': ClipboardList, 'Wilayah Kerja': MapPinned, FAQ: BookOpenText, Pengaturan: Settings, 'Status sistem': ShieldCheck, Akun: Users }
-const items = computed(() => MENU_PERAN[profil.value?.peran ?? 'upt'].filter(item => !item.href.startsWith('/admin')))
-const itemPemantauan = computed(() => items.value.filter(item => ['/upt', '/upt/laporan', '/upt/kegiatan', '/kanwil', '/kanwil/peringkat', '/kanwil/pantauan', '/kanwil/laporan', '/kanwil/kegiatan'].includes(item.href)))
-const itemPengelolaan = computed(() => items.value.filter(item => !itemPemantauan.value.some(pantauan => pantauan.href === item.href)))
-const itemsAdmin = computed(() => profil.value?.peran === 'admin' ? MENU_PERAN.admin.filter(item => item.href.startsWith('/admin')) : [])
-const initials = computed(() => (profil.value?.nama_tampil ?? APP_NAME).split(/\s+/).slice(0, 2).map(word => word[0]).join('').toUpperCase())
+const IKON: Record<string, LucideIcon> = {
+  '/upt': LayoutDashboard, '/kanwil': LayoutDashboard, '/upt/laporan': FileText, '/kanwil/laporan': FileText, '/upt/kegiatan': ClipboardList, '/kanwil/kegiatan': ClipboardList,
+  '/upt/pegawai': Users, '/upt/profil': Building2, '/kanwil/peringkat': ChartNoAxesCombined, '/kanwil/pantauan': Activity, '/kanwil/desa-binaan': MapPinned,
+  '/kanwil/penugasan': UserRoundCog, '/kanwil/wilayah-kerja': IkonPeta, '/kanwil/faq': BookOpenText, '/kanwil/pengaturan': Settings, '/admin/status': ShieldCheck, '/admin/akun': Users
+}
+const grup = computed(() => kelompokMenu(profil.value?.peran ?? 'upt'))
+const sidebarProps = computed(() => ({ collapsible: props.collapsible, side: props.side, variant: props.variant }))
 </script>
 
 <template>
-  <Sidebar v-bind="props">
-    <SidebarHeader class="border-t-4 border-t-sidebar-primary border-b border-sidebar-border/60 px-3 py-4">
+  <Sidebar v-bind="sidebarProps">
+    <SidebarHeader class="px-3 pt-4 pb-3">
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child>
-            <NuxtLink to="/" class="min-w-0">
-              <img class="size-9 shrink-0 object-contain" src="/images/logo.webp" alt="" width="36" height="36">
-              <span class="grid min-w-0 flex-1 text-left text-sm leading-tight"><span class="truncate font-semibold">{{ APP_NAME }}</span><span class="truncate text-xs">Pelayanan Keimigrasian Riau</span></span>
+          <SidebarMenuButton size="lg" as-child class="hover:bg-sidebar-foreground/8">
+            <NuxtLink :to="profil?.peran === 'upt' ? '/upt' : '/kanwil'" class="min-w-0 no-underline">
+              <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-white/95 p-1 shadow-sm ring-1 ring-sidebar-primary/60"><img class="size-full object-contain" src="/images/logo.webp" alt="" width="36" height="36"></span>
+              <span class="grid min-w-0 flex-1 text-left leading-tight"><span class="truncate text-sm font-bold tracking-wide">{{ APP_NAME }}</span><span class="truncate text-xs text-sidebar-foreground/65">Keimigrasian Riau</span></span>
             </NuxtLink>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeader>
-    <SidebarContent>
-      <SidebarGroup class="px-2 py-3">
-        <SidebarGroupLabel class="px-2 text-[0.68rem] font-semibold uppercase tracking-wider">{{ profil?.peran === 'upt' ? 'Operasional' : 'Pemantauan' }}</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem v-for="item in itemPemantauan" :key="item.href">
-            <SidebarMenuButton class="relative data-[active=true]:before:absolute data-[active=true]:before:inset-y-2 data-[active=true]:before:left-0 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-sidebar-primary" as-child :is-active="route.path === item.href || (item.href !== '/upt' && item.href !== '/kanwil' && route.path.startsWith(`${item.href}/`))" :tooltip="item.label">
-              <NuxtLink :to="item.href"><component :is="icons[item.label] ?? FileText" /><span>{{ item.label }}</span></NuxtLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-      <SidebarGroup v-if="itemPengelolaan.length" class="px-2 py-1">
-        <SidebarGroupLabel class="px-2 text-[0.68rem] font-semibold uppercase tracking-wider">Pengelolaan</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem v-for="item in itemPengelolaan" :key="item.href">
-            <SidebarMenuButton class="relative data-[active=true]:before:absolute data-[active=true]:before:inset-y-2 data-[active=true]:before:left-0 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-sidebar-primary" as-child :is-active="route.path === item.href || (item.href !== '/upt' && item.href !== '/kanwil' && route.path.startsWith(`${item.href}/`))" :tooltip="item.label">
-              <NuxtLink :to="item.href"><component :is="icons[item.label] ?? FileText" /><span>{{ item.label }}</span></NuxtLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarGroup>
-      <SidebarGroup v-if="itemsAdmin.length" class="px-2 py-1">
-        <SidebarGroupLabel class="px-2 text-[0.68rem] font-semibold uppercase tracking-wider">Admin</SidebarGroupLabel>
-        <SidebarMenu>
-          <SidebarMenuItem v-for="item in itemsAdmin" :key="item.href">
-            <SidebarMenuButton class="relative data-[active=true]:before:absolute data-[active=true]:before:inset-y-2 data-[active=true]:before:left-0 data-[active=true]:before:w-0.5 data-[active=true]:before:rounded-full data-[active=true]:before:bg-sidebar-primary" as-child :is-active="route.path === item.href || route.path.startsWith(`${item.href}/`)" :tooltip="item.label">
-              <NuxtLink :to="item.href"><component :is="icons[item.label] ?? FileText" /><span>{{ item.label }}</span></NuxtLink>
+    <div class="mx-4 h-px bg-linear-to-r from-sidebar-primary/70 via-sidebar-primary/25 to-transparent group-data-[collapsible=icon]:mx-2" aria-hidden="true" />
+    <SidebarContent class="gap-0 py-2">
+      <SidebarGroup v-for="item in grup" :key="item.label" class="px-2 py-1.5">
+        <SidebarGroupLabel class="px-2 text-[0.68rem] font-semibold tracking-[0.12em] text-sidebar-foreground/50 uppercase">{{ item.label }}</SidebarGroupLabel>
+        <SidebarMenu class="gap-0.5">
+          <SidebarMenuItem v-for="menu in item.items" :key="menu.href">
+            <SidebarMenuButton
+              as-child
+              :is-active="menuCocok(route.path, menu.href)"
+              :tooltip="menu.label"
+              class="relative h-9 text-sidebar-foreground/80 hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-foreground/12 data-[active=true]:text-sidebar-foreground data-[active=true]:before:absolute data-[active=true]:before:inset-y-1.5 data-[active=true]:before:left-0 data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-full data-[active=true]:before:bg-sidebar-primary [&[data-active=true]>svg]:text-sidebar-primary"
+            >
+              <NuxtLink :to="menu.href" class="no-underline"><component :is="IKON[menu.href] ?? FileText" /><span>{{ menu.label }}</span></NuxtLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroup>
     </SidebarContent>
-    <SidebarFooter class="border-t border-sidebar-border/60 p-3">
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton size="lg" as-child>
-            <NuxtLink to="/akun/password">
-              <Avatar class="size-8 rounded-lg"><AvatarFallback class="rounded-lg">{{ initials }}</AvatarFallback></Avatar>
-              <span class="grid flex-1 text-left text-sm leading-tight"><span class="truncate font-medium">{{ profil?.nama_tampil }}</span><span class="truncate text-xs">{{ LABEL_MENU.akun }} · {{ profil?.peran }}</span></span>
-            </NuxtLink>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
+    <SidebarFooter class="border-t border-sidebar-foreground/10 p-2">
+      <SidebarMenu><SidebarMenuItem><MenuPengguna tampilan="sidebar" :nama-petugas="namaPetugas" @keluar="$emit('keluar')" /></SidebarMenuItem></SidebarMenu>
     </SidebarFooter>
     <SidebarRail />
   </Sidebar>

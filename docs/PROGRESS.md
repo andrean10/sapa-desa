@@ -179,3 +179,14 @@ npm melaporkan 17 advisori pada dependency tree (6 low, 11 moderate) setelah ins
 - Tidak ada perintah yang menulis ke database; tidak ada skema yang diubah.
 - Commit lokal Tahap 1: `42bf04b siapkan kerangka Tahap 1`. Tidak ada perubahan yang di-push.
 - `public/favicon.ico` masih berubah di working tree dan sengaja tidak dimasukkan ke commit karena tidak terkait Tahap 1.
+
+## Redesign tampilan dashboard (admin, Kanwil, UPT)
+
+Hanya tampilan dashboard; halaman publik (landing, informasi, lapor, lacak) dan login tidak diubah. Tidak ada perubahan database atau endpoint server.
+
+- **Warna**: `tema.ts` mendapat token semantik baru (`--emas`, `--sukses`, `--peringatan`, `--info`, `--bahaya-muda`, dst.) yang diambil dari palet yang sudah ada. Di area dashboard, `--accent` dipasang ke warna redam lewat `VARIABEL_TEMA_DASHBOARD` (di `<body>`, agar dialog/dropdown ikut), sehingga hover tombol/menu tidak lagi berwarna emas. Emas dipakai sebagai penanda (peringkat 1–3, sidebar aktif, kegiatan).
+- **Kerangka**: header ringkas dengan remah roti (kelompok › menu › detail), chip "Bertugas: {nama}" untuk UPT, pemilih "Lihat sebagai UPT", dan menu pengguna (Ganti petugas, Ganti password, Logout) di header dan kaki sidebar.
+- **Komponen bersama** di `app/components/dashboard/`: `KepalaHalaman`, `KartuAngka`, `KartuBagian`, `BingkaiTabel`, `PaginasiTabel`, `SegmenTab`, `FilterPeriode`, `FilterStatus`, `BilahFilterLaporan`, `State{Memuat,Kosong,Galat}`, `Lencana{Status,Jenis,Batas}`, `WaktuRelatif`, grafik (`GrafikBulanan`, `GrafikKomposisi`, `BatangMendatar`), `IsiLaporan`, `TimelineInternal`, `PanelUbahStatus`, dan `KontenDashboardUpt` (dipakai `/upt` dan `/kanwil/upt/[kantorId]`).
+- **Alur**: pemilih periode dashboard UPT dipindah ke bagian Tren (hanya memengaruhi tren, sesuai PRD 7.1d); tab cepat → cari → filter → reset pada daftar laporan; kartu angka Kanwil menaut ke daftar terfilter; pegawai memakai dialog Tambah/Ubah dan pesan "masih bertugas di {desa}" saat penonaktifan ditolak; kunci `rentangPeriode` dan `formatRelatifWib` di `shared/utils/waktu.ts` (dengan tes).
+- **Perbaikan ikut serta**: label bulan grafik tidak lagi dobel/hilang; saklar `Switch` di status sistem memakai `model-value` (reka-ui v2); kolom "Kabupaten/Kota" di daftar laporan Kanwil sebelumnya berisi kecamatan.
+- **Verifikasi**: `npm run typecheck`, `npm run lint`, `npm run test` (9 tes), dan `npm run build` lulus. Tampilan diperiksa dengan data contoh lokal (tidak di-commit) di 1440 px dan 390 px.

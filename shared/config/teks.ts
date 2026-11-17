@@ -20,9 +20,9 @@ export const STATUS_LAPORAN_TAMPILAN = STATUS_LAPORAN.map(status => ({
 }))
 
 export const JENIS_TERLAPOR = [
-  { value: 'wna', label: 'Warga Negara Asing (WNA)' },
-  { value: 'wni', label: 'Warga Negara Indonesia (WNI)' }
-] as const satisfies readonly { value: Enums<'jenis_terlapor'>; label: string }[]
+  { value: 'wna', label: 'Warga Negara Asing (WNA)', singkat: 'WNA' },
+  { value: 'wni', label: 'Warga Negara Indonesia (WNI)', singkat: 'WNI' }
+] as const satisfies readonly { value: Enums<'jenis_terlapor'>; label: string; singkat: string }[]
 
 export const PERAN_PENGGUNA = [
   { value: 'admin', label: 'Admin' },

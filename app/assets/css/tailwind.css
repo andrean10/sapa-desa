@@ -23,6 +23,15 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-surface: var(--card);
+  --color-emas: var(--emas);
+  --color-emas-foreground: var(--emas-foreground);
+  --color-sukses: var(--sukses);
+  --color-sukses-muda: var(--sukses-muda);
+  --color-peringatan: var(--peringatan);
+  --color-peringatan-muda: var(--peringatan-muda);
+  --color-info: var(--info);
+  --color-info-muda: var(--info-muda);
+  --color-bahaya-muda: var(--bahaya-muda);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);

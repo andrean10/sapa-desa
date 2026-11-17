@@ -1,54 +1,93 @@
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
+import { Pencil, Search, UserPlus, Users } from '@lucide/vue'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Switch } from '~/components/ui/switch'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import type { PegawaiUpt } from '~/composables/usePegawaiUpt'
 import { LABEL_FORM } from '~~/shared/config/teks'
+
 definePageMeta({ layout: 'dashboard', title: 'Pegawai' })
 const { daftar, tambah, ubah } = usePegawaiUpt()
 const { data: pegawai, pending, error, refresh } = await daftar()
-const nama = ref('')
-const nip = ref('')
 const cari = ref('')
-const pesan = ref('')
-const sibuk = ref(false)
-const editId = ref('')
-const editNama = ref('')
-const editNip = ref('')
 const terlihat = computed(() => (pegawai.value ?? []).filter(item => item.nama.toLocaleLowerCase('id').includes(cari.value.trim().toLocaleLowerCase('id'))))
+const jumlahAktif = computed(() => (pegawai.value ?? []).filter(item => item.aktif).length)
 
-async function simpanBaru() {
-  sibuk.value = true; pesan.value = ''
-  try { await tambah(nama.value, nip.value); nama.value = ''; nip.value = ''; await refresh() }
-  catch (galat) { pesan.value = (galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Pegawai belum dapat ditambahkan.' }
+// Satu dialog untuk tambah dan ubah (PRD 7.6). Tidak ada hapus pegawai.
+const dialogTerbuka = ref(false)
+const isian = reactive({ id: '', nama: '', nip: '' })
+const sibuk = ref(false)
+const pesanDialog = ref('')
+function bukaDialog(item?: PegawaiUpt) {
+  Object.assign(isian, { id: item?.id ?? '', nama: item?.nama ?? '', nip: item?.nip ?? '' })
+  pesanDialog.value = ''
+  dialogTerbuka.value = true
+}
+async function simpan() {
+  if (!isian.nama.trim()) { pesanDialog.value = 'Nama wajib diisi.'; return }
+  sibuk.value = true; pesanDialog.value = ''
+  try {
+    if (isian.id) await ubah(isian.id, { nama: isian.nama, nip: isian.nip || null })
+    else await tambah(isian.nama, isian.nip)
+    await refresh(); dialogTerbuka.value = false
+    toast.success(isian.id ? 'Data pegawai diperbarui.' : 'Pegawai ditambahkan.')
+  } catch (galat) { pesanDialog.value = pesanGalat(galat, isian.id ? 'Data pegawai belum dapat diubah.' : 'Pegawai belum dapat ditambahkan.') }
   finally { sibuk.value = false }
 }
-async function gantiAktif(id: string, aktif: boolean) {
-  pesan.value = ''
-  try { await ubah(id, { aktif }); await refresh() }
-  catch (galat) { pesan.value = (galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Status pegawai belum dapat diubah.' }
+const sedangUbahStatus = ref('')
+async function gantiAktif(item: PegawaiUpt) {
+  sedangUbahStatus.value = item.id
+  try { await ubah(item.id, { aktif: !item.aktif }); await refresh(); toast.success(`${item.nama} ${item.aktif ? 'dinonaktifkan' : 'diaktifkan'}.`) }
+  catch (galat) {
+    // Pesan database tidak memuat nama desa; ambil dari penugasan aktif pegawai.
+    toast.error(item.aktif && item.desa_binaan.length
+      ? `Tidak dapat dinonaktifkan: masih bertugas sebagai PIMPASA di ${item.desa_binaan.join(', ')}. Minta Kanwil mengakhiri penugasannya terlebih dahulu.`
+      : pesanGalat(galat, 'Status pegawai belum dapat diubah.'))
+  } finally { sedangUbahStatus.value = '' }
 }
-function mulaiUbah(item: { id: string; nama: string; nip: string | null }) {
-  editId.value = item.id; editNama.value = item.nama; editNip.value = item.nip ?? ''; pesan.value = ''
-}
-async function simpanUbah() {
-  if (!editId.value || !editNama.value.trim()) return
-  try { await ubah(editId.value, { nama: editNama.value, nip: editNip.value || null }); editId.value = ''; await refresh() }
-  catch (galat) { pesan.value = (galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Data pegawai belum dapat diubah.' }
-}
-function batalUbah() { editId.value = '' }
 </script>
 
 <template>
-  <section class="grid gap-5">
-    <header><h2 class="text-2xl font-extrabold text-primary">Pegawai kantor</h2><p class="mt-1 text-muted-foreground">Kelola daftar petugas yang dapat dipilih saat bertugas.</p></header>
-    <form class="grid gap-3 rounded-xl border border-border bg-card p-5 shadow-card md:grid-cols-[1fr_1fr_auto] md:items-end" @submit.prevent="simpanBaru"><label class="grid gap-2 font-semibold" for="nama-pegawai">{{ LABEL_FORM.nama }}<Input id="nama-pegawai" v-model="nama" maxlength="150" required /></label><label class="grid gap-2 font-semibold" for="nip-pegawai">{{ LABEL_FORM.nip }} (opsional)<Input id="nip-pegawai" v-model="nip" maxlength="30" /></label><Button type="submit" :disabled="sibuk">Tambah pegawai</Button></form>
-    <p v-if="pesan" class="rounded-lg bg-muted p-4 text-destructive" role="alert">{{ pesan }}</p>
-    <label class="grid max-w-md gap-2 font-semibold" for="cari-pegawai">Cari nama<Input id="cari-pegawai" v-model="cari" class="min-h-11 rounded-lg border border-border bg-card px-3 text-base" type="search" /></label>
-    <p v-if="pending" role="status">Memuat pegawai...</p><div v-else-if="error" class="rounded-xl border border-border bg-card p-5" role="alert">Daftar pegawai belum dapat dimuat. <Button variant="outline" type="button" @click="refresh()">Coba lagi</Button></div>
-    <div v-else-if="!pegawai?.length" class="rounded-xl border border-border bg-card p-6 text-muted-foreground">Belum ada pegawai terdaftar di kantor Anda.</div>
-    <div v-else-if="!terlihat.length" class="rounded-xl border border-border bg-card p-6 text-muted-foreground">Tidak ada pegawai yang cocok dengan pencarian.</div>
-    <div v-else class="overflow-x-auto rounded-xl border border-border bg-card shadow-card"><Table class="w-full min-w-[760px] text-left text-sm"><TableHeader class="bg-muted"><TableRow><TableHead class="p-4">Nama</TableHead><TableHead class="p-4">NIP</TableHead><TableHead class="p-4">Status</TableHead><TableHead class="p-4">Bertugas di</TableHead><TableHead class="p-4">Aksi</TableHead></TableRow></TableHeader><TableBody>
-      <TableRow v-for="item in terlihat" :key="item.id" class="border-t border-border">
-        <template v-if="editId === item.id"><TableCell class="p-3"><input v-model="editNama" class="min-h-10 w-full rounded-lg border border-border bg-background px-3" aria-label="Nama pegawai"></TableCell><TableCell class="p-3"><input v-model="editNip" class="min-h-10 w-full rounded-lg border border-border bg-background px-3" aria-label="NIP"></TableCell><TableCell class="p-4">{{ item.aktif ? 'Aktif' : 'Nonaktif' }}</TableCell><TableCell class="p-4">{{ item.desa_binaan.join(', ') || '—' }}</TableCell><TableCell class="p-3"><div class="flex gap-2"><Button size="sm" type="button" @click="simpanUbah">Simpan</Button><Button variant="outline" size="sm" type="button" @click="batalUbah">Batal</Button></div></TableCell></template>
-        <template v-else><TableCell class="p-4 font-semibold">{{ item.nama }}</TableCell><TableCell class="p-4">{{ item.nip || '—' }}</TableCell><TableCell class="p-4">{{ item.aktif ? 'Aktif' : 'Nonaktif' }}</TableCell><TableCell class="p-4"><span v-for="desa in item.desa_binaan" :key="desa" class="mr-1 inline-block rounded-full bg-muted px-2 py-1 text-xs">{{ desa }}</span><span v-if="!item.desa_binaan.length" class="text-muted-foreground">—</span></TableCell><TableCell class="p-4"><div class="flex gap-2"><Button variant="ghost" size="sm" type="button" @click="mulaiUbah(item)">Ubah</Button><Button :variant="item.aktif ? 'destructive' : 'secondary'" size="sm" type="button" @click="gantiAktif(item.id, !item.aktif)">{{ item.aktif ? 'Nonaktifkan' : 'Aktifkan' }}</Button></div></TableCell></template>
-      </TableRow>
-    </TableBody></Table></div>
-  </section>
+  <div class="grid gap-5">
+    <DashboardKepalaHalaman judul="Pegawai kantor" deskripsi="Daftar petugas yang dapat dipilih saat bertugas dan ditugaskan sebagai PIMPASA.">
+      <template #aksi><Button @click="bukaDialog()"><UserPlus class="size-4" />Tambah pegawai</Button></template>
+    </DashboardKepalaHalaman>
+    <DashboardBingkaiTabel>
+      <template #toolbar>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="relative w-full sm:w-72"><Search class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><label for="cari-pegawai" class="sr-only">Cari nama</label><Input id="cari-pegawai" v-model="cari" type="search" placeholder="Cari nama pegawai…" class="h-9 bg-card pl-9" /></div>
+          <p class="text-sm text-muted-foreground"><strong class="font-semibold text-foreground tabular-nums">{{ jumlahAktif }}</strong> aktif dari {{ pegawai?.length ?? 0 }} pegawai</p>
+        </div>
+      </template>
+      <div v-if="pending" class="p-4"><DashboardStateMemuat /></div>
+      <div v-else-if="error" class="p-4"><DashboardStateGalat pesan="Daftar pegawai belum dapat dimuat." @coba="refresh()" /></div>
+      <div v-else-if="!pegawai?.length" class="p-4"><DashboardStateKosong judul="Belum ada pegawai terdaftar di kantor Anda." :ikon="Users"><Button @click="bukaDialog()"><UserPlus class="size-4" />Tambah pegawai</Button></DashboardStateKosong></div>
+      <div v-else-if="!terlihat.length" class="p-4"><DashboardStateKosong judul="Tidak ada pegawai yang cocok dengan pencarian." ringkas /></div>
+      <Table v-else class="min-w-[760px]">
+        <TableHeader><TableRow><TableHead>{{ LABEL_FORM.nama }}</TableHead><TableHead>{{ LABEL_FORM.nip }}</TableHead><TableHead>Bertugas di</TableHead><TableHead>Status</TableHead><TableHead class="text-right"><span class="sr-only">Aksi</span></TableHead></TableRow></TableHeader>
+        <TableBody>
+          <TableRow v-for="item in terlihat" :key="item.id" :class="item.aktif ? '' : 'text-muted-foreground'">
+            <TableCell class="font-medium">{{ item.nama }}</TableCell>
+            <TableCell class="font-mono text-xs">{{ item.nip || '—' }}</TableCell>
+            <TableCell><div v-if="item.desa_binaan.length" class="flex flex-wrap gap-1"><span v-for="desa in item.desa_binaan" :key="desa" class="rounded-md bg-emas/15 px-2 py-0.5 text-xs font-medium text-emas-foreground">{{ desa }}</span></div><span v-else class="text-muted-foreground">—</span></TableCell>
+            <TableCell><label class="inline-flex items-center gap-2 text-sm"><Switch :model-value="item.aktif" :disabled="sedangUbahStatus === item.id" @update:model-value="gantiAktif(item)" /><span :class="item.aktif ? 'font-medium text-sukses' : ''">{{ item.aktif ? 'Aktif' : 'Nonaktif' }}</span></label></TableCell>
+            <TableCell class="text-right"><Button variant="ghost" size="sm" @click="bukaDialog(item)"><Pencil class="size-3.5" />Ubah</Button></TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </DashboardBingkaiTabel>
+    <Dialog v-model:open="dialogTerbuka">
+      <DialogContent>
+        <DialogHeader><DialogTitle>{{ isian.id ? 'Ubah pegawai' : 'Tambah pegawai' }}</DialogTitle><DialogDescription>Nama harus unik di kantor Anda. NIP boleh dikosongkan.</DialogDescription></DialogHeader>
+        <form id="form-pegawai" class="grid gap-4" @submit.prevent="simpan">
+          <label class="grid gap-1.5 text-sm font-medium" for="nama-pegawai">{{ LABEL_FORM.nama }}<Input id="nama-pegawai" v-model="isian.nama" maxlength="150" required /></label>
+          <label class="grid gap-1.5 text-sm font-medium" for="nip-pegawai">{{ LABEL_FORM.nip }} <span class="font-normal text-muted-foreground">(opsional)</span><Input id="nip-pegawai" v-model="isian.nip" maxlength="30" inputmode="numeric" /></label>
+          <p v-if="pesanDialog" class="rounded-md bg-bahaya-muda px-3 py-2 text-sm text-destructive" role="alert">{{ pesanDialog }}</p>
+        </form>
+        <DialogFooter><Button variant="outline" @click="dialogTerbuka = false">Batal</Button><Button type="submit" form="form-pegawai" :disabled="sibuk">{{ sibuk ? 'Menyimpan…' : 'Simpan' }}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
 </template>

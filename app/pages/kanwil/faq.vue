@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { ExternalLink, MoveDown, MoveUp, Pencil, Plus, Trash2 } from '@lucide/vue'
+import { BookOpenText, ChevronDown, ChevronUp, ExternalLink, Globe, Pencil, Plus, Trash2 } from '@lucide/vue'
 import { useKelolaKanwil } from '~/composables/useKelolaKanwil'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Textarea } from '~/components/ui/textarea'
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
-import { Skeleton } from '~/components/ui/skeleton'
 
 definePageMeta({ layout: 'dashboard', title: 'Kelola FAQ' })
 const kelola = useKelolaKanwil()
@@ -45,10 +42,50 @@ async function geser(index: number, arah: -1 | 1) {
 </script>
 
 <template>
-  <div class="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-5 sm:gap-6">
-    <header class="flex min-w-0 flex-col gap-4 border-l-2 border-accent py-1 pl-4 sm:flex-row sm:items-end sm:justify-between"><div class="min-w-0 space-y-1"><p class="text-sm font-semibold text-muted-foreground">Konten publik</p><h1 class="text-2xl font-bold tracking-tight text-primary sm:text-3xl">Pertanyaan yang sering diajukan</h1><p class="text-sm leading-6 text-muted-foreground">Konten ini langsung tampil di halaman informasi masyarakat.</p></div><div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"><Button class="w-full sm:w-auto" as-child variant="outline"><NuxtLink to="/informasi" target="_blank" rel="noopener noreferrer">Lihat halaman publik<ExternalLink class="ml-2 size-4" /></NuxtLink></Button><Button class="w-full sm:w-auto" @click="tambah"><Plus class="mr-2 size-4" />Tambah FAQ</Button></div></header>
-    <Alert variant="destructive"><AlertTitle>Periksa isi sebelum menyimpan</AlertTitle><AlertDescription>Semua FAQ langsung tampil ke publik. Pastikan jawaban sudah siap dan tidak memuat informasi internal.</AlertDescription></Alert>
-    <Card><CardHeader><CardTitle>Daftar FAQ</CardTitle><CardDescription>{{ data?.length ?? 0 }} pertanyaan · Atur urutan dengan tombol panah.</CardDescription></CardHeader><CardContent><div v-if="pending" class="grid gap-3"><Skeleton v-for="i in 4" :key="i" class="h-24 w-full" /></div><div v-else-if="error" class="grid gap-3 text-sm text-destructive" role="alert">FAQ belum dapat dimuat.<Button class="w-fit" variant="outline" @click="refresh()">Coba lagi</Button></div><ol v-else class="grid gap-3"><li v-for="(item, index) in (data ?? [])" :key="item.id" class="rounded-lg border bg-card p-4"><div class="flex flex-wrap items-start justify-between gap-4"><div class="min-w-0 flex-1"><p class="mb-2 text-xs font-medium text-muted-foreground">Urutan {{ item.urutan }}</p><h3 class="font-semibold">{{ item.pertanyaan }}</h3><p class="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">{{ item.jawaban }}</p></div><div class="flex shrink-0 gap-1"><Button variant="ghost" size="icon" aria-label="Naikkan urutan" :disabled="index === 0" @click="geser(index, -1)"><MoveUp class="size-4" /></Button><Button variant="ghost" size="icon" aria-label="Turunkan urutan" :disabled="index === (data?.length ?? 0) - 1" @click="geser(index, 1)"><MoveDown class="size-4" /></Button><Button variant="ghost" size="icon" aria-label="Ubah FAQ" @click="ubah(item)"><Pencil class="size-4" /></Button><AlertDialog><AlertDialogTrigger as-child><Button variant="ghost" size="icon" aria-label="Hapus FAQ"><Trash2 class="size-4 text-destructive" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Hapus FAQ?</AlertDialogTitle><AlertDialogDescription>“{{ item.pertanyaan }}” akan dihapus dan tidak lagi tampil kepada masyarakat.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="idHapus = item.id; hapus()">Hapus</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog></div></div></li><li v-if="!data?.length" class="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">Belum ada FAQ. Tambahkan pertanyaan pertama.</li></ol></CardContent></Card>
-    <Dialog v-model:open="bukaDialog"><DialogContent class="sm:max-w-2xl"><DialogHeader><DialogTitle>{{ isian.id ? 'Ubah FAQ' : 'Tambah FAQ' }}</DialogTitle><DialogDescription>Jawaban disimpan sebagai teks biasa; baris baru akan dipertahankan.</DialogDescription></DialogHeader><div class="grid gap-4"><label class="grid gap-2 text-sm font-medium">Pertanyaan · {{ isian.pertanyaan.length }}/250<Input v-model="isian.pertanyaan" maxlength="250" required /></label><label class="grid gap-2 text-sm font-medium">Jawaban · {{ isian.jawaban.length }}/5000<Textarea v-model="isian.jawaban" maxlength="5000" rows="8" required /></label><label class="grid max-w-40 gap-2 text-sm font-medium">Urutan<Input v-model.number="isian.urutan" type="number" min="0" step="1" required /></label><p v-if="pesan" class="text-sm text-destructive" role="alert">{{ pesan }}</p></div><DialogFooter><Button variant="outline" @click="bukaDialog = false">Batal</Button><Button :disabled="sedangSimpan" @click="simpan">{{ sedangSimpan ? 'Menyimpan…' : 'Simpan FAQ' }}</Button></DialogFooter></DialogContent></Dialog>
+  <div class="grid gap-5">
+    <DashboardKepalaHalaman judul="Kelola FAQ" deskripsi="Informasi keimigrasian yang tampil di halaman Informasi masyarakat.">
+      <template #aksi>
+        <Button as-child variant="outline"><NuxtLink to="/informasi" target="_blank" rel="noopener noreferrer" class="no-underline">Lihat halaman publik<ExternalLink class="size-4" /></NuxtLink></Button>
+        <Button @click="tambah"><Plus class="size-4" />Tambah FAQ</Button>
+      </template>
+    </DashboardKepalaHalaman>
+    <p class="flex items-start gap-2 rounded-lg border border-destructive/25 bg-bahaya-muda px-4 py-3 text-sm text-destructive" role="note"><Globe class="mt-0.5 size-4 shrink-0" aria-hidden="true" /><span><strong>Semua FAQ langsung tampil ke publik.</strong> Isi hanya setelah siap dan jangan memuat informasi internal.</span></p>
+
+    <div v-if="pending"><DashboardStateMemuat :baris="4" tinggi="h-24" /></div>
+    <DashboardStateGalat v-else-if="error" pesan="FAQ belum dapat dimuat." @coba="refresh()" />
+    <DashboardStateKosong v-else-if="!data?.length" judul="Belum ada FAQ." deskripsi="Tambahkan pertanyaan pertama untuk masyarakat." :ikon="BookOpenText"><Button @click="tambah"><Plus class="size-4" />Tambah FAQ</Button></DashboardStateKosong>
+    <ol v-else class="grid gap-3">
+      <li v-for="(item, index) in data" :key="item.id" class="group flex gap-4 rounded-xl border border-border/80 bg-card p-4 shadow-xs transition hover:border-primary/25 sm:p-5">
+        <div class="flex shrink-0 flex-col items-center gap-1">
+          <Button variant="ghost" size="icon-sm" aria-label="Naikkan urutan" :disabled="index === 0" @click="geser(index, -1)"><ChevronUp class="size-4" /></Button>
+          <span class="grid size-7 place-items-center rounded-full bg-primary/8 text-xs font-semibold text-primary tabular-nums" :title="`Urutan ${item.urutan}`">{{ index + 1 }}</span>
+          <Button variant="ghost" size="icon-sm" aria-label="Turunkan urutan" :disabled="index === data.length - 1" @click="geser(index, 1)"><ChevronDown class="size-4" /></Button>
+        </div>
+        <div class="min-w-0 flex-1">
+          <h3 class="font-semibold text-foreground">{{ item.pertanyaan }}</h3>
+          <p class="mt-1.5 line-clamp-3 text-sm leading-6 whitespace-pre-line text-muted-foreground">{{ item.jawaban }}</p>
+        </div>
+        <div class="flex shrink-0 items-start gap-1">
+          <Button variant="ghost" size="icon-sm" aria-label="Ubah FAQ" @click="ubah(item)"><Pencil class="size-4" /></Button>
+          <AlertDialog>
+            <AlertDialogTrigger as-child><Button variant="ghost" size="icon-sm" class="text-destructive hover:bg-bahaya-muda hover:text-destructive" aria-label="Hapus FAQ"><Trash2 class="size-4" /></Button></AlertDialogTrigger>
+            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Hapus FAQ?</AlertDialogTitle><AlertDialogDescription>“{{ item.pertanyaan }}” akan dihapus dan tidak lagi tampil kepada masyarakat.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="idHapus = item.id; hapus()">Hapus</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </li>
+    </ol>
+
+    <Dialog v-model:open="bukaDialog">
+      <DialogContent class="sm:max-w-2xl">
+        <DialogHeader><DialogTitle>{{ isian.id ? 'Ubah FAQ' : 'Tambah FAQ' }}</DialogTitle><DialogDescription>Jawaban disimpan sebagai teks biasa; baris baru dipertahankan.</DialogDescription></DialogHeader>
+        <div class="grid gap-4">
+          <label class="grid gap-1.5 text-sm font-medium"><span class="flex justify-between">Pertanyaan<span class="font-normal text-muted-foreground tabular-nums">{{ isian.pertanyaan.length }}/250</span></span><Input v-model="isian.pertanyaan" maxlength="250" required /></label>
+          <label class="grid gap-1.5 text-sm font-medium"><span class="flex justify-between">Jawaban<span class="font-normal text-muted-foreground tabular-nums">{{ isian.jawaban.length }}/5000</span></span><Textarea v-model="isian.jawaban" maxlength="5000" rows="8" required /></label>
+          <label class="grid max-w-40 gap-1.5 text-sm font-medium">Urutan<Input v-model.number="isian.urutan" type="number" min="0" step="1" required /></label>
+          <p v-if="pesan" class="rounded-md bg-bahaya-muda px-3 py-2 text-sm text-destructive" role="alert">{{ pesan }}</p>
+        </div>
+        <DialogFooter><Button variant="outline" @click="bukaDialog = false">Batal</Button><Button :disabled="sedangSimpan" @click="simpan">{{ sedangSimpan ? 'Menyimpan…' : 'Simpan FAQ' }}</Button></DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

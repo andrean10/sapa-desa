@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Button } from '~/components/ui/button'
+import { MapPinCheck, MapPinX, Shield, Building, Landmark, UserX } from '@lucide/vue'
 import { Switch } from '~/components/ui/switch'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '~/components/ui/alert-dialog'
 import { Skeleton } from '~/components/ui/skeleton'
-import { Badge } from '~/components/ui/badge'
 
 definePageMeta({ layout: 'dashboard', title: 'Status sistem' })
 const api = useApi()
@@ -18,20 +16,36 @@ async function ubahLokasi(aktif: boolean) {
   catch (galat) { toast.error(pesanGalat(galat, 'Status lokasi gagal diperbarui.')) }
   finally { proses.value = false; konfirmasi.value = false }
 }
+// Mematikan validasi selalu lewat konfirmasi; menghidupkan langsung.
+function gantiSaklar(aktif: boolean) { if (aktif) void ubahLokasi(true); else konfirmasi.value = true }
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-screen-2xl space-y-6 sm:space-y-8">
-    <header class="space-y-1 border-l-2 border-accent py-1 pl-4"><p class="text-sm font-semibold text-muted-foreground">Administrasi</p><h1 class="text-2xl font-bold tracking-tight text-primary sm:text-3xl">Status sistem</h1><p class="max-w-2xl text-sm leading-6 text-muted-foreground">Pantau validasi lokasi dan akun SAPA DESA.</p></header>
-    <div v-if="pending" class="grid gap-4 sm:grid-cols-2"><Skeleton v-for="i in 5" :key="i" class="h-28 w-full" /></div>
-    <p v-if="error" role="alert" class="text-destructive">Status sistem belum dapat dimuat. <Button variant="outline" @click="refresh()">Coba lagi</Button></p>
-    <Card v-if="data && !pending" :class="!data.validasi_lokasi_aktif ? 'border-destructive bg-destructive/5' : 'border-t-2 border-t-accent'">
-      <CardHeader class="flex flex-row items-start justify-between gap-4"><div><CardTitle>Validasi lokasi</CardTitle><CardDescription>{{ data.validasi_lokasi_aktif ? 'Laporan dibatasi ke wilayah Provinsi Riau.' : 'Validasi mati; laporan dari luar Riau dapat masuk.' }}</CardDescription></div><Badge :variant="data.validasi_lokasi_aktif ? 'secondary' : 'destructive'">{{ data.validasi_lokasi_aktif ? 'Aktif' : 'Nonaktif' }}</Badge></CardHeader>
-      <CardContent class="flex min-w-0 flex-wrap items-center justify-between gap-4"><label for="validasi-lokasi" class="text-sm font-semibold">{{ data.validasi_lokasi_aktif ? 'Validasi aktif' : 'Validasi nonaktif' }}</label><Switch id="validasi-lokasi" :checked="data.validasi_lokasi_aktif" :disabled="proses" :aria-label="data.validasi_lokasi_aktif ? 'Matikan validasi lokasi' : 'Hidupkan validasi lokasi'" @update:checked="(aktif:boolean) => aktif ? ubahLokasi(true) : (konfirmasi = true)" /></CardContent>
-    </Card>
-    <div v-if="!pending && data" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <Card v-for="item in [{label:'Admin', value:data.akun_admin},{label:'Kanwil',value:data.akun_kanwil},{label:'UPT',value:data.akun_upt},{label:'Akun nonaktif',value:data.akun_nonaktif}]" :key="item.label"><CardHeader class="gap-3"><CardDescription class="font-medium">{{ item.label }}</CardDescription><CardTitle class="text-3xl font-bold tabular-nums tracking-tight text-primary">{{ item.value }}</CardTitle></CardHeader></Card>
-    </div>
-    <AlertDialog :open="konfirmasi" @update:open="konfirmasi = $event"><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Matikan validasi lokasi?</AlertDialogTitle><AlertDialogDescription>Mematikan validasi memungkinkan laporan dari luar Provinsi Riau masuk. Gunakan hanya untuk pengujian. Lanjutkan?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction @click="ubahLokasi(false)">Matikan validasi</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+  <div class="grid gap-5">
+    <DashboardKepalaHalaman judul="Status sistem" deskripsi="Saklar validasi lokasi dan ringkasan akun SAPA DESA." />
+    <div v-if="pending" class="grid gap-4"><Skeleton class="h-36 rounded-xl" /><div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"><Skeleton v-for="i in 4" :key="i" class="h-28 rounded-xl" /></div></div>
+    <DashboardStateGalat v-else-if="error" pesan="Status sistem belum dapat dimuat." @coba="refresh()" />
+    <template v-else-if="data">
+      <section class="flex flex-col gap-5 rounded-xl border p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between" :class="data.validasi_lokasi_aktif ? 'border-border/80 bg-card' : 'border-destructive bg-bahaya-muda'">
+        <div class="flex gap-4">
+          <span class="grid size-12 shrink-0 place-items-center rounded-xl" :class="data.validasi_lokasi_aktif ? 'bg-sukses-muda text-sukses' : 'bg-destructive text-white'" aria-hidden="true"><MapPinCheck v-if="data.validasi_lokasi_aktif" class="size-6" /><MapPinX v-else class="size-6" /></span>
+          <div>
+            <h2 class="font-semibold">Validasi lokasi Provinsi Riau</h2>
+            <p class="mt-1 max-w-2xl text-sm text-muted-foreground">{{ data.validasi_lokasi_aktif ? 'Aktif. Laporan hanya diterima dari dalam wilayah Provinsi Riau.' : 'Mati. Laporan dari luar Riau dapat masuk. Hidupkan kembali setelah pengujian.' }} Izin lokasi di form tetap wajib dan koordinat tetap disimpan.</p>
+          </div>
+        </div>
+        <label for="validasi-lokasi" class="flex shrink-0 items-center gap-3 rounded-lg border bg-card px-4 py-2.5 text-sm font-semibold">
+          <span :class="data.validasi_lokasi_aktif ? 'text-sukses' : 'text-destructive'">{{ data.validasi_lokasi_aktif ? 'Aktif' : 'Mati' }}</span>
+          <Switch id="validasi-lokasi" :model-value="data.validasi_lokasi_aktif" :disabled="proses" :aria-label="data.validasi_lokasi_aktif ? 'Matikan validasi lokasi' : 'Hidupkan validasi lokasi'" @update:model-value="gantiSaklar" />
+        </label>
+      </section>
+      <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Jumlah akun">
+        <DashboardKartuAngka label="Admin" :nilai="data.akun_admin" :ikon="Shield" ringkas />
+        <DashboardKartuAngka label="Kanwil" :nilai="data.akun_kanwil" :ikon="Landmark" nada="emas" ringkas />
+        <DashboardKartuAngka label="UPT" :nilai="data.akun_upt" :ikon="Building" nada="info" ringkas />
+        <DashboardKartuAngka label="Akun nonaktif" :nilai="data.akun_nonaktif" :ikon="UserX" nada="peringatan" ke="/admin/akun" keterangan="Kelola akun" ringkas />
+      </section>
+    </template>
+    <AlertDialog :open="konfirmasi" @update:open="konfirmasi = $event"><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Matikan validasi lokasi?</AlertDialogTitle><AlertDialogDescription>Mematikan validasi memungkinkan laporan dari luar Provinsi Riau masuk. Gunakan hanya untuk pengujian. Lanjutkan?</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="ubahLokasi(false)">Matikan validasi</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
   </div>
 </template>
