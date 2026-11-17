@@ -120,7 +120,7 @@ Penjelasan ramah untuk masyarakat (ditampilkan di halaman lacak, juga di config)
 
 | Bagian | Pustaka |
 |---|---|
-| Halaman masyarakat dan landing: `/`, `/informasi`, `/lapor`, `/lacak`, `/privasi` | **HyperUI** (snippet Tailwind, disalin menjadi komponen di `app/components/public`) |
+| Halaman masyarakat dan landing: `/`, `/informasi`, `/lapor`, `/lacak` | **HyperUI** (snippet Tailwind, disalin menjadi komponen di `app/components/public`) |
 | Login dan semua dashboard (admin, Kanwil, UPT) | **shadcn-vue** (di `app/components/ui`) |
 
 Grafik memakai komponen chart bawaan shadcn-vue.
@@ -137,7 +137,6 @@ Grafik memakai komponen chart bawaan shadcn-vue.
 | `/informasi` | Informasi keimigrasian (FAQ) |
 | `/lapor` | Form laporan |
 | `/lacak` | Cek status laporan (`?kode=` opsional) |
-| `/privasi` | Ketentuan penggunaan data (isi disediakan Kanwil) |
 
 ### 3.2 Login dan umum
 
@@ -198,7 +197,7 @@ Prinsip: **mobile-first** (lebar dasar 360 px), tombol dan target sentuh minimal
 ### 4.1 Layout publik
 
 - **Header**: nama `APP_NAME` (dan logo bila ada), menu: Beranda, Informasi, Buat Laporan, Cek Status. Di HP menu jadi tombol hamburger. Tombol "Buat Laporan" berwarna emas.
-- **Footer**: nama instansi, tautan Privasi, dan tautan kecil "Masuk petugas" (`/masuk`). Kontak instansi **[USULAN: kosong dulu, isi di config bila tersedia]**.
+- **Footer**: nama instansi dan tautan kecil "Masuk petugas" (`/masuk`). Kontak instansi **[USULAN: kosong dulu, isi di config bila tersedia]**.
 - Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan QR atau tautan lewat media sosial.
 - Rute petugas (`/upt/*`, `/kanwil/*`, `/admin/*`, `/masuk`, `/akun/*`) diberi `noindex`.
 
@@ -211,7 +210,6 @@ Tujuan: orang yang scan QR langsung paham apa ini dan ke mana harus melangkah.
 | Hero | Judul pendek (mis. "Lihat sesuatu yang mencurigakan di desa Anda?") dan satu kalimat penjelasan **[USULAN, teks di config]**. Dua tombol: **Buat Laporan** (emas, utama) dan **Cek Status Laporan** (garis biru tua) |
 | Cara kerja | 3 langkah dengan ikon: (1) Isi laporan di HP Anda, (2) Petugas Imigrasi setempat menindaklanjuti, (3) Pantau perkembangan dengan kode laporan |
 | Informasi keimigrasian | Kartu pintasan ke 4 sampai 5 pertanyaan FAQ pertama dan tombol "Lihat semua informasi" ke `/informasi` |
-| Catatan privasi singkat | "Laporan hanya dapat dikirim dari wilayah Provinsi Riau. Lokasi perangkat Anda dipakai untuk memastikan hal itu." dengan tautan ke `/privasi` |
 
 Keadaan: jika FAQ kosong, bagian "Informasi keimigrasian" **disembunyikan** (jangan tampilkan bagian kosong).
 
@@ -271,8 +269,6 @@ Urutan dan label (label boleh disempurnakan, tetapi isi dan urutan tetap):
 
 Foto: di HP, tombol "Pilih foto atau ambil dengan kamera" (`accept="image/*"`). Foto yang lebih besar dari batas **dikompres otomatis di browser** (perkecil sisi terpanjang sekitar 1600 px, kualitas bertahap) sebelum diunggah; jika tetap melebihi 3 MB, tolak dengan pesan jelas. Tampilkan pratinjau kecil dengan tombol "Hapus foto".
 
-Teks bantu di bawah form: "Lokasi perangkat Anda hanya dipakai untuk memastikan laporan berasal dari Provinsi Riau. Jangan menuliskan data yang tidak diperlukan." dan tautan ke `/privasi`.
-
 #### Pengiriman
 
 - Tombol **Kirim Laporan** aktif hanya jika lokasi terdeteksi dan semua isian wajib valid. Pesan validasi tampil di bawah kolom yang bersangkutan, dalam Bahasa Indonesia.
@@ -317,10 +313,6 @@ Komponen `TimelineStatus` (HyperUI timeline), satu komponen untuk dua tempat. Se
 - **Sisi kanan garis**: lencana status (warna 2.2) dan, **bila ada**, keterangan tambahan sebagai paragraf di bawahnya. Keterangan tampil apa adanya sebagai teks biasa (di-escape).
 - Urut dari yang terlama ke terbaru; butir terakhir diberi penekanan (penanda lebih besar).
 - Di layar sempit, waktu pindah ke atas lencana (satu kolom).
-
-### 4.7 Privasi `/privasi`
-
-Halaman statis berisi ketentuan penggunaan data (data yang dikumpulkan: nama, alamat, lokasi perangkat, isi dan foto laporan; tujuannya; siapa yang dapat melihat). **Isi teks disediakan Kanwil** [USULAN: sementara kerangka berjudul "Ketentuan Penggunaan Data" dengan teks "Akan diisi oleh Kanwil"].
 
 ---
 
@@ -745,7 +737,7 @@ Kerjakan bertahap; selesaikan dan uji satu tahap sebelum lanjut.
 | Tahap | Isi |
 |---|---|
 | 1. Kerangka | Struktur folder MVC, `shared/config` (app, tema, teks, batas file), client Supabase (browser, sesi pengguna, service role), utilitas WIB, `.env.example`, tata letak publik dan dashboard, middleware rute |
-| 2. Masyarakat | Landing, `/informasi`, `/lapor` (lokasi, kirim, dialog), `/lacak`, `/privasi` |
+| 2. Masyarakat | Landing, `/informasi`, `/lapor` (lokasi, kirim, dialog), `/lacak` |
 | 3. Login dan UPT | `/masuk`, pilih petugas, ganti password, dashboard UPT, laporan masyarakat (daftar, detail, ubah status), laporan kegiatan, pegawai, profil |
 | 4. Kanwil | Dashboard, peringkat, pantauan, laporan baca saja, desa binaan, penugasan, wilayah kerja, FAQ, pengaturan |
 | 5. Admin dan penutup | Status sistem, akun, impersonasi, aktivasi log dan halaman log, polesan, pemeriksaan kriteria penerimaan |
@@ -759,7 +751,6 @@ Kerjakan bertahap; selesaikan dan uji satu tahap sebelum lanjut.
 | Logo SAPA DESA | belum ada; sementara teks `APP_NAME` |
 | Teks hero landing dan judul-judul pemasaran | [USULAN] di config, boleh diganti |
 | Kontak instansi di footer | belum ada |
-| Isi halaman `/privasi` | disediakan Kanwil |
 | Isi FAQ | diisi admin/Kanwil lewat dashboard |
 | Warna status laporan, ambang "desa lama" (30 hari), font | [USULAN] |
 | Jenis ikon dan gaya ilustrasi | bebas selama konsisten |

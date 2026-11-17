@@ -77,15 +77,9 @@ export const TEKS_LANDING = {
     { judul: 'Petugas setempat menindaklanjuti', keterangan: 'Laporan diteruskan ke kantor imigrasi yang menangani wilayah tersebut.' },
     { judul: 'Pantau dengan kode laporan', keterangan: 'Gunakan kode pelacakan untuk melihat status laporan.' }
   ],
-  catatanPrivasi: 'Laporan hanya dapat dikirim dari wilayah Provinsi Riau. Lokasi perangkat Anda dipakai untuk memastikan hal itu.',
   faqJudul: 'Informasi keimigrasian',
   faqLihatSemua: 'Lihat semua informasi',
   cekStatus: 'Cek Status Laporan'
-} as const
-
-export const TEKS_PRIVASI = {
-  judul: 'Ketentuan Penggunaan Data',
-  isi: 'Akan diisi oleh Kanwil.'
 } as const
 
 export const TEKS_FAQ = {
@@ -123,7 +117,6 @@ export const TEKS_LAPORAN_PUBLIK = {
   hapusFoto: 'Hapus foto',
   tindakLanjut: 'Ini tindak lanjut laporan sebelumnya?',
   kodeSebelumnya: 'Kode laporan sebelumnya',
-  bantuanPrivasi: 'Lokasi perangkat Anda hanya dipakai untuk memastikan laporan berasal dari Provinsi Riau. Jangan menuliskan data yang tidak diperlukan.',
   kirim: 'Kirim Laporan',
   mengirim: 'Mengirim…',
   gagalKirim: 'Laporan belum terkirim. Periksa koneksi Anda lalu coba lagi.',
@@ -172,7 +165,6 @@ export const TEKS_UMUM = {
   keteranganPublik: 'Keterangan ini dapat dilihat oleh pelapor',
   modeUjiCoba: 'MODE UJI COBA',
   identitasPetugas: 'Masuk petugas',
-  privasi: 'Privasi',
   navigasiUtama: 'Navigasi utama',
   bukaMenu: 'Buka menu',
   tutup: 'Tutup'

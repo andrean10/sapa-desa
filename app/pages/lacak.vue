@@ -44,25 +44,37 @@ async function cari() {
 </script>
 
 <template>
-  <main class="mx-auto min-h-[70vh] max-w-3xl px-5 py-10 sm:px-8 sm:py-16">
-    <p class="text-xs font-extrabold uppercase tracking-[.16em] text-secondary">Pelayanan masyarakat</p>
-    <h1 class="mt-2 text-4xl font-black tracking-tight text-primary">{{ TEKS_LACAK_PUBLIK.judul }}</h1>
-    <p class="mt-3 text-muted-foreground">{{ TEKS_LACAK_PUBLIK.petunjuk }}</p>
-    <form class="mt-7 grid gap-4 rounded-2xl border border-border bg-card p-6 shadow-card sm:p-8" @submit.prevent="cari">
-      <label class="font-semibold" for="kode">{{ TEKS_LACAK_PUBLIK.labelKode }}</label>
-      <input id="kode" v-model="kode" class="min-h-12 rounded-lg border border-border bg-background px-3 font-mono text-base tracking-wider outline-none focus:border-primary focus:ring-2 focus:ring-ring" :placeholder="FORMAT_KODE_PELACAKAN" autocomplete="off" required>
-      <button class="min-h-12 rounded-lg bg-primary px-5 font-bold text-white transition hover:bg-secondary disabled:cursor-wait disabled:opacity-60" type="submit" :disabled="sedangMemuat">{{ sedangMemuat ? TEKS_LACAK_PUBLIK.mengirim : TEKS_LACAK_PUBLIK.cek }}</button>
-      <p v-if="pesanError" class="rounded-lg bg-background p-3 text-destructive" role="alert">{{ pesanError }}</p>
-    </form>
-    <section v-if="hasil" class="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card sm:p-8" aria-live="polite">
-      <dl class="grid gap-5 sm:grid-cols-2">
-        <div><dt class="text-sm text-muted-foreground">Kode</dt><dd class="mt-1 font-bold tracking-wider text-primary">{{ hasil.kode_pelacakan }}</dd></div>
-        <div><dt class="text-sm text-muted-foreground">{{ TEKS_LACAK_PUBLIK.statusKini }}</dt><dd class="mt-2"><StatusBadge :status="hasil.status" /><p class="mt-2 text-sm leading-6 text-muted-foreground">{{ statusKini?.penjelasan }}</p></dd></div>
-        <div><dt class="text-sm text-muted-foreground">Kantor penanganan</dt><dd class="mt-1 font-semibold">{{ hasil.kantor }}</dd></div>
-        <div><dt class="text-sm text-muted-foreground">Dikirim</dt><dd class="mt-1 font-semibold">{{ formatTanggalWib(hasil.dikirim_pada) }}</dd></div>
-      </dl>
-      <div class="mt-8 flex items-center justify-between gap-4"><h2 class="text-xl font-extrabold text-primary">{{ TEKS_LACAK_PUBLIK.riwayat }}</h2><button class="min-h-10 rounded-lg border border-border px-3 text-sm font-bold text-primary" type="button" :disabled="sedangMemuat" @click="cari">{{ TEKS_LACAK_PUBLIK.muatUlang }}</button></div>
-      <TimelineStatus class="mt-5" :timeline="hasil.timeline" />
+  <main>
+    <section class="bg-primary text-primary-foreground">
+      <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+        <p class="text-xs font-extrabold uppercase tracking-[.18em] text-accent">Pelayanan masyarakat</p>
+        <h1 class="mt-5 max-w-3xl text-4xl font-black leading-[1.06] tracking-tight sm:text-6xl">{{ TEKS_LACAK_PUBLIK.judul }}</h1>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-white/75">{{ TEKS_LACAK_PUBLIK.petunjuk }}</p>
+      </div>
+    </section>
+    <section class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
+      <div class="mx-auto max-w-3xl">
+        <form class="bg-card p-6 shadow-card sm:p-10" @submit.prevent="cari">
+          <label class="block text-sm font-extrabold uppercase tracking-[.14em] text-primary" for="kode">{{ TEKS_LACAK_PUBLIK.labelKode }}</label>
+          <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+            <input id="kode" v-model="kode" class="min-h-14 flex-1 rounded-xl border border-input bg-background px-4 font-mono text-base tracking-wider text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary" :placeholder="FORMAT_KODE_PELACAKAN" autocomplete="off" required>
+            <button class="min-h-14 rounded-xl bg-primary px-7 font-bold text-primary-foreground transition hover:-translate-y-0.5 hover:bg-secondary disabled:cursor-wait disabled:opacity-60" type="submit" :disabled="sedangMemuat">{{ sedangMemuat ? TEKS_LACAK_PUBLIK.mengirim : TEKS_LACAK_PUBLIK.cek }}</button>
+          </div>
+          <p v-if="pesanError" class="mt-4 bg-destructive/10 p-4 text-sm font-medium text-destructive" role="alert">{{ pesanError }}</p>
+        </form>
+        <section v-if="hasil" class="mt-10 bg-card p-6 shadow-card sm:p-10" aria-live="polite">
+          <div class="flex flex-wrap items-start justify-between gap-5 border-b border-border pb-7">
+            <div><p class="text-xs font-extrabold uppercase tracking-[.16em] text-muted-foreground">{{ TEKS_LACAK_PUBLIK.statusKini }}</p><div class="mt-3"><StatusBadge :status="hasil.status" /></div><p class="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">{{ statusKini?.penjelasan }}</p></div>
+            <button class="min-h-11 font-bold text-primary underline decoration-accent decoration-2 underline-offset-4 transition hover:-translate-y-0.5 disabled:opacity-60" type="button" :disabled="sedangMemuat" @click="cari">{{ TEKS_LACAK_PUBLIK.muatUlang }}</button>
+          </div>
+          <dl class="grid gap-x-8 gap-y-6 py-7 sm:grid-cols-2">
+            <div><dt class="text-sm text-muted-foreground">Kode laporan</dt><dd class="mt-1 font-mono font-bold tracking-wider text-primary">{{ hasil.kode_pelacakan }}</dd></div>
+            <div><dt class="text-sm text-muted-foreground">Dikirim</dt><dd class="mt-1 font-semibold text-foreground">{{ formatTanggalWib(hasil.dikirim_pada) }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-sm text-muted-foreground">Kantor penanganan</dt><dd class="mt-1 font-semibold text-foreground">{{ hasil.kantor }}</dd></div>
+          </dl>
+          <div class="border-t border-border pt-7"><h2 class="text-2xl font-extrabold text-primary">{{ TEKS_LACAK_PUBLIK.riwayat }}</h2><TimelineStatus class="mt-7" :timeline="hasil.timeline" /></div>
+        </section>
+      </div>
     </section>
   </main>
 </template>
