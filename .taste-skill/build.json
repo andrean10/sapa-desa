@@ -1,0 +1,11 @@
+{
+ "page": null,
+ "url": "http://localhost:3000/upt/kegiatan",
+ "root": null,
+ "kind": "software",
+ "category": "dashboard pelaporan kegiatan PIMPASA",
+ "primary": "Buat laporan kegiatan",
+ "rounds": 3,
+ "start": "2026-11-17T19:45:41.698Z",
+ "by": "gate.mjs --start"
+}

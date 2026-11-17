@@ -35,5 +35,5 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (pegawai && pegawai.length === 0) return
   }
 
-  return navigateTo('/upt/pilih-petugas')
+  return navigateTo({ path: '/upt/pilih-petugas', query: { redirect: to.fullPath } })
 })

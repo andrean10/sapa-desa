@@ -1,0 +1,51 @@
+{
+ "start": "2026-11-17T19:45:41.698Z",
+ "round": 0,
+ "idle": 0,
+ "errors": 1,
+ "status": "error",
+ "history": [
+  {
+   "at": "2026-11-17T19:46:15.960Z",
+   "mode": "manual",
+   "status": "error",
+   "fails": 0,
+   "round": 0,
+   "reused": false,
+   "stopHookActive": false
+  }
+ ],
+ "max": 3,
+ "marker": {
+  "page": null,
+  "url": "http://localhost:3000/upt/kegiatan",
+  "root": null,
+  "kind": "software",
+  "category": "dashboard pelaporan kegiatan PIMPASA",
+  "primary": "Buat laporan kegiatan",
+  "rounds": 3,
+  "start": "2026-11-17T19:45:41.698Z",
+  "by": "gate.mjs --start"
+ },
+ "manual": true,
+ "fp": "0492d7c4946e2920",
+ "page": "http://localhost:3000/upt/kegiatan",
+ "found": {
+  "fails": [],
+  "warns": [],
+  "crashed": [
+   "the copy (the page showed no <main>, <section> or <h1> to lint)",
+   "consistency.mjs gave no report (exit 1: Error: Chrome exited early (null))",
+   "check.mjs could not run (exit 2: check: Chrome did not start)"
+  ],
+  "seconds": {
+   "consistency": 0,
+   "layout": 15
+  }
+ },
+ "open": [],
+ "waived": [],
+ "warnCount": 0,
+ "note": "the copy (the page showed no <main>, <section> or <h1> to lint); consistency.mjs gave no report (exit 1: Error: Chrome exited early (null)); check.mjs could not run (exit 2: check: Chrome did not start)",
+ "at": "2026-11-17T19:46:15.965Z"
+}

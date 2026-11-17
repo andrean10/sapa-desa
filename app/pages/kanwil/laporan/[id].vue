@@ -53,10 +53,10 @@ async function simpanStatus() {
 </script>
 
 <template>
-  <div class="grid gap-5">
-    <header>
+  <div class="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-5 sm:gap-6">
+    <header class="space-y-1 border-l-2 border-accent py-1 pl-4">
       <Button as-child variant="ghost" class="-ml-3"><NuxtLink to="/kanwil/laporan">← Kembali ke daftar</NuxtLink></Button>
-      <h2 class="mt-2 text-2xl font-semibold tracking-tight">Detail laporan</h2>
+      <p class="text-sm font-semibold text-muted-foreground">Pelayanan masyarakat</p><h1 class="text-2xl font-bold tracking-tight text-primary sm:text-3xl">Detail laporan</h1>
     </header>
     <div v-if="pending" class="grid gap-3 lg:grid-cols-2"><Skeleton class="h-96 w-full" /><Skeleton class="h-96 w-full" /></div>
     <Card v-else-if="error" role="alert">

@@ -14,6 +14,15 @@ type Akun = { id: string; username: string; nama_tampil: string; peran: 'admin'|
 const api = useApi()
 const { data, pending, error, refresh } = await useAsyncData('admin-akun', () => api<{akun:Akun[]; kantor:{id:string;nama:string;aktif:boolean}[]}>('/api/admin/akun'))
 const namaKantor = computed(() => Object.fromEntries((data.value?.kantor ?? []).map(k => [k.id,k.nama])))
+const ringkasanAkun = computed(() => {
+  const akun = data.value?.akun ?? []
+  return [
+    { label: 'Total akun', nilai: akun.length },
+    { label: 'Aktif', nilai: akun.filter(item => item.aktif).length },
+    { label: 'Nonaktif', nilai: akun.filter(item => !item.aktif).length },
+    { label: 'Akun UPT', nilai: akun.filter(item => item.peran === 'upt').length }
+  ]
+})
 const labelPeran = (peran: Akun['peran']) => PERAN_PENGGUNA.find(item => item.value === peran)?.label ?? peran
 const baru = ref({ username: '', nama_tampil: '', peran: 'upt' as Akun['peran'], kantor_id: '', password: '' })
 const passwordReset = ref<Record<string,string>>({})
@@ -52,9 +61,10 @@ async function masukSebagai(akun: Akun) {
 </script>
 
 <template>
-  <div class="space-y-5">
-    <header><h1 class="text-2xl font-semibold">Kelola akun</h1><p class="text-muted-foreground">Akun petugas Kanwil dan UPT SAPA DESA.</p></header>
-    <Card><CardHeader><CardTitle>Buat akun</CardTitle><CardDescription>Password awal hanya digunakan untuk membuat akun dan tidak disimpan atau ditampilkan ulang.</CardDescription></CardHeader><CardContent><form class="grid gap-3 sm:grid-cols-2" @submit.prevent="buat"><label class="space-y-1 text-sm">Username<Input v-model="baru.username" required pattern="[a-z0-9._-]+" autocomplete="off" /></label><label class="space-y-1 text-sm">Nama tampil<Input v-model="baru.nama_tampil" required maxlength="100" /></label><label class="space-y-1 text-sm">Peran<NativeSelect v-model="baru.peran"><NativeSelectOption v-for="peran in PERAN_PENGGUNA" :key="peran.value" :value="peran.value">{{ peran.label }}</NativeSelectOption></NativeSelect></label><label v-if="baru.peran==='upt'" class="space-y-1 text-sm">Kantor<NativeSelect v-model="baru.kantor_id" required><NativeSelectOption value="">Pilih kantor</NativeSelectOption><NativeSelectOption v-for="k in data?.kantor.filter(k => k.aktif)" :key="k.id" :value="k.id">{{ k.nama }}</NativeSelectOption></NativeSelect></label><label class="space-y-1 text-sm">Password awal<Input v-model="baru.password" type="password" required minlength="8" autocomplete="new-password" /></label><Button class="self-end" :disabled="!!busy">Buat akun</Button></form></CardContent></Card>
+  <div class="mx-auto w-full max-w-screen-2xl space-y-6 sm:space-y-8">
+    <header class="space-y-1 border-l-2 border-accent py-1 pl-4"><p class="text-sm font-semibold text-muted-foreground">Administrasi</p><h1 class="text-2xl font-bold tracking-tight text-primary sm:text-3xl">Kelola akun</h1><p class="max-w-2xl text-sm leading-6 text-muted-foreground">Akun petugas Kanwil dan UPT SAPA DESA.</p></header>
+    <section v-if="data?.akun" class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Ringkasan akun"><Card v-for="item in ringkasanAkun" :key="item.label" class="gap-3 py-4"><CardHeader class="gap-1 pb-0"><CardDescription>{{ item.label }}</CardDescription><CardTitle class="text-2xl font-semibold tabular-nums tracking-tight text-primary">{{ item.nilai }}</CardTitle></CardHeader></Card></section>
+    <Card><CardHeader><CardTitle>Buat akun</CardTitle><CardDescription>Password awal hanya digunakan untuk membuat akun dan tidak disimpan atau ditampilkan ulang.</CardDescription></CardHeader><CardContent><form class="grid gap-4 sm:grid-cols-2" @submit.prevent="buat"><label class="grid gap-2 text-sm font-medium">Username<Input v-model="baru.username" required pattern="[a-z0-9._-]+" autocomplete="off" /></label><label class="grid gap-2 text-sm font-medium">Nama tampil<Input v-model="baru.nama_tampil" required maxlength="100" /></label><label class="grid gap-2 text-sm font-medium">Peran<NativeSelect v-model="baru.peran"><NativeSelectOption v-for="peran in PERAN_PENGGUNA" :key="peran.value" :value="peran.value">{{ peran.label }}</NativeSelectOption></NativeSelect></label><label v-if="baru.peran==='upt'" class="grid gap-2 text-sm font-medium">Kantor<NativeSelect v-model="baru.kantor_id" required><NativeSelectOption value="">Pilih kantor</NativeSelectOption><NativeSelectOption v-for="k in data?.kantor.filter(k => k.aktif)" :key="k.id" :value="k.id">{{ k.nama }}</NativeSelectOption></NativeSelect></label><label class="grid gap-2 text-sm font-medium">Password awal<Input v-model="baru.password" type="password" required minlength="8" autocomplete="new-password" /></label><Button class="min-h-10 self-end" :disabled="!!busy">Buat akun</Button></form></CardContent></Card>
     <Card><CardHeader><CardTitle>Daftar akun</CardTitle><CardDescription>Nama pengguna, peran, kantor, dan status akun.</CardDescription></CardHeader><CardContent>
       <div v-if="pending" class="space-y-3"><Skeleton v-for="n in 5" :key="n" class="h-10 w-full" /></div>
       <div v-else-if="error" class="space-y-3 text-destructive" role="alert">Daftar akun belum dapat dimuat.<Button variant="outline" @click="refresh()">Coba lagi</Button></div>

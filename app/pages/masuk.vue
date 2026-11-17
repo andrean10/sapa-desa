@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { Eye, EyeOff } from '@lucide/vue'
-import { APP_NAME, PUBLIC_BRAND_NAME, REGIONAL_OFFICE_NAME } from '~~/shared/config/app'
+import { PUBLIC_BRAND_NAME } from '~~/shared/config/app'
 import type { PeranAplikasi } from '~~/shared/config/app'
-import { TEKS_LOGIN, TEKS_UMUM } from '~~/shared/config/teks'
+import { TEKS_LOGIN } from '~~/shared/config/teks'
 import { Button } from '~/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
-import { Field, FieldDescription, FieldGroup, FieldLabel } from '~/components/ui/field'
+import { CardTitle } from '~/components/ui/card'
+import { Field, FieldGroup, FieldLabel } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
 
-definePageMeta({ layout: 'publik' })
+definePageMeta({ layout: false })
 useHead({ title: TEKS_LOGIN.judul, meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 const { masuk, muatProfil } = useAuth()
 const route = useRoute()
@@ -45,50 +45,32 @@ async function submitLogin() {
 </script>
 
 <template>
-  <main class="relative flex min-h-svh items-center justify-center overflow-hidden bg-muted/50 px-4 py-10 sm:px-8">
-    <div class="pointer-events-none absolute inset-x-0 top-0 h-2 bg-accent" aria-hidden="true" />
-    <div class="grid w-full max-w-5xl overflow-hidden rounded-3xl border border-border bg-card shadow-xl md:min-h-[38rem] md:grid-cols-[.9fr_1.1fr]">
-      <aside class="relative flex flex-col justify-between overflow-hidden bg-primary p-7 text-primary-foreground sm:p-10">
-        <div class="absolute -right-20 -top-24 size-72 rounded-full border-[1px] border-white/10" aria-hidden="true" />
-        <div class="absolute -bottom-32 -left-24 size-80 rounded-full border-[1px] border-white/10" aria-hidden="true" />
-        <NuxtLink to="/" class="relative flex items-center gap-4 text-white no-underline" :aria-label="PUBLIC_BRAND_NAME">
-          <img class="size-16 shrink-0 object-contain" src="/images/logo.webp" alt="" width="64" height="64">
-          <span class="max-w-[17rem] text-xs font-black leading-tight tracking-wider sm:text-sm">SISTEM PELAPORAN<br>PEMANTAUAN AKTIFITAS<br>DESA BINAAN IMIGRASI</span>
+  <main class="flex min-h-svh items-start justify-center bg-background px-5 py-8 sm:items-center sm:px-8 sm:py-12">
+    <section class="w-full max-w-md">
+      <div class="bg-card p-6 shadow-card sm:p-10">
+        <NuxtLink to="/" class="mx-auto mb-8 flex w-fit max-w-full items-center gap-3 text-primary no-underline sm:mb-10" :aria-label="PUBLIC_BRAND_NAME">
+          <img class="size-14 shrink-0 object-contain sm:size-16" src="/images/logo.webp" alt="" width="64" height="64">
+          <span class="text-[0.68rem] font-black leading-[1.2] tracking-[.07em] sm:text-xs">SISTEM PELAPORAN<br>PEMANTAUAN AKTIFITAS<br>DESA BINAAN IMIGRASI</span>
         </NuxtLink>
-        <div class="relative mt-12">
-          <p class="text-xs font-extrabold uppercase tracking-[.2em] text-accent">{{ REGIONAL_OFFICE_NAME }}</p>
-          <h1 class="mt-5 max-w-md text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">Ruang kerja<br>petugas imigrasi.</h1>
-          <p class="mt-5 max-w-sm text-base leading-7 text-white/75">Masuk untuk menindaklanjuti laporan masyarakat dan mencatat kegiatan di desa binaan.</p>
-        </div>
-        <p class="relative mt-12 text-xs font-medium tracking-wide text-white/55">{{ APP_NAME }} · Riau</p>
-      </aside>
-      <section class="flex items-center justify-center px-6 py-10 sm:px-12">
-        <div class="w-full max-w-md">
-          <div class="mb-8">
-            <p class="text-xs font-extrabold uppercase tracking-[.18em] text-primary">Akses petugas</p>
-            <CardTitle class="mt-3 text-3xl font-black tracking-tight">{{ TEKS_LOGIN.judul }}</CardTitle>
-            <CardDescription class="mt-2 text-base">{{ TEKS_LOGIN.pengantar }}</CardDescription>
-          </div>
+        <h1 class="mb-7 text-left text-3xl font-black tracking-tight text-primary">Login</h1>
           <form @submit.prevent="submitLogin">
-            <FieldGroup>
+            <FieldGroup class="gap-5">
               <Field>
-                <FieldLabel for="username">{{ TEKS_LOGIN.username }}</FieldLabel>
-                <Input id="username" v-model="username" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+                <FieldLabel class="text-sm font-bold text-primary" for="username">{{ TEKS_LOGIN.username }}</FieldLabel>
+                <Input id="username" v-model="username" class="h-12 rounded-xl border-input bg-background px-4 text-base shadow-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" autocomplete="username" autocapitalize="none" spellcheck="false" required />
               </Field>
               <Field>
-                <FieldLabel for="password">{{ TEKS_LOGIN.password }}</FieldLabel>
-                <div class="relative"><Input id="password" v-model="password" class="pr-11" :type="passwordTerlihat ? 'text' : 'password'" autocomplete="current-password" required /><Button class="absolute right-1 top-1" variant="ghost" size="icon" type="button" :aria-label="passwordTerlihat ? TEKS_LOGIN.sembunyikan : TEKS_LOGIN.tampilkan" @click="passwordTerlihat = !passwordTerlihat"><EyeOff v-if="passwordTerlihat" /><Eye v-else /></Button></div>
-                <FieldDescription>{{ TEKS_LOGIN.bantuan }}</FieldDescription>
+                <FieldLabel class="text-sm font-bold text-primary" for="password">{{ TEKS_LOGIN.password }}</FieldLabel>
+                <div class="relative"><Input id="password" v-model="password" class="h-12 rounded-xl border-input bg-background px-4 pr-12 text-base shadow-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" :type="passwordTerlihat ? 'text' : 'password'" autocomplete="current-password" required /><Button class="absolute right-1 top-1 size-10" variant="ghost" size="icon" type="button" :aria-label="passwordTerlihat ? TEKS_LOGIN.sembunyikan : TEKS_LOGIN.tampilkan" @click="passwordTerlihat = !passwordTerlihat"><EyeOff v-if="passwordTerlihat" /><Eye v-else /></Button></div>
               </Field>
               <Field>
-                <Button class="w-full" size="lg" type="submit" :disabled="sedangMemproses">{{ sedangMemproses ? TEKS_LOGIN.memproses : TEKS_LOGIN.masuk }}</Button>
+                <Button class="min-h-12 w-full rounded-xl text-base font-bold" size="lg" type="submit" :disabled="sedangMemproses">{{ sedangMemproses ? TEKS_LOGIN.memproses : TEKS_LOGIN.masuk }}</Button>
                 <p v-if="pesanError" class="text-sm text-destructive" role="alert">{{ pesanError }}</p>
               </Field>
             </FieldGroup>
           </form>
-          <p class="mt-7 border-t border-border pt-5 text-xs leading-5 text-muted-foreground">{{ TEKS_UMUM.identitasPetugas }} · {{ APP_NAME }}</p>
-        </div>
-      </section>
-    </div>
+        <p class="mt-6 text-sm leading-5 text-muted-foreground">{{ TEKS_LOGIN.bantuan }}</p>
+      </div>
+    </section>
   </main>
 </template>

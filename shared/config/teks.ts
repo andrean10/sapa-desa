@@ -155,7 +155,7 @@ export const TEKS_UMUM = {
   cobaLagi: 'Coba lagi',
   memuat: 'Memuat data…',
   dataKosong: 'Belum ada data untuk ditampilkan.',
-  keluar: 'Keluar',
+  keluar: 'Logout',
   gantiPassword: 'Ganti password',
   gantiPetugas: 'Ganti petugas',
   aksesDitolak: 'Anda tidak memiliki akses ke halaman itu.',
