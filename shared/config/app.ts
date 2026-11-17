@@ -2,6 +2,7 @@ import type { Enums } from '../types/database.types'
 import { LABEL_MENU } from './teks'
 
 export const APP_NAME = 'SAPA DESA'
+export const PUBLIC_BRAND_NAME = 'SISTEM PELAPORAN PEMANTAUAN AKTIFITAS DESA BINAAN IMIGRASI'
 export const APP_TAGLINE = 'Pelayanan dan pengawasan keimigrasian di Riau.'
 export const ORGANIZATION_NAME = 'Kementerian Imigrasi dan Pemasyarakatan Republik Indonesia'
 export const REGIONAL_OFFICE_NAME = 'Kantor Wilayah Direktorat Jenderal Imigrasi Riau'
