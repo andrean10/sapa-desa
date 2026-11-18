@@ -112,7 +112,7 @@ Penjelasan ramah untuk masyarakat (ditampilkan di halaman lacak, juga di config)
 ### 2.3 Gaya
 
 - Gaya prototipe dipertahankan: header gradasi `#17365d → #285783` dengan garis bawah emas 4 px, kartu putih berbatas `#dce4ee` dengan sudut membulat, judul biru tua tebal.
-- Huruf: tumpukan font sistem (`"Segoe UI", system-ui, Arial, sans-serif`) **[USULAN]**, satu tempat di config.
+- Huruf: **Plus Jakarta Sans** (variabel, di-host sendiri lewat `@fontsource-variable/plus-jakarta-sans`, tanpa request ke pihak ketiga), satu tempat di `tailwind.css` (`--font-sans`). Dipakai di seluruh aplikasi.
 - Ikon: satu set (disarankan Lucide, bawaan shadcn). Jangan memakai emoji sebagai ikon antarmuka.
 - Nama dan tagline dari config: `APP_NAME = "SAPA DESA"`, tagline "Sistem Aplikasi Pemantauan Aktivitas Desa Binaan Imigrasi" (dari prototipe), nama instansi "Kantor Wilayah Kemenimipas Riau". Logo: **belum ada** [USULAN: tempatkan berkas logo di satu path, config menunjuk ke path itu; sementara tampilkan teks `APP_NAME`].
 
@@ -196,22 +196,28 @@ Prinsip: **mobile-first** (lebar dasar 360 px), tombol dan target sentuh minimal
 
 ### 4.1 Layout publik
 
-- **Header**: nama `APP_NAME` (dan logo bila ada), menu: Beranda, Informasi, Buat Laporan, Cek Status. Di HP menu jadi tombol hamburger. Tombol "Buat Laporan" berwarna emas.
-- **Footer**: nama instansi dan tautan kecil "Masuk petugas" (`/masuk`). Kontak instansi **[USULAN: kosong dulu, isi di config bila tersedia]**.
-- Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan QR atau tautan lewat media sosial.
+- **Header** (melekat di atas, latar blur): logo SAPA DESA dan nama sistem (di HP cukup "SAPA DESA"), menu tengah **Beranda · Informasi · Cek Aduan**, dan tombol emas **Aduan Masyarakat** di kanan (di HP dipendekkan menjadi "Aduan"). Di HP menu menjadi hamburger berisi semua tautan ditambah **PIMPASA · Masuk petugas**.
+- **Footer** (biru tua, garis aksen emas): logo + deskripsi layanan + logo instansi; kolom **Jelajahi** (tautan menu + tombol PIMPASA untuk petugas); kolom **Hubungi kami** (alamat, telepon, email, Instagram, TikTok dari `KONTAK_INSTANSI` di `shared/config/app.ts`). Di `/informasi` footer diawali blok ajakan "Lihat sesuatu yang mencurigakan?" dengan tombol Aduan Masyarakat dan Cek Aduan.
+- Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan tautan lewat media sosial.
 - Rute petugas (`/upt/*`, `/kanwil/*`, `/admin/*`, `/masuk`, `/akun/*`) diberi `noindex`.
+- **Istilah**: menu dan tombol memakai "**Aduan Masyarakat**" (halaman `/lapor`) dan "**Cek Aduan**" (halaman `/lacak`).
 
 ### 4.2 Landing `/`
 
-Tujuan: orang yang scan QR langsung paham apa ini dan ke mana harus melangkah.
+Tujuan: pengunjung yang mencari SAPA DESA lewat mesin pencari (tanpa QR) memahami program PIMPASA dan dapat menyampaikan atau mengecek aduan. **QR di titik desa mengarah langsung ke `/lapor` (Aduan Masyarakat), bukan ke landing.** Petugas masuk lewat tombol **PIMPASA**.
 
 | Bagian | Isi |
 |---|---|
-| Hero | Judul pendek (mis. "Lihat sesuatu yang mencurigakan di desa Anda?") dan satu kalimat penjelasan **[USULAN, teks di config]**. Dua tombol: **Buat Laporan** (emas, utama) dan **Cek Status Laporan** (garis biru tua) |
-| Cara kerja | 3 langkah dengan ikon: (1) Isi laporan di HP Anda, (2) Petugas Imigrasi setempat menindaklanjuti, (3) Pantau perkembangan dengan kode laporan |
-| Informasi keimigrasian | Kartu pintasan ke 4 sampai 5 pertanyaan FAQ pertama dan tombol "Lihat semua informasi" ke `/informasi` |
+| Hero PIMPASA | Latar terang. Kiri: label "Program Desa Binaan Imigrasi", judul **PIMPASA** + "Petugas Imigrasi Pembina Desa", paragraf pengantar, **satu tombol "PIMPASA"** (biru tua) menuju `/masuk` dengan catatan "Khusus petugas". Kanan: foto petugas PIMPASA (**cutout transparan**) di depan lingkaran biru muda, dengan kartu melayang: jumlah desa binaan, jumlah kantor imigrasi dan kabupaten/kota, serta daftar kegiatan PIMPASA |
+| Logo instansi | Pita putih di bawah hero: nama kantor wilayah dan logo dari `LOGO_INSTANSI` |
+| Aduan Masyarakat | Foto kiri (kartu melayang contoh kode aduan), kanan: judul "Lihat sesuatu yang mencurigakan di desa Anda?", pengantar, tiga poin centang, dua tombol: **Aduan Masyarakat** (emas, ikon, ke `/lapor`) dan **Cek Aduan** (biru tua, ikon, ke `/lacak`) |
+| Alur dan tata cara aduan | 3 kartu bernomor dengan ikon: isi aduan di HP, petugas setempat menindaklanjuti, pantau dengan kode aduan |
+| Informasi keimigrasian | Pintasan 5 pertanyaan FAQ pertama dan tombol "Lihat semua informasi" ke `/informasi` |
 
-Keadaan: jika FAQ kosong, bagian "Informasi keimigrasian" **disembunyikan** (jangan tampilkan bagian kosong).
+- **Angka kartu hero** (`desaBinaan`, `kantor`, `kabupaten`) diambil dari `GET /api/publik/statistik`, yang hanya menghitung baris di tabel yang boleh dibaca `anon` (`desa_kelurahan` dengan `dbi = true`, `kantor_imigrasi` aktif, `kabupaten`). Hasil di-cache server 1 jam. Bila gagal dimuat, kartu angka disembunyikan (tidak menampilkan angka palsu).
+- **Foto**: taruh `pimpasa-petugas.png` dan `aduan-masyarakat.png` (PNG/WebP, latar transparan untuk hero) di `public/images/landing/`. Nama dan ukuran ada di `FOTO_LANDING`. Selama berkas belum ada, tampil ilustrasi pengganti berukuran sama.
+- Keadaan: bila FAQ kosong setelah dimuat, bagian "Informasi keimigrasian" **disembunyikan**. Saat memuat tampil skeleton; bila gagal, pesan dan tombol "Coba lagi".
+- Animasi kartu melayang dimatikan saat pengguna memilih `prefers-reduced-motion`.
 
 ### 4.3 Informasi keimigrasian `/informasi`
 
@@ -748,9 +754,9 @@ Kerjakan bertahap; selesaikan dan uji satu tahap sebelum lanjut.
 
 | Hal | Status |
 |---|---|
-| Logo SAPA DESA | belum ada; sementara teks `APP_NAME` |
+| Logo SAPA DESA | `public/images/logo.webp`; logo instansi di `LOGO_INSTANSI` |
 | Teks hero landing dan judul-judul pemasaran | [USULAN] di config, boleh diganti |
-| Kontak instansi di footer | belum ada |
+| Kontak instansi di footer | sudah ada di `KONTAK_INSTANSI` (alamat, telepon, email, Instagram, TikTok). **URL Instagram diasumsikan `instagram.com/imigrasiriau`; mohon dipastikan** |
 | Isi FAQ | diisi admin/Kanwil lewat dashboard |
 | Warna status laporan, ambang "desa lama" (30 hari), font | [USULAN] |
 | Jenis ikon dan gaya ilustrasi | bebas selama konsisten |

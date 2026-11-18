@@ -65,21 +65,57 @@ export const LABEL_MENU = {
 export const NAVIGASI_PUBLIK = [
   { label: 'Beranda', href: '/' },
   { label: 'Informasi', href: '/informasi' },
-  { label: 'Buat Laporan', href: '/lapor' },
-  { label: 'Cek Status', href: '/lacak' }
+  { label: 'Aduan Masyarakat', href: '/lapor' },
+  { label: 'Cek Aduan', href: '/lacak' }
 ] as const
 
 export const TEKS_LANDING = {
-  judul: 'Lihat sesuatu yang mencurigakan di desa Anda?',
-  pengantar: 'Sampaikan laporan keimigrasian dari wilayah Riau dan pantau tindak lanjutnya dengan kode laporan.',
-  langkah: [
-    { judul: 'Isi laporan di HP Anda', keterangan: 'Pilih wilayah dan ceritakan hal yang ingin Anda laporkan.' },
-    { judul: 'Petugas setempat menindaklanjuti', keterangan: 'Laporan diteruskan ke kantor imigrasi yang menangani wilayah tersebut.' },
-    { judul: 'Pantau dengan kode laporan', keterangan: 'Gunakan kode pelacakan untuk melihat status laporan.' }
-  ],
+  pimpasa: {
+    label: 'Program Desa Binaan Imigrasi',
+    nama: 'PIMPASA',
+    kepanjangan: 'Petugas Imigrasi Pembina Desa',
+    pengantar: 'Petugas imigrasi hadir di desa binaan untuk mendampingi masyarakat: memberi penyuluhan keimigrasian, memantau keberadaan dan kegiatan orang asing, serta menjadi penghubung aduan warga ke kantor imigrasi setempat.',
+    tombol: 'PIMPASA',
+    catatanTombol: 'Khusus petugas. Masuk dengan akun yang diberikan administrator.',
+    kartu: {
+      desaBinaan: 'Desa Binaan Imigrasi',
+      kantor: 'Kantor Imigrasi melayani',
+      kabupaten: 'Kabupaten/Kota di Riau',
+      kegiatanJudul: 'Kegiatan PIMPASA',
+      kegiatan: ['Penyuluhan keimigrasian', 'Pengawasan orang asing', 'Pendampingan desa']
+    }
+  },
+  aduan: {
+    label: 'Aduan Masyarakat',
+    judul: 'Lihat sesuatu yang mencurigakan di desa Anda?',
+    pengantar: 'Sampaikan aduan keimigrasian dari wilayah Riau dan pantau tindak lanjutnya dengan kode aduan.',
+    poin: [
+      'Isi aduan lewat HP, tanpa perlu membuat akun',
+      'Diteruskan ke kantor imigrasi yang membawahi wilayah Anda',
+      'Pantau perkembangannya kapan saja dengan kode aduan'
+    ],
+    tombolAduan: 'Aduan Masyarakat',
+    tombolCek: 'Cek Aduan',
+    kartuKode: 'Kode aduan',
+    kartuStatus: 'Sedang ditindaklanjuti'
+  },
+  alur: {
+    label: 'Alur layanan',
+    judul: 'Alur dan tata cara aduan',
+    pengantar: 'Tiga langkah sederhana, dari HP Anda sampai ditangani petugas.',
+    langkah: [
+      { judul: 'Isi aduan di HP Anda', keterangan: 'Aktifkan lokasi, pilih wilayah, lalu ceritakan hal yang ingin Anda adukan. Foto pendukung boleh dilampirkan.' },
+      { judul: 'Petugas setempat menindaklanjuti', keterangan: 'Aduan diteruskan ke kantor imigrasi yang menangani wilayah tersebut untuk diperiksa dan ditangani.' },
+      { judul: 'Pantau dengan kode aduan', keterangan: 'Simpan kode aduan, lalu cek statusnya kapan saja di halaman Cek Aduan.' }
+    ]
+  },
+  faqLabel: 'Pusat informasi',
   faqJudul: 'Informasi keimigrasian',
+  faqPengantar: 'Jawaban atas pertanyaan yang sering diajukan seputar keimigrasian.',
   faqLihatSemua: 'Lihat semua informasi',
-  cekStatus: 'Cek Status Laporan'
+  footerDeskripsi: 'Layanan aduan dan pendampingan desa binaan untuk masyarakat Riau.',
+  footerAjakanJudul: 'Lihat sesuatu yang mencurigakan?',
+  footerAjakanIsi: 'Sampaikan aduan Anda, dan pantau tindak lanjutnya dengan kode aduan.'
 } as const
 
 export const TEKS_FAQ = {

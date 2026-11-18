@@ -56,3 +56,27 @@ export const MENU_PERAN: Record<PeranAplikasi, readonly { label: string; href: s
     { label: LABEL_MENU.akun, href: '/admin/akun' }
   ]
 }
+
+/** Kontak resmi instansi (footer landing). */
+export const KONTAK_INSTANSI = {
+  alamat: 'Jl. Jend. Sudirman No.233, Pekanbaru, Riau 28111',
+  telepon: { label: '+62 853-6447-1782', href: 'tel:+6285364471782' },
+  email: 'kanwilriau@imigrasi.go.id',
+  instagram: { nama: 'Imigrasi Riau', url: 'https://www.instagram.com/imigrasiriau/' },
+  tiktok: { nama: '@imigrasiriau', url: 'https://www.tiktok.com/@imigrasiriau' }
+} as const
+
+/** Logo instansi yang tampil di landing page (berkas di `public/images`). Tambah atau ganti di sini saja. */
+export const LOGO_INSTANSI = [
+  { src: '/images/logo_kantor.png', alt: 'Lambang Kementerian Imigrasi dan Pemasyarakatan dan lambang Imigrasi', lebar: 277, tinggi: 144 },
+  { src: '/images/logo_jargon_kantor.png', alt: 'Imigrasi untuk Rakyat, #Patenlah', lebar: 293, tinggi: 65 }
+] as const
+
+/**
+ * Foto landing page. Taruh berkasnya di `public/images/landing/` dengan nama di bawah ini
+ * (PNG/WebP). Selama berkas belum ada, landing menampilkan ilustrasi pengganti.
+ */
+export const FOTO_LANDING = {
+  pimpasa: { src: '/images/landing/pimpasa-petugas.png', alt: 'Petugas Imigrasi Pembina Desa (PIMPASA)', lebar: 720, tinggi: 900 },
+  aduan: { src: '/images/landing/aduan-masyarakat.png', alt: 'Petugas imigrasi melayani aduan masyarakat', lebar: 720, tinggi: 720 }
+} as const

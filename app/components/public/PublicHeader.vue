@@ -1,64 +1,53 @@
 <script setup lang="ts">
-import { PUBLIC_BRAND_NAME } from '~~/shared/config/app'
-import { NAVIGASI_PUBLIK, TEKS_UMUM } from '~~/shared/config/teks'
+import { FilePlus2, Menu, ShieldCheck, X } from '@lucide/vue'
+import { PUBLIC_BRAND_NAME, APP_NAME } from '~~/shared/config/app'
+import { NAVIGASI_PUBLIK, TEKS_LANDING, TEKS_UMUM } from '~~/shared/config/teks'
 
 const route = useRoute()
 const menuMobile = ref<HTMLDetailsElement>()
+const menuTerbuka = ref(false)
+// Aduan Masyarakat tampil sebagai tombol di kanan, jadi tidak diulang di menu tengah.
+const menuTengah = NAVIGASI_PUBLIK.filter(item => item.href !== '/lapor')
+const tombolAduan = NAVIGASI_PUBLIK.find(item => item.href === '/lapor')!
 
-watch(() => route.fullPath, () => {
-  if (menuMobile.value) menuMobile.value.open = false
-})
-
-function tutupMenu() {
-  if (menuMobile.value) menuMobile.value.open = false
-}
+watch(() => route.fullPath, () => { if (menuMobile.value) menuMobile.value.open = false; menuTerbuka.value = false })
+function tutupMenu() { if (menuMobile.value) menuMobile.value.open = false; menuTerbuka.value = false }
 </script>
 
 <template>
-  <header class="sticky top-0 z-30 border-b border-primary/10 bg-background/95 backdrop-blur">
-    <div class="h-1 bg-accent" aria-hidden="true" />
-    <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-5 py-3 sm:px-8 sm:py-4">
-      <NuxtLink class="group flex min-w-0 items-center gap-3 font-extrabold tracking-tight text-primary no-underline" to="/" :aria-label="PUBLIC_BRAND_NAME">
-        <img class="size-14 shrink-0 object-contain transition duration-200 group-hover:-translate-y-0.5 sm:size-[4.5rem]" src="/images/logo.webp" alt="" width="72" height="72">
-        <span class="flex min-w-0 max-w-[14rem] flex-col justify-center text-[0.76rem] font-black leading-[1.2] tracking-[0.075em] sm:max-w-[20rem] sm:text-sm sm:leading-[1.22]">
-          <span class="block">SISTEM PELAPORAN</span>
-          <span class="block">PEMANTAUAN AKTIFITAS</span>
-          <span class="block">DESA BINAAN IMIGRASI</span>
+  <header class="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-5 py-2.5 sm:gap-6 sm:px-8 sm:py-3">
+      <NuxtLink class="group flex min-w-0 items-center gap-3 text-primary no-underline" to="/" :aria-label="PUBLIC_BRAND_NAME">
+        <img class="size-11 shrink-0 object-contain transition duration-200 group-hover:-translate-y-0.5 sm:size-14" src="/images/logo.webp" alt="" width="56" height="56">
+        <span class="hidden min-w-0 flex-col justify-center text-[0.7rem] leading-[1.25] font-extrabold tracking-[0.07em] lg:flex xl:text-xs">
+          <span class="block">SISTEM PELAPORAN</span><span class="block">PEMANTAUAN AKTIFITAS</span><span class="block">DESA BINAAN IMIGRASI</span>
         </span>
+        <span class="text-base leading-none font-extrabold tracking-wide whitespace-nowrap sm:text-lg lg:hidden">{{ APP_NAME }}</span>
       </NuxtLink>
 
-      <nav class="hidden items-center gap-7 md:flex" :aria-label="TEKS_UMUM.navigasiUtama">
+      <nav class="hidden items-center gap-1 md:flex" :aria-label="TEKS_UMUM.navigasiUtama">
         <NuxtLink
-          v-for="item in NAVIGASI_PUBLIK"
+          v-for="item in menuTengah"
           :key="item.href"
           :to="item.href"
-          class="relative min-h-11 content-center text-sm font-bold text-foreground no-underline transition hover:text-primary after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:origin-left after:scale-x-0 after:bg-accent after:transition-transform hover:after:scale-x-100"
-          :class="route.path === item.href
-            ? 'text-primary after:scale-x-100'
-            : ''"
-        >
-          {{ item.label }}
-        </NuxtLink>
+          class="relative rounded-full px-4 py-2 text-sm font-bold no-underline transition hover:bg-info-muda/70 hover:text-primary"
+          :class="route.path === item.href ? 'bg-info-muda text-primary' : 'text-foreground/80'"
+          :aria-current="route.path === item.href ? 'page' : undefined"
+        >{{ item.label }}</NuxtLink>
       </nav>
 
-      <details ref="menuMobile" class="relative md:hidden">
-        <summary class="grid size-12 cursor-pointer list-none place-items-center rounded-xl text-primary transition hover:bg-muted" :aria-label="TEKS_UMUM.bukaMenu">
-          <span class="text-xl leading-none" aria-hidden="true">☰</span>
-        </summary>
-        <nav class="absolute right-0 z-20 mt-3 grid min-w-64 gap-1 rounded-2xl bg-card p-3 shadow-card ring-1 ring-primary/10" :aria-label="TEKS_UMUM.navigasiUtama">
-          <NuxtLink
-            v-for="item in NAVIGASI_PUBLIK"
-            :key="item.href"
-            :to="item.href"
-            class="min-h-12 content-center rounded-xl px-4 font-bold no-underline transition hover:bg-muted"
-            :class="route.path === item.href ? 'text-primary' : 'text-foreground'"
-            @click="tutupMenu"
-          >
-            {{ item.label }}
-          </NuxtLink>
-          <NuxtLink class="mt-1 min-h-12 content-center rounded-xl border-t border-border px-4 pt-2 font-bold text-primary no-underline" to="/masuk" @click="tutupMenu">{{ TEKS_UMUM.identitasPetugas }}</NuxtLink>
-        </nav>
-      </details>
+      <div class="flex items-center gap-2">
+        <NuxtLink :to="tombolAduan.href" :aria-label="tombolAduan.label" class="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-emas px-3.5 py-2 text-[0.8rem] font-extrabold whitespace-nowrap text-emas-foreground no-underline sm:gap-2 sm:text-sm shadow-md shadow-emas/25 transition duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none sm:px-5"><FilePlus2 class="size-4" aria-hidden="true" /><span class="sm:hidden" aria-hidden="true">Aduan</span><span class="hidden sm:inline">{{ tombolAduan.label }}</span></NuxtLink>
+        <details ref="menuMobile" class="relative md:hidden" @toggle="menuTerbuka = menuMobile?.open ?? false">
+          <summary class="grid size-11 cursor-pointer list-none place-items-center rounded-full text-primary transition hover:bg-info-muda focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none [&::-webkit-details-marker]:hidden" :aria-label="menuTerbuka ? TEKS_UMUM.tutup : TEKS_UMUM.bukaMenu">
+            <X v-if="menuTerbuka" class="size-6" aria-hidden="true" /><Menu v-else class="size-6" aria-hidden="true" />
+          </summary>
+          <nav class="absolute right-0 z-20 mt-3 grid w-64 gap-1 rounded-2xl bg-card p-2.5 shadow-2xl shadow-primary/15 ring-1 ring-border" :aria-label="TEKS_UMUM.navigasiUtama">
+            <NuxtLink v-for="item in NAVIGASI_PUBLIK" :key="item.href" :to="item.href" class="min-h-12 content-center rounded-xl px-4 font-bold no-underline transition hover:bg-info-muda/70" :class="route.path === item.href ? 'bg-info-muda text-primary' : 'text-foreground'" @click="tutupMenu">{{ item.label }}</NuxtLink>
+            <NuxtLink class="mt-1 flex min-h-12 items-center gap-2 rounded-xl border-t border-border px-4 pt-2 font-bold text-primary no-underline hover:bg-info-muda/70" to="/masuk" @click="tutupMenu"><ShieldCheck class="size-4 text-emas-foreground" aria-hidden="true" />{{ TEKS_LANDING.pimpasa.tombol }} · {{ TEKS_UMUM.identitasPetugas }}</NuxtLink>
+          </nav>
+        </details>
+      </div>
     </div>
   </header>
 </template>

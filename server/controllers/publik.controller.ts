@@ -4,6 +4,7 @@ import { REGEX_KODE_PELACAKAN } from '../../shared/config/app'
 import { BATAS_FILE } from '../../shared/config/batas-file'
 import { JENIS_TERLAPOR, STATUS_LAPORAN } from '../../shared/config/teks'
 import type { LaporanBaru } from '../../shared/types/laporan'
+import type { StatistikPublik } from '../../shared/types/publik'
 import type { Enums } from '../../shared/types/database.types'
 import {
   ambilDesaPublik,
@@ -12,6 +13,7 @@ import {
   ambilKantorPublik,
   ambilKecamatanPublik,
   cariLaporanSebelumnya,
+  hitungStatistikPublik,
   hapusFotoLaporan,
   lacakLaporanPublik,
   simpanFotoLaporan,
@@ -61,6 +63,15 @@ export async function daftarFaqPublik() {
   }
 
   return hasil.data
+}
+
+export async function statistikPublik(): Promise<StatistikPublik> {
+  const hasil = await hitungStatistikPublik()
+  const { desaBinaan, kantor, kabupaten } = hasil
+  if (desaBinaan.error || kantor.error || kabupaten.error || desaBinaan.count === null || kantor.count === null || kabupaten.count === null) {
+    throw createError({ statusCode: 503, statusMessage: PESAN_GAGAL_MEMUAT })
+  }
+  return { desaBinaan: desaBinaan.count, kantor: kantor.count, kabupaten: kabupaten.count }
 }
 
 export async function namaKantorPublik(kantorId: string) {
