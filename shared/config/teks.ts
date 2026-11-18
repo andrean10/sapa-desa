@@ -2,11 +2,11 @@ import type { Enums } from '../types/database.types'
 import { WARNA_STATUS } from './tema'
 
 export const STATUS_LAPORAN = [
-  { value: 'diterima', label: 'Diterima', penjelasan: 'Laporan Anda sudah masuk dan menunggu diperiksa petugas.', urutanTimeline: 1 },
-  { value: 'diverifikasi', label: 'Diverifikasi', penjelasan: 'Petugas sudah memeriksa laporan Anda.', urutanTimeline: 2 },
-  { value: 'ditindaklanjuti', label: 'Ditindaklanjuti', penjelasan: 'Laporan Anda sedang ditangani.', urutanTimeline: 3 },
-  { value: 'selesai', label: 'Selesai', penjelasan: 'Penanganan laporan sudah selesai.', urutanTimeline: 4 },
-  { value: 'ditolak', label: 'Ditolak', penjelasan: 'Laporan tidak dapat diproses. Lihat keterangan petugas.', urutanTimeline: 5 }
+  { value: 'diterima', label: 'Diterima', penjelasan: 'Aduan Anda sudah masuk dan menunggu diperiksa petugas.', urutanTimeline: 1 },
+  { value: 'diverifikasi', label: 'Diverifikasi', penjelasan: 'Petugas sudah memeriksa aduan Anda.', urutanTimeline: 2 },
+  { value: 'ditindaklanjuti', label: 'Ditindaklanjuti', penjelasan: 'Aduan Anda sedang ditangani.', urutanTimeline: 3 },
+  { value: 'selesai', label: 'Selesai', penjelasan: 'Penanganan aduan sudah selesai.', urutanTimeline: 4 },
+  { value: 'ditolak', label: 'Ditolak', penjelasan: 'Aduan tidak dapat diproses. Lihat keterangan petugas.', urutanTimeline: 5 }
 ] as const satisfies readonly {
   value: Enums<'status_laporan'>
   label: string
@@ -121,17 +121,17 @@ export const TEKS_LANDING = {
 export const TEKS_FAQ = {
   judul: 'Pertanyaan yang Sering Diajukan',
   label: 'FAQ',
-  ajakanJudul: 'Ingin melapor?',
-  ajakanIsi: 'Laporkan langsung dan pantau dengan kode laporan.',
-  kosong: 'Informasi belum tersedia. Anda tetap dapat membuat laporan.',
+  ajakanJudul: 'Ingin mengadu?',
+  ajakanIsi: 'Adukan langsung dan pantau dengan kode aduan.',
+  kosong: 'Informasi belum tersedia. Anda tetap dapat membuat aduan.',
   gagal: 'Informasi gagal dimuat.',
   cari: 'Cari pertanyaan atau jawaban',
   ulang: 'Coba lagi'
 } as const
 
 export const TEKS_LAPORAN_PUBLIK = {
-  judul: 'Kirim laporan pengaduan',
-  tungguLokasi: 'Aktifkan lokasi untuk melanjutkan. Laporan hanya dapat dikirim dari wilayah Provinsi Riau.',
+  judul: 'Kirim aduan',
+  tungguLokasi: 'Aktifkan lokasi untuk melanjutkan. Aduan hanya dapat dikirim dari wilayah Provinsi Riau.',
   lokasiTerdeteksi: 'Lokasi terdeteksi',
   izinDitolak: 'Izin lokasi ditolak. Aktifkan izin lokasi untuk situs ini di pengaturan browser, lalu coba lagi.',
   gpsMati: 'Lokasi perangkat tidak tersedia. Nyalakan GPS atau layanan lokasi di HP Anda, lalu coba lagi.',
@@ -147,24 +147,24 @@ export const TEKS_LAPORAN_PUBLIK = {
   kabupaten: 'Kabupaten/Kota',
   kecamatan: 'Kecamatan',
   desa: 'Desa/Kelurahan',
-  kantor: 'Laporan Anda akan dilayani oleh:',
-  jenisTerlapor: 'Siapa yang Anda laporkan?',
-  isi: 'Apa yang ingin Anda laporkan?',
+  kantor: 'Aduan Anda akan dilayani oleh:',
+  jenisTerlapor: 'Siapa yang Anda adukan?',
+  isi: 'Apa yang ingin Anda adukan?',
   foto: 'Foto pendukung (opsional)',
   pilihFoto: 'Pilih foto atau ambil dengan kamera',
   hapusFoto: 'Hapus foto',
-  tindakLanjut: 'Ini tindak lanjut laporan sebelumnya?',
-  kodeSebelumnya: 'Kode laporan sebelumnya',
-  kirim: 'Kirim Laporan',
+  tindakLanjut: 'Ini tindak lanjut aduan sebelumnya?',
+  kodeSebelumnya: 'Kode aduan sebelumnya',
+  kirim: 'Kirim Aduan',
   mengirim: 'Mengirim…',
-  gagalKirim: 'Laporan belum terkirim. Periksa koneksi Anda lalu coba lagi.',
-  lokasiDiLuarRiau: 'Lokasi Anda terdeteksi di luar Provinsi Riau. Laporan hanya dapat dikirim dari wilayah Riau.',
+  gagalKirim: 'Aduan belum terkirim. Periksa koneksi Anda lalu coba lagi.',
+  lokasiDiLuarRiau: 'Lokasi Anda terdeteksi di luar Provinsi Riau. Aduan hanya dapat dikirim dari wilayah Riau.',
   terlaluBanyak: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
-  kodeSebelumnyaTidakAda: 'Kode laporan sebelumnya tidak ditemukan. Periksa penulisannya atau kosongkan kolom itu.',
+  kodeSebelumnyaTidakAda: 'Kode aduan sebelumnya tidak ditemukan. Periksa penulisannya atau kosongkan kolom itu.',
   fotoDitolak: 'Foto harus berformat JPEG, PNG, atau WebP dan berukuran maksimal 3 MB.',
   desaTidakValid: 'Desa atau kelurahan yang dipilih tidak valid. Pilih ulang dari daftar.',
-  sukses: 'Laporan berhasil dikirim',
-  simpanKode: 'Simpan kode ini. Anda memerlukannya untuk memantau laporan.',
+  sukses: 'Aduan berhasil dikirim',
+  simpanKode: 'Simpan kode ini. Anda memerlukannya untuk memantau aduan.',
   salinKode: 'Salin kode',
   tersalin: 'Tersalin',
   cekStatus: 'Cek status',
@@ -173,23 +173,23 @@ export const TEKS_LAPORAN_PUBLIK = {
 } as const
 
 export const TEKS_LACAK_PUBLIK = {
-  judul: 'Cek status laporan',
-  petunjuk: 'Masukkan kode pelacakan yang diberikan setelah laporan dikirim.',
-  labelKode: 'Kode laporan',
+  judul: 'Cek status aduan',
+  petunjuk: 'Masukkan kode pelacakan yang diberikan setelah aduan dikirim.',
+  labelKode: 'Kode aduan',
   contohKode: 'SD-7KQ2-M9XP',
   cek: 'Cek Status',
   statusKini: 'Status saat ini',
   tidakDitemukan: 'Kode tidak ditemukan. Periksa kembali penulisan kode Anda.',
   terlaluBanyak: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
-  gagal: 'Status laporan belum dapat dimuat. Periksa koneksi Anda lalu coba lagi.',
+  gagal: 'Status aduan belum dapat dimuat. Periksa koneksi Anda lalu coba lagi.',
   mengirim: 'Memeriksa status…',
-  riwayat: 'Riwayat laporan',
-  kodeLaporan: 'Kode laporan',
+  riwayat: 'Riwayat aduan',
+  kodeLaporan: 'Kode aduan',
   dikirim: 'Dikirim',
   kantorPenanganan: 'Kantor penanganan',
   pembaruanTerakhir: 'Pembaruan terakhir',
   progres: 'Progres penanganan',
-  bantuanKode: 'Kode ada di layar setelah laporan terkirim, formatnya SD-XXXX-XXXX.'
+  bantuanKode: 'Kode ada di layar setelah aduan terkirim, formatnya SD-XXXX-XXXX.'
 } as const
 
 export const TEKS_UMUM = {

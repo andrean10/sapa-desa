@@ -21,7 +21,7 @@ const hasil = computed(() => {
           <p class="text-xs font-extrabold uppercase tracking-[.18em] text-accent">{{ TEKS_FAQ.label }}</p>
           <h1 class="mt-5 max-w-3xl text-4xl font-black leading-[1.06] tracking-tight sm:text-6xl">{{ TEKS_FAQ.judul }}</h1>
         </div>
-        <p class="max-w-md text-lg leading-8 text-white/75">Panduan singkat seputar layanan keimigrasian sebelum Anda membuat laporan.</p>
+        <p class="max-w-md text-lg leading-8 text-white/75">Panduan singkat seputar layanan keimigrasian sebelum Anda menyampaikan aduan.</p>
       </div>
     </section>
     <section class="mx-auto max-w-5xl px-5 py-14 sm:px-8 sm:py-20" aria-label="Daftar pertanyaan">

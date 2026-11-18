@@ -200,7 +200,7 @@ Prinsip: **mobile-first** (lebar dasar 360 px), tombol dan target sentuh minimal
 - **Footer** (biru tua, garis aksen emas): logo + deskripsi layanan + logo instansi; kolom **Jelajahi** (tautan menu + tombol PIMPASA untuk petugas); kolom **Hubungi kami** (alamat, telepon, email, Instagram, TikTok dari `KONTAK_INSTANSI` di `shared/config/app.ts`). Di `/informasi` footer diawali blok ajakan "Lihat sesuatu yang mencurigakan?" dengan tombol Aduan Masyarakat dan Cek Aduan.
 - Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan tautan lewat media sosial.
 - Rute petugas (`/upt/*`, `/kanwil/*`, `/admin/*`, `/masuk`, `/akun/*`) diberi `noindex`.
-- **Istilah**: menu dan tombol memakai "**Aduan Masyarakat**" (halaman `/lapor`) dan "**Cek Aduan**" (halaman `/lacak`).
+- **Istilah**: menu dan tombol memakai "**Aduan Masyarakat**" (halaman `/lapor`) dan "**Cek Aduan**" (halaman `/lacak`). Seluruh teks yang dilihat masyarakat (form, dialog berhasil, hasil lacak, pesan galat, FAQ) juga memakai kata "aduan", bukan "laporan". Istilah "laporan" tetap dipakai di sisi petugas (dashboard UPT, Kanwil, admin) dan pada nama rute, tabel, dan enum database.
 
 ### 4.2 Landing `/`
 
