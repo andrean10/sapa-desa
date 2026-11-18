@@ -10,7 +10,7 @@ import { formatTanggalWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Desa binaan' })
 const kelola = useKelolaKanwil()
-const { data, pending, error, refresh } = await useAsyncData('kanwil-desa-binaan', () => kelola.daftarDesa())
+const { data, pending, error, refresh } = await useAsyncData('kanwil-desa-binaan', () => kelola.daftarDesa(), { lazy: true })
 const bukaTambah = ref(false)
 const menyimpan = ref(false)
 const pesan = ref('')

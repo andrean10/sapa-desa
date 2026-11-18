@@ -190,3 +190,12 @@ Hanya tampilan dashboard; halaman publik (landing, informasi, lapor, lacak) dan 
 - **Alur**: pemilih periode dashboard UPT dipindah ke bagian Tren (hanya memengaruhi tren, sesuai PRD 7.1d); tab cepat → cari → filter → reset pada daftar laporan; kartu angka Kanwil menaut ke daftar terfilter; pegawai memakai dialog Tambah/Ubah dan pesan "masih bertugas di {desa}" saat penonaktifan ditolak; kunci `rentangPeriode` dan `formatRelatifWib` di `shared/utils/waktu.ts` (dengan tes).
 - **Perbaikan ikut serta**: label bulan grafik tidak lagi dobel/hilang; saklar `Switch` di status sistem memakai `model-value` (reka-ui v2); kolom "Kabupaten/Kota" di daftar laporan Kanwil sebelumnya berisi kecamatan.
 - **Verifikasi**: `npm run typecheck`, `npm run lint`, `npm run test` (9 tes), dan `npm run build` lulus. Tampilan diperiksa dengan data contoh lokal (tidak di-commit) di 1440 px dan 390 px.
+
+## Perbaikan lag saat pindah menu dashboard
+
+Penyebab: setiap pindah menu middleware memanggil `/api/auth/me` (2 panggilan Supabase berurutan) lebih dulu, baru halaman memanggil endpoint datanya, dan `await` di setup halaman menahan transisi tanpa feedback.
+
+- `useAuth.muatProfil`: di browser, profil yang diverifikasi < `MASA_BERLAKU_PROFIL_MS` (60 detik, `shared/config/app.ts`) dipakai ulang tanpa memanggil `/api/auth/me`. Hanya memengaruhi routing; setiap endpoint server tetap memverifikasi sesi dan peran. Respons 401/403 dari server (lewat `useApi`) membatalkan cache sehingga navigasi berikutnya memverifikasi ulang. `muatProfil({ paksa: true })` selalu memverifikasi.
+- Semua `useAsyncData` halaman dashboard dan composable-nya memakai `lazy: true`: halaman langsung tampil dengan skeleton, data dimuat paralel.
+- Diukur dengan latensi buatan 150 ms per panggilan: halaman baru tampil ±390–530 ms → ±50–120 ms.
+- Belum dikerjakan: mempercepat `profilSesi` di server (`auth.getUser()` + query `profiles` di setiap endpoint data). Perlu keputusan soal tipe JWT Supabase (asymmetric atau secret).

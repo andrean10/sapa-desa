@@ -25,7 +25,7 @@ export type DetailKegiatanUpt = Pick<KegiatanUpt, 'id' | 'tanggal_kegiatan' | 'd
 
 export function useKegiatanUpt() {
   const api = useApi()
-  function daftar() { return useAsyncData<{ data: KegiatanUpt[]; batas_menit_hapus: number }>('upt-kegiatan', () => api<{ data: KegiatanUpt[]; batas_menit_hapus: number }>('/api/upt/kegiatan'), { default: () => ({ data: [], batas_menit_hapus: 10 }) }) }
+  function daftar() { return useAsyncData<{ data: KegiatanUpt[]; batas_menit_hapus: number }>('upt-kegiatan', () => api<{ data: KegiatanUpt[]; batas_menit_hapus: number }>('/api/upt/kegiatan'), { default: () => ({ data: [], batas_menit_hapus: 10 }), lazy: true }) }
   async function opsi() { return await api<OpsiKegiatanUpt>('/api/upt/kegiatan/opsi') }
   async function detail(id: string) { return await api<DetailKegiatanUpt>(`/api/upt/kegiatan/${id}`) }
   async function buat(input: { tanggal_kegiatan: string; desa_id: string; pegawai_id: string; jenis_kegiatan_id: string; jumlah_peserta: number; uraian_hasil: string; foto_path?: string; pdf_path?: string }) {

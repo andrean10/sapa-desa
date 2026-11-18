@@ -14,7 +14,7 @@ const kustom = ref({ mulai: `${hariIni.slice(0, 7)}-01`, selesai: hariIni })
 const periode = computed(() => rentangPeriode(modePeriode.value, kustom.value, hariIni))
 const api = useApi()
 type DataUpt = DataDashboardUpt & { kantor: { nama: string; nama_singkat: string } }
-const { data, pending, error, refresh } = await useAsyncData<DataUpt>(() => `kanwil-lihat-upt-${kantorId.value}`, () => api<DataUpt>(`/api/kanwil/upt/${kantorId.value}`, { query: periode.value }), { watch: [periode] })
+const { data, pending, error, refresh } = await useAsyncData<DataUpt>(() => `kanwil-lihat-upt-${kantorId.value}`, () => api<DataUpt>(`/api/kanwil/upt/${kantorId.value}`, { query: periode.value }), { lazy: true, watch: [periode] })
 </script>
 
 <template>

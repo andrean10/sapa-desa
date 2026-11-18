@@ -8,7 +8,7 @@ import { Switch } from '~/components/ui/switch'
 
 definePageMeta({ layout: 'dashboard', title: 'Pengaturan' })
 const kelola = useKelolaKanwil()
-const { data, pending, error, refresh } = await useAsyncData('kanwil-pengaturan', () => kelola.daftarPengaturan())
+const { data, pending, error, refresh } = await useAsyncData('kanwil-pengaturan', () => kelola.daftarPengaturan(), { lazy: true })
 const tab = ref<'umum' | 'jenis'>('umum')
 const nilai = reactive<Record<string, string>>({})
 const sedangSimpan = ref('')

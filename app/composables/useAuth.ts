@@ -1,11 +1,12 @@
 import { toast } from 'vue-sonner'
 import type { PegawaiPilihan, ProfilAkun } from '~~/shared/types/auth'
-import { AUTH_EMAIL_DOMAIN } from '~~/shared/config/app'
+import { AUTH_EMAIL_DOMAIN, MASA_BERLAKU_PROFIL_MS } from '~~/shared/config/app'
 import { TEKS_UMUM } from '~~/shared/config/teks'
 
 export function useAuth() {
   const api = useApi()
   const profil = useState<ProfilAkun | null>('profil-akun', () => null)
+  const profilDimuatPada = useState<number>('profil-dimuat-pada', () => 0)
   const pegawaiBertugasId = useCookie<string | null>('sapa-bertugas-id', { path: '/', sameSite: 'lax' })
   const akunImpersonasi = useCookie<string | null>('sapa-impersonasi', { path: '/', sameSite: 'lax' })
 
@@ -27,6 +28,7 @@ export function useAuth() {
     pegawaiBertugasId.value = null
     try {
       profil.value = await api<ProfilAkun>('/api/auth/me')
+      profilDimuatPada.value = Date.now()
       return {
         profil: profil.value,
         pegawai: profil.value.peran === 'upt'
@@ -45,13 +47,20 @@ export function useAuth() {
     }
   }
 
-  async function muatProfil() {
+  /**
+   * Memuat profil akun. Di browser, profil yang baru diverifikasi (< MASA_BERLAKU_PROFIL_MS) dipakai ulang
+   * agar pindah menu tidak menunggu /api/auth/me. `paksa` selalu memverifikasi ke server.
+   */
+  async function muatProfil(opsi: { paksa?: boolean } = {}) {
+    if (!opsi.paksa && import.meta.client && profil.value && Date.now() - profilDimuatPada.value < MASA_BERLAKU_PROFIL_MS) return profil.value
     const adaSesiSebelumnya = profil.value !== null
     try {
       profil.value = await api<ProfilAkun>('/api/auth/me')
+      profilDimuatPada.value = Date.now()
       return profil.value
     } catch (error) {
       profil.value = null
+      profilDimuatPada.value = 0
       const galat = error as { statusCode?: number; status?: number; response?: { status?: number } }
       const status = galat.statusCode ?? galat.status ?? galat.response?.status
       if (!import.meta.client) return null
@@ -78,6 +87,7 @@ export function useAuth() {
   async function keluar() {
     await buatClientBrowser().auth.signOut()
     profil.value = null
+    profilDimuatPada.value = 0
     pegawaiBertugasId.value = null
     akunImpersonasi.value = null
     await navigateTo('/masuk')

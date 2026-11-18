@@ -8,7 +8,7 @@ import { formatTanggalWib } from '~~/shared/utils/waktu'
 definePageMeta({ layout: 'dashboard', title: 'Detail kegiatan PIMPASA' })
 const route = useRoute()
 type DetailKegiatan = Omit<Tables<'laporan_pimpasa'>, 'foto_path' | 'pdf_path' | 'kantor_id'> & { kantor: string; desa: string; pegawai: string; jenis: string; foto_url: string | null; pdf_url: string | null }
-const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`kanwil-kegiatan-${route.params.id}`, () => useApi()<DetailKegiatan>(`/api/kanwil/kegiatan/${route.params.id}`))
+const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`kanwil-kegiatan-${route.params.id}`, () => useApi()<DetailKegiatan>(`/api/kanwil/kegiatan/${route.params.id}`), { lazy: true })
 </script>
 
 <template>

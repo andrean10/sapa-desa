@@ -14,7 +14,7 @@ type DetailLaporan = Omit<Tables<'laporan'>, 'foto_path'> & {
   riwayat_status: { id: string; status: Enums<'status_laporan'>; keterangan: string | null; created_at: string; nama_pegawai: string | null }[]
 }
 const api = useApi()
-const { data, pending, error, refresh } = await useAsyncData<DetailLaporan>(`kanwil-laporan-${route.params.id}`, () => api<DetailLaporan>(`/api/kanwil/laporan/${route.params.id}`))
+const { data, pending, error, refresh } = await useAsyncData<DetailLaporan>(`kanwil-laporan-${route.params.id}`, () => api<DetailLaporan>(`/api/kanwil/laporan/${route.params.id}`), { lazy: true })
 const { profil } = useAuth()
 const sedangSimpan = ref(false)
 const pesan = ref('')

@@ -17,6 +17,7 @@ export function useLaporanUpt() {
     return useAsyncData<{ data: LaporanUptRingkas[]; total: number; halaman: number }>(`upt-laporan-${toValue(halaman)}`, () => api('/api/upt/laporan', {
       query: { halaman: toValue(halaman), ...Object.fromEntries(Object.entries(toValue(filter)).filter(entry => entry[1] !== '' && entry[1] !== false)) }
     }), {
+      lazy: true,
       watch: [() => toValue(halaman), () => JSON.stringify(toValue(filter))],
       default: () => ({ data: [] as LaporanUptRingkas[], total: 0, halaman: 1 })
     })

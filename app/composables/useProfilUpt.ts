@@ -9,5 +9,5 @@ type ProfilKantorUptResponse = {
 
 export function useProfilUpt() {
   const api = useApi()
-  return useAsyncData<ProfilKantorUptResponse>('upt-profil-kantor', () => api<ProfilKantorUptResponse>('/api/upt/profil'))
+  return useAsyncData<ProfilKantorUptResponse>('upt-profil-kantor', () => api<ProfilKantorUptResponse>('/api/upt/profil'), { lazy: true })
 }

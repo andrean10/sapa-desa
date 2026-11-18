@@ -11,6 +11,9 @@ export const AUTH_EMAIL_DOMAIN = 'sapadesa.com'
 export const TIMEZONE = 'Asia/Jakarta'
 export const AMBANG_DESA_LAMA_HARI = 30
 export const BATAS_WAKTU_GPS_MS = 15_000
+// Selama rentang ini profil akun di browser dianggap masih valid saat pindah menu (tanpa memanggil /api/auth/me lagi).
+// Hanya memengaruhi routing; setiap endpoint server tetap memverifikasi sesi dan peran sendiri.
+export const MASA_BERLAKU_PROFIL_MS = 60_000
 
 export const FORMAT_KODE_PELACAKAN = 'SD-XXXX-XXXX'
 export const POLA_KODE_PELACAKAN = '^SD-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'

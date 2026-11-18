@@ -13,7 +13,7 @@ definePageMeta({ layout: 'dashboard', title: 'Kelola akun' })
 type Akun = { id: string; username: string; nama_tampil: string; peran: 'admin' | 'kanwil' | 'upt'; kantor_id: string | null; aktif: boolean }
 const api = useApi()
 const { profil } = useAuth()
-const { data, pending, error, refresh } = await useAsyncData('admin-akun', () => api<{ akun: Akun[]; kantor: { id: string; nama: string; aktif: boolean }[] }>('/api/admin/akun'))
+const { data, pending, error, refresh } = await useAsyncData('admin-akun', () => api<{ akun: Akun[]; kantor: { id: string; nama: string; aktif: boolean }[] }>('/api/admin/akun'), { lazy: true })
 const namaKantor = computed(() => Object.fromEntries((data.value?.kantor ?? []).map(k => [k.id, k.nama])))
 const labelPeran = (peran: Akun['peran']) => PERAN_PENGGUNA.find(item => item.value === peran)?.label ?? peran
 const ringkasanAkun = computed(() => {

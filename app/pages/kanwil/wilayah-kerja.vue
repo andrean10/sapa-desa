@@ -8,7 +8,7 @@ import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
 
 definePageMeta({ layout: 'dashboard', title: 'Wilayah kerja' })
 const kelola = useKelolaKanwil()
-const { data, pending, error, refresh } = await useAsyncData('kanwil-wilayah-kerja', () => kelola.daftarWilayah())
+const { data, pending, error, refresh } = await useAsyncData('kanwil-wilayah-kerja', () => kelola.daftarWilayah(), { lazy: true })
 const kantorTujuan = ref('')
 const terpilih = ref<{ id: string; nama: string; kantor_id: string; jumlahPenugasanAktif: number }>()
 const dialogKonfirmasi = ref(false)

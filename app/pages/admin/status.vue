@@ -7,7 +7,7 @@ import { Skeleton } from '~/components/ui/skeleton'
 
 definePageMeta({ layout: 'dashboard', title: 'Status sistem' })
 const api = useApi()
-const { data, refresh, error, pending } = await useAsyncData('admin-status', () => api<{ validasi_lokasi_aktif: boolean; akun_admin: number; akun_kanwil: number; akun_upt: number; akun_nonaktif: number }>('/api/admin/status'))
+const { data, refresh, error, pending } = await useAsyncData('admin-status', () => api<{ validasi_lokasi_aktif: boolean; akun_admin: number; akun_kanwil: number; akun_upt: number; akun_nonaktif: number }>('/api/admin/status'), { lazy: true })
 const konfirmasi = ref(false)
 const proses = ref(false)
 async function ubahLokasi(aktif: boolean) {

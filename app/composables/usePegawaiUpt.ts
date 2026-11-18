@@ -5,7 +5,7 @@ export type PegawaiUpt = PegawaiPilihan & Pick<Tables<'pegawai'>, 'nip' | 'aktif
 
 export function usePegawaiUpt() {
   const api = useApi()
-  function daftar() { return useAsyncData<PegawaiUpt[]>('upt-pegawai', () => api('/api/upt/pegawai'), { default: () => [] }) }
+  function daftar() { return useAsyncData<PegawaiUpt[]>('upt-pegawai', () => api('/api/upt/pegawai'), { default: () => [], lazy: true }) }
   async function tambah(nama: string, nip: string) {
     return await api<PegawaiUpt>('/api/upt/pegawai', { method: 'POST', body: { nama, nip } })
   }

@@ -10,6 +10,7 @@ type DashboardUpt = {
 export function useDashboardUpt(periode: MaybeRefOrGetter<{ mulai?: string; selesai?: string }> = {}) {
   const api = useApi()
   return useAsyncData<DashboardUpt>('dashboard-upt', async () => await api<DashboardUpt>('/api/upt/dashboard', { query: toValue(periode) }), {
+    lazy: true,
     watch: [() => toValue(periode)],
     default: () => ({ ringkasan: null, tindakan: [], desa: [], tren: null })
   })

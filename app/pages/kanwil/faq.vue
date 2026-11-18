@@ -8,7 +8,7 @@ import { Textarea } from '~/components/ui/textarea'
 
 definePageMeta({ layout: 'dashboard', title: 'Kelola FAQ' })
 const kelola = useKelolaKanwil()
-const { data, pending, error, refresh } = await useAsyncData('kanwil-faq', () => kelola.daftarFaq())
+const { data, pending, error, refresh } = await useAsyncData('kanwil-faq', () => kelola.daftarFaq(), { lazy: true })
 const bukaDialog = ref(false)
 const idHapus = ref('')
 const sedangSimpan = ref(false)
