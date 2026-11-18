@@ -6,6 +6,7 @@ import { TEKS_LOGIN } from '~~/shared/config/teks'
 import { Button } from '~/components/ui/button'
 import { Field, FieldGroup, FieldLabel } from '~/components/ui/field'
 import { Input } from '~/components/ui/input'
+import { Spinner } from '~/components/ui/spinner'
 
 definePageMeta({ layout: false })
 useHead({ title: TEKS_LOGIN.judul, meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
@@ -16,6 +17,8 @@ const password = ref('')
 const passwordTerlihat = ref(false)
 const sedangMemproses = ref(false)
 const pesanError = ref('')
+// Form disembunyikan selama sesi diperiksa agar akun yang sudah login tidak melihat form login sebelum dialihkan.
+const memeriksaSesi = ref(true)
 watch(username, (value) => { const normal = value.toLowerCase().trim(); if (normal !== value) username.value = normal })
 
 function tujuanSetelahMasuk(peran: PeranAplikasi) {
@@ -31,8 +34,14 @@ function tujuanAkses(peran: PeranAplikasi) {
   return peran === 'upt' && !path.startsWith('/upt/pilih-petugas') && path !== '/akun/password' ? `/upt/pilih-petugas?redirect=${encodeURIComponent(tujuan)}` : tujuan
 }
 onMounted(async () => {
-  const akun = await muatProfil()
-  if (akun) await navigateTo(tujuanAkses(akun.peran))
+  let sudahLogin = false
+  try {
+    const akun = await muatProfil()
+    if (akun) { sudahLogin = true; await navigateTo(tujuanAkses(akun.peran)) }
+  } finally {
+    // Bila sudah login, kartu "Memeriksa sesi…" tetap tampil sampai halaman berpindah.
+    if (!sudahLogin) memeriksaSesi.value = false
+  }
 })
 async function submitLogin() {
   sedangMemproses.value = true
@@ -51,6 +60,11 @@ async function submitLogin() {
           <img class="size-14 shrink-0 object-contain sm:size-16" src="/images/logo.webp" alt="" width="64" height="64">
           <span class="text-[0.68rem] font-black leading-[1.2] tracking-[.07em] sm:text-xs">SISTEM PELAPORAN<br>PEMANTAUAN AKTIFITAS<br>DESA BINAAN IMIGRASI</span>
         </NuxtLink>
+        <div v-if="memeriksaSesi" class="grid place-items-center gap-4 py-10 text-center" role="status" aria-live="polite">
+          <Spinner class="size-8 text-primary" />
+          <div><p class="text-lg font-extrabold text-primary">{{ TEKS_LOGIN.memeriksaSesi }}</p><p class="mt-1 text-sm text-muted-foreground">{{ TEKS_LOGIN.memeriksaSesiBantuan }}</p></div>
+        </div>
+        <template v-else>
         <h1 class="mb-7 text-left text-3xl font-black tracking-tight text-primary">Login</h1>
           <form @submit.prevent="submitLogin">
             <FieldGroup class="gap-5">
@@ -69,6 +83,7 @@ async function submitLogin() {
             </FieldGroup>
           </form>
         <p class="mt-6 text-sm leading-5 text-muted-foreground">{{ TEKS_LOGIN.bantuan }}</p>
+        </template>
       </div>
     </section>
   </main>

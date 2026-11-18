@@ -234,6 +234,8 @@ export const TEKS_LOGIN = {
   tampilkan: 'Tampilkan kata sandi',
   sembunyikan: 'Sembunyikan kata sandi',
   memproses: 'Memeriksa akun…',
+  memeriksaSesi: 'Memeriksa sesi…',
+  memeriksaSesiBantuan: 'Jika Anda sudah login, Anda akan diarahkan ke dashboard.',
   masuk: 'Masuk',
   gagal: 'Login belum dapat diproses.'
 } as const
