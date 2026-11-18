@@ -21,7 +21,7 @@ const warnaStatus = (status: Enums<'status_laporan'>) => STATUS_LAPORAN_TAMPILAN
 </script>
 
 <template>
-  <ol :aria-label="label ?? 'Riwayat status laporan'">
+  <ol :aria-label="label ?? 'Riwayat status aduan'">
     <li
       v-for="(butir, index) in timeline"
       :key="`${butir.waktu}-${butir.status}-${index}`"

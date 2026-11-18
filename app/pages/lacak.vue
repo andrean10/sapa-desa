@@ -73,7 +73,7 @@ async function cari() {
           <p v-if="pesanError" class="mt-4 border-s-4 border-destructive bg-destructive/10 p-4 text-sm font-medium text-destructive" role="alert">{{ pesanError }}</p>
           <p v-else class="mt-3 text-sm text-muted-foreground">{{ TEKS_LACAK_PUBLIK.bantuanKode }}</p>
         </form>
-        <div v-if="sedangMemuat && !hasil" class="mt-10 animate-pulse space-y-5 bg-card p-6 shadow-card sm:p-10" role="status" aria-label="Memuat status laporan">
+        <div v-if="sedangMemuat && !hasil" class="mt-10 animate-pulse space-y-5 bg-card p-6 shadow-card sm:p-10" role="status" aria-label="Memuat status aduan">
           <div class="h-5 w-1/3 bg-muted" /><div class="h-9 w-2/3 bg-muted" /><div class="h-2 w-full bg-muted" /><div class="h-24 w-full bg-muted" />
         </div>
         <section v-if="hasil" class="mt-10 bg-card shadow-card transition-opacity" :class="sedangMemuat ? 'opacity-60' : ''" aria-live="polite">

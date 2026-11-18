@@ -80,3 +80,14 @@ export async function simpanLaporan(input: LaporanBaru) {
     .select('kode_pelacakan')
     .single()
 }
+
+/** Jumlah baris saja (head + count), tanpa mengambil datanya. */
+export async function hitungStatistikPublik() {
+  const client = buatClientAnonimo()
+  const [desaBinaan, kantor, kabupaten] = await Promise.all([
+    client.from('desa_kelurahan').select('id', { count: 'exact', head: true }).eq('dbi', true),
+    client.from('kantor_imigrasi').select('id', { count: 'exact', head: true }).eq('aktif', true),
+    client.from('kabupaten').select('id', { count: 'exact', head: true })
+  ])
+  return { desaBinaan, kantor, kabupaten }
+}

@@ -129,9 +129,9 @@ function bukaLokasi() { if (!dialogLokasi.value?.open) dialogLokasi.value?.showM
   <main>
     <section class="bg-primary text-primary-foreground">
       <div class="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
-        <p class="text-xs font-extrabold uppercase tracking-[.18em] text-accent">Laporan masyarakat</p>
+        <p class="text-xs font-extrabold uppercase tracking-[.18em] text-accent">Aduan Masyarakat</p>
         <h1 class="mt-5 max-w-3xl text-4xl font-black leading-[1.06] tracking-tight sm:text-6xl">{{ TEKS_LAPORAN_PUBLIK.judul }}</h1>
-        <p class="mt-6 max-w-2xl text-lg leading-8 text-white/75">Sampaikan informasi yang Anda lihat. Laporan diteruskan ke kantor imigrasi yang menangani wilayah tersebut.</p>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-white/75">Sampaikan informasi yang Anda lihat. Aduan diteruskan ke kantor imigrasi yang menangani wilayah tersebut.</p>
       </div>
     </section>
     <section class="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-20">
@@ -142,7 +142,7 @@ function bukaLokasi() { if (!dialogLokasi.value?.open) dialogLokasi.value?.showM
             <button class="min-h-10 rounded-xl bg-primary px-4 font-bold text-primary-foreground transition hover:bg-secondary" type="button" @click="bukaLokasi">{{ TEKS_LAPORAN_PUBLIK.bukaPengaturanLokasi }}</button>
           </div>
           <fieldset class="grid min-w-0 w-full gap-6 disabled:opacity-60" :disabled="!aktifkanForm">
-            <legend class="text-2xl font-extrabold text-primary">Informasi laporan</legend>
+            <legend class="text-2xl font-extrabold text-primary">Informasi aduan</legend>
             <div class="grid min-w-0 w-full gap-6 sm:grid-cols-2">
               <label class="grid min-w-0 gap-2 text-sm font-bold text-primary sm:col-span-2" for="nama"><span>{{ TEKS_LAPORAN_PUBLIK.nama }}</span><input id="nama" v-model="isian.nama_pelapor" class="min-h-12 w-full min-w-0 rounded-xl border border-input bg-background px-4 text-base font-normal text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary" maxlength="150" required autocomplete="name"></label>
               <label class="grid min-w-0 gap-2 text-sm font-bold text-primary" for="kabupaten"><span>{{ TEKS_LAPORAN_PUBLIK.kabupaten }}</span><PublicSelect id="kabupaten" v-model="kabupatenId" placeholder="Pilih kabupaten/kota" :options="opsiKabupaten" :disabled="!aktifkanForm" /></label>
@@ -166,7 +166,7 @@ function bukaLokasi() { if (!dialogLokasi.value?.open) dialogLokasi.value?.showM
     </section>
     <dialog ref="dialogLokasi" class="fixed inset-0 m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2.5rem)] max-w-[31rem] overflow-y-auto rounded-2xl border-0 bg-card p-0 text-foreground shadow-card backdrop:bg-primary/60" aria-labelledby="judul-dialog-lokasi">
       <section class="p-6 sm:p-9">
-        <p class="text-xs font-extrabold uppercase tracking-[.18em] text-accent">Sebelum mengisi laporan</p>
+        <p class="text-xs font-extrabold uppercase tracking-[.18em] text-accent">Sebelum mengisi aduan</p>
         <h2 id="judul-dialog-lokasi" class="mt-4 text-3xl font-black leading-tight text-primary">Aktifkan lokasi perangkat</h2>
         <p v-if="keadaanLokasi === 'meminta'" class="mt-5 leading-7 text-muted-foreground" role="status">{{ TEKS_LAPORAN_PUBLIK.memintaLokasi }}</p>
         <p v-else-if="keadaanLokasi === 'ditolak' || keadaanLokasi === 'gps-mati' || keadaanLokasi === 'timeout' || keadaanLokasi === 'tidak-didukung'" class="mt-5 leading-7 text-destructive" role="alert">{{ keadaanLokasi === 'ditolak' ? TEKS_LAPORAN_PUBLIK.izinDitolak : keadaanLokasi === 'gps-mati' ? TEKS_LAPORAN_PUBLIK.gpsMati : keadaanLokasi === 'timeout' ? TEKS_LAPORAN_PUBLIK.gpsTimeout : TEKS_LAPORAN_PUBLIK.gpsTidakDidukung }}</p>
@@ -178,7 +178,7 @@ function bukaLokasi() { if (!dialogLokasi.value?.open) dialogLokasi.value?.showM
       </section>
     </dialog>
     <dialog ref="dialogSukses" class="fixed inset-0 m-auto max-h-[calc(100dvh-2rem)] w-[min(42rem,calc(100%-2rem))] overflow-y-auto rounded-2xl border border-border bg-card p-0 text-foreground shadow-card backdrop:bg-black/50" @cancel="tutupSukses">
-      <section class="p-6 sm:p-8"><h2 class="text-2xl font-black text-primary">{{ TEKS_LAPORAN_PUBLIK.sukses }}</h2><p class="mt-2 text-muted-foreground">{{ TEKS_LAPORAN_PUBLIK.simpanKode }}</p><div class="mt-4 flex flex-wrap items-center gap-3"><strong class="rounded-lg bg-muted px-4 py-3 font-mono text-xl tracking-wider text-primary">{{ kodePelacakan }}</strong><button class="min-h-11 rounded-lg border border-border px-4 font-bold text-primary" type="button" @click="salinKode">{{ sudahDisalin ? TEKS_LAPORAN_PUBLIK.tersalin : TEKS_LAPORAN_PUBLIK.salinKode }}</button></div><h3 class="mt-7 font-bold text-primary">Riwayat status</h3><TimelineStatus class="mt-4" :timeline="[{ status: 'diterima', waktu: waktuDiterima }]" /><div class="mt-6 flex flex-wrap gap-3"><NuxtLink class="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 font-bold text-accent-foreground no-underline" :to="`/lacak?kode=${encodeURIComponent(kodePelacakan)}`">{{ TEKS_LAPORAN_PUBLIK.cekStatus }}</NuxtLink><button class="min-h-11 rounded-lg border border-border px-4 font-bold" type="button" @click="tutupSukses()">{{ TEKS_LAPORAN_PUBLIK.tutup }}</button></div></section>
+      <section class="p-6 sm:p-8"><h2 class="text-2xl font-black text-primary">{{ TEKS_LAPORAN_PUBLIK.sukses }}</h2><p class="mt-2 text-muted-foreground">{{ TEKS_LAPORAN_PUBLIK.simpanKode }}</p><div class="mt-4 flex flex-wrap items-center gap-3"><strong class="rounded-lg bg-muted px-4 py-3 font-mono text-xl tracking-wider text-primary">{{ kodePelacakan }}</strong><button class="min-h-11 rounded-lg border border-border px-4 font-bold text-primary" type="button" @click="salinKode">{{ sudahDisalin ? TEKS_LAPORAN_PUBLIK.tersalin : TEKS_LAPORAN_PUBLIK.salinKode }}</button></div><template v-if="waktuDiterima"><h3 class="mt-7 font-bold text-primary">Riwayat status</h3><TimelineStatus class="mt-4" :timeline="[{ status: 'diterima', waktu: waktuDiterima }]" /></template><div class="mt-6 flex flex-wrap gap-3"><NuxtLink class="inline-flex min-h-11 items-center rounded-lg bg-accent px-4 font-bold text-accent-foreground no-underline" :to="`/lacak?kode=${encodeURIComponent(kodePelacakan)}`">{{ TEKS_LAPORAN_PUBLIK.cekStatus }}</NuxtLink><button class="min-h-11 rounded-lg border border-border px-4 font-bold" type="button" @click="tutupSukses()">{{ TEKS_LAPORAN_PUBLIK.tutup }}</button></div></section>
     </dialog>
   </main>
 </template>
