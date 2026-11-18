@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { FilePlus2, Menu, ShieldCheck, X } from '@lucide/vue'
+import { Menu, ShieldCheck, X } from '@lucide/vue'
 import { PUBLIC_BRAND_NAME, APP_NAME } from '~~/shared/config/app'
 import { NAVIGASI_PUBLIK, TEKS_LANDING, TEKS_UMUM } from '~~/shared/config/teks'
 
 const route = useRoute()
 const menuMobile = ref<HTMLDetailsElement>()
 const menuTerbuka = ref(false)
-// Aduan Masyarakat tampil sebagai tombol di kanan, jadi tidak diulang di menu tengah.
-const menuTengah = NAVIGASI_PUBLIK.filter(item => item.href !== '/lapor')
-const tombolAduan = NAVIGASI_PUBLIK.find(item => item.href === '/lapor')!
 
 watch(() => route.fullPath, () => { if (menuMobile.value) menuMobile.value.open = false; menuTerbuka.value = false })
 function tutupMenu() { if (menuMobile.value) menuMobile.value.open = false; menuTerbuka.value = false }
@@ -25,9 +22,9 @@ function tutupMenu() { if (menuMobile.value) menuMobile.value.open = false; menu
         <span class="text-base leading-none font-extrabold tracking-wide whitespace-nowrap sm:text-lg lg:hidden">{{ APP_NAME }}</span>
       </NuxtLink>
 
-      <nav class="hidden items-center gap-1 md:flex" :aria-label="TEKS_UMUM.navigasiUtama">
+      <nav class="ml-auto hidden items-center gap-1 md:flex" :aria-label="TEKS_UMUM.navigasiUtama">
         <NuxtLink
-          v-for="item in menuTengah"
+          v-for="item in NAVIGASI_PUBLIK"
           :key="item.href"
           :to="item.href"
           class="relative rounded-full px-4 py-2 text-sm font-bold no-underline transition hover:bg-info-muda/70 hover:text-primary"
@@ -37,7 +34,6 @@ function tutupMenu() { if (menuMobile.value) menuMobile.value.open = false; menu
       </nav>
 
       <div class="flex items-center gap-2">
-        <NuxtLink :to="tombolAduan.href" :aria-label="tombolAduan.label" class="inline-flex min-h-11 items-center gap-1.5 rounded-full bg-emas px-3.5 py-2 text-[0.8rem] font-extrabold whitespace-nowrap text-emas-foreground no-underline sm:gap-2 sm:text-sm shadow-md shadow-emas/25 transition duration-200 hover:-translate-y-0.5 hover:brightness-105 focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none sm:px-5"><FilePlus2 class="size-4" aria-hidden="true" /><span class="sm:hidden" aria-hidden="true">Aduan</span><span class="hidden sm:inline">{{ tombolAduan.label }}</span></NuxtLink>
         <details ref="menuMobile" class="relative md:hidden" @toggle="menuTerbuka = menuMobile?.open ?? false">
           <summary class="grid size-11 cursor-pointer list-none place-items-center rounded-full text-primary transition hover:bg-info-muda focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none [&::-webkit-details-marker]:hidden" :aria-label="menuTerbuka ? TEKS_UMUM.tutup : TEKS_UMUM.bukaMenu">
             <X v-if="menuTerbuka" class="size-6" aria-hidden="true" /><Menu v-else class="size-6" aria-hidden="true" />

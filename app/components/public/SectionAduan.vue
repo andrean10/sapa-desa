@@ -29,8 +29,7 @@ const teks = TEKS_LANDING.aduan
       </div>
 
       <div class="max-w-xl">
-        <p class="inline-flex rounded-full bg-emas/20 px-3.5 py-1.5 text-sm font-bold text-emas-foreground">{{ teks.label }}</p>
-        <h2 id="judul-aduan" class="mt-5 text-3xl leading-tight font-extrabold text-primary sm:text-4xl lg:text-[2.6rem]">{{ teks.judul }}</h2>
+        <h2 id="judul-aduan" class="text-3xl leading-tight font-extrabold text-primary sm:text-4xl lg:text-[2.6rem]">{{ teks.judul }}</h2>
         <p class="mt-5 text-base leading-8 text-muted-foreground sm:text-lg">{{ teks.pengantar }}</p>
         <ul class="mt-7 grid gap-4">
           <li v-for="poin in teks.poin" :key="poin" class="flex items-start gap-3.5">
