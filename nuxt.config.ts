@@ -1,22 +1,22 @@
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  css: ['~/assets/css/tailwind.css'],
+  css: ["~/assets/css/tailwind.css"],
   vite: { plugins: [tailwindcss()] },
-  modules: ['shadcn-nuxt', '@nuxt/eslint'],
+  modules: ["shadcn-nuxt", "@nuxt/eslint"],
   shadcn: {
-    prefix: '',
-    componentDir: '@/components/ui'
+    prefix: "",
+    componentDir: "@/components/ui",
   },
   runtimeConfig: {
-    supabaseServiceRoleKey: '',
+    supabaseServiceRoleKey: "",
     public: {
-      supabaseUrl: '',
-      supabaseAnonKey: '',
-      appMode: 'test'
-    }
-  }
-})
+      supabaseUrl: "",
+      supabaseAnonKey: "",
+      appMode: "test",
+    },
+  },
+});
