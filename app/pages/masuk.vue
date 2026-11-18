@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowLeft, Eye, EyeOff } from '@lucide/vue'
-import { APP_NAME, APP_TAGLINE, FOTO_LANDING, PUBLIC_BRAND_NAME } from '~~/shared/config/app'
+import { APP_NAME, APP_TAGLINE, FOTO_LANDING, LOGO_INSTANSI, PUBLIC_BRAND_NAME } from '~~/shared/config/app'
 import type { PeranAplikasi } from '~~/shared/config/app'
 import { TEKS_LOGIN } from '~~/shared/config/teks'
 import { Button } from '~/components/ui/button'
@@ -91,10 +91,14 @@ async function submitLogin() {
           <p class="mt-6 text-center text-sm text-muted-foreground">{{ TEKS_LOGIN.bantuan }}</p>
         </template>
       </div>
+
+      <div class="mx-auto flex w-full max-w-sm flex-wrap items-center justify-center gap-x-6 gap-y-3 border-t pt-5">
+        <img v-for="logo in LOGO_INSTANSI" :key="logo.src" :src="logo.src" :alt="logo.alt" :width="logo.lebar" :height="logo.tinggi" class="h-10 w-auto object-contain sm:h-11" loading="lazy">
+      </div>
     </section>
 
     <!-- Panel pendamping: hanya desktop, dekoratif -->
-    <aside class="relative hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between" aria-hidden="true">
+    <aside class="relative hidden lg:sticky lg:top-0 lg:h-svh overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between" aria-hidden="true">
       <div class="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-primary-foreground/10" />
       <div class="pointer-events-none absolute -bottom-32 -left-20 size-96 rounded-full bg-primary-foreground/5" />
       <div class="relative z-10 p-12 xl:p-16">
