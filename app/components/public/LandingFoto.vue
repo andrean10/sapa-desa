@@ -30,6 +30,6 @@ const rasio = computed(() => `${properti.foto.lebar} / ${properti.foto.tinggi}`)
       <circle cx="120" cy="86" r="42" class="fill-primary/20" />
       <path d="M30 300c2-58 36-96 90-96s88 38 90 96z" class="fill-primary/20" />
     </svg>
-    <p v-if="isDev" class="absolute top-1/2 left-1/2 w-3/4 -translate-x-1/2 rounded-lg bg-card/90 px-3 py-2 text-center text-xs font-semibold text-muted-foreground shadow-sm">Taruh foto di {{ foto.src }}</p>
+    <p v-if="isDev" class="absolute top-1/2 left-1/2 w-3/4 -translate-x-1/2 rounded-lg bg-card/90 px-3 py-2 text-center text-xs break-all font-semibold text-muted-foreground shadow-sm">Taruh foto di {{ foto.src }}</p>
   </div>
 </template>
