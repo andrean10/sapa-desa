@@ -87,7 +87,7 @@ export const TEKS_LANDING = {
   },
   aduan: {
     label: 'Aduan Masyarakat',
-    judul: 'Lihat sesuatu yang mencurigakan di desa Anda?',
+    judul: 'Ada yang ingin Anda sampaikan untuk desa Anda?',
     pengantar: 'Sampaikan aduan keimigrasian dari wilayah Riau dan pantau tindak lanjutnya dengan kode aduan.',
     poin: [
       'Isi aduan lewat HP, tanpa perlu membuat akun',
@@ -114,7 +114,7 @@ export const TEKS_LANDING = {
   faqPengantar: 'Jawaban atas pertanyaan yang sering diajukan seputar keimigrasian.',
   faqLihatSemua: 'Lihat semua informasi',
   footerDeskripsi: 'Layanan aduan dan pendampingan desa binaan untuk masyarakat Riau.',
-  footerAjakanJudul: 'Lihat sesuatu yang mencurigakan?',
+  footerAjakanJudul: 'Ada yang ingin Anda sampaikan?',
   footerAjakanIsi: 'Sampaikan aduan Anda, dan pantau tindak lanjutnya dengan kode aduan.'
 } as const
 

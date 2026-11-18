@@ -21,7 +21,7 @@ SAPA DESA adalah website pelayanan Kantor Wilayah Kemenimipas Riau dan 7 Kantor 
 
 | Pengguna | Tujuan | Perangkat utama |
 |---|---|---|
-| **Masyarakat** (tanpa akun) | Membaca informasi keimigrasian, melapor WNA/WNI yang mencurigakan, memantau laporannya | **HP** (scan QR di titik desa) |
+| **Masyarakat** (tanpa akun) | Membaca informasi keimigrasian, menyampaikan aduan tentang WNA/WNI, memantau aduannya | **HP** (scan QR di titik desa) |
 | **UPT** (1 akun per kantor, dipakai bersama) | Menangani laporan yang masuk, mencatat kegiatan PIMPASA di desa binaan | Laptop atau PC kantor, kadang tablet |
 | **Kanwil** | Memantau kinerja UPT, mengelola desa binaan, penugasan, dan wilayah kerja | Laptop atau PC |
 | **Admin** (pemilik project) | Semua hak Kanwil + mengubah status laporan, pengaturan sistem, akun, log | Laptop atau PC |
@@ -197,7 +197,7 @@ Prinsip: **mobile-first** (lebar dasar 360 px), tombol dan target sentuh minimal
 ### 4.1 Layout publik
 
 - **Header** (melekat di atas, latar blur): logo SAPA DESA dan nama sistem (di HP cukup "SAPA DESA"), menu tengah **Beranda · Informasi · Cek Aduan**, dan tombol emas **Aduan Masyarakat** di kanan (di HP dipendekkan menjadi "Aduan"). Di HP menu menjadi hamburger berisi semua tautan ditambah **PIMPASA · Masuk petugas**.
-- **Footer** (biru tua, garis aksen emas): logo + deskripsi layanan + logo instansi; kolom **Jelajahi** (tautan menu + tombol PIMPASA untuk petugas); kolom **Hubungi kami** (alamat, telepon, email, Instagram, TikTok dari `KONTAK_INSTANSI` di `shared/config/app.ts`). Di `/informasi` footer diawali blok ajakan "Lihat sesuatu yang mencurigakan?" dengan tombol Aduan Masyarakat dan Cek Aduan.
+- **Footer** (biru tua, garis aksen emas): logo + deskripsi layanan + logo instansi; kolom **Jelajahi** (tautan menu + tombol PIMPASA untuk petugas); kolom **Hubungi kami** (alamat, telepon, email, Instagram, TikTok dari `KONTAK_INSTANSI` di `shared/config/app.ts`). Di `/informasi` footer diawali blok ajakan "Ada yang ingin Anda sampaikan?" dengan tombol Aduan Masyarakat dan Cek Aduan.
 - Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan tautan lewat media sosial.
 - Rute petugas (`/upt/*`, `/kanwil/*`, `/admin/*`, `/masuk`, `/akun/*`) diberi `noindex`.
 - **Istilah**: menu dan tombol memakai "**Aduan Masyarakat**" (halaman `/lapor`) dan "**Cek Aduan**" (halaman `/lacak`). Seluruh teks yang dilihat masyarakat (form, dialog berhasil, hasil lacak, pesan galat, FAQ) juga memakai kata "aduan", bukan "laporan". Istilah "laporan" tetap dipakai di sisi petugas (dashboard UPT, Kanwil, admin) dan pada nama rute, tabel, dan enum database.
@@ -210,7 +210,7 @@ Tujuan: pengunjung yang mencari SAPA DESA lewat mesin pencari (tanpa QR) memaham
 |---|---|
 | Hero PIMPASA | Latar terang. Kiri: label "Program Desa Binaan Imigrasi", judul **PIMPASA** + "Petugas Imigrasi Pembina Desa", paragraf pengantar, **satu tombol "PIMPASA"** (biru tua) menuju `/masuk` dengan catatan "Khusus petugas". Kanan: foto petugas PIMPASA (**cutout transparan**) di depan lingkaran biru muda, dengan kartu melayang: jumlah desa binaan, jumlah kantor imigrasi dan kabupaten/kota, serta daftar kegiatan PIMPASA |
 | Logo instansi | Pita putih di bawah hero: nama kantor wilayah dan logo dari `LOGO_INSTANSI` |
-| Aduan Masyarakat | Foto kiri (kartu melayang contoh kode aduan), kanan: judul "Lihat sesuatu yang mencurigakan di desa Anda?", pengantar, tiga poin centang, dua tombol: **Aduan Masyarakat** (emas, ikon, ke `/lapor`) dan **Cek Aduan** (biru tua, ikon, ke `/lacak`) |
+| Aduan Masyarakat | Foto kiri (kartu melayang contoh kode aduan), kanan: judul "Ada yang ingin Anda sampaikan untuk desa Anda?", pengantar, tiga poin centang, dua tombol: **Aduan Masyarakat** (emas, ikon, ke `/lapor`) dan **Cek Aduan** (biru tua, ikon, ke `/lacak`) |
 | Alur dan tata cara aduan | 3 kartu bernomor dengan ikon: isi aduan di HP, petugas setempat menindaklanjuti, pantau dengan kode aduan |
 | Informasi keimigrasian | Pintasan 5 pertanyaan FAQ pertama dan tombol "Lihat semua informasi" ke `/informasi` |
 
