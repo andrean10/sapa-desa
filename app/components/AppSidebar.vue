@@ -4,7 +4,7 @@ import type { LucideIcon } from '@lucide/vue'
 import { APP_NAME } from '~~/shared/config/app'
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from '~/components/ui/sidebar'
 
-const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset'; namaPetugas?: string }>(), { collapsible: 'icon', side: 'left', variant: 'sidebar', namaPetugas: '' })
+const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset' }>(), { collapsible: 'icon', side: 'left', variant: 'sidebar' })
 defineEmits<{ keluar: [] }>()
 const { profil } = useAuth()
 const route = useRoute()
@@ -50,7 +50,7 @@ const sidebarProps = computed(() => ({ collapsible: props.collapsible, side: pro
       </SidebarGroup>
     </SidebarContent>
     <SidebarFooter class="border-t border-sidebar-foreground/10 p-2">
-      <SidebarMenu><SidebarMenuItem><MenuPengguna tampilan="sidebar" :nama-petugas="namaPetugas" @keluar="$emit('keluar')" /></SidebarMenuItem></SidebarMenu>
+      <SidebarMenu><SidebarMenuItem><MenuPengguna tampilan="sidebar" @keluar="$emit('keluar')" /></SidebarMenuItem></SidebarMenu>
     </SidebarFooter>
     <SidebarRail />
   </Sidebar>

@@ -292,6 +292,39 @@ export type Database = {
         }
         Relationships: []
       }
+      laporan_dibaca: {
+        Row: {
+          dibaca_oleh: string
+          dibaca_pada: string
+          laporan_id: string
+        }
+        Insert: {
+          dibaca_oleh: string
+          dibaca_pada?: string
+          laporan_id: string
+        }
+        Update: {
+          dibaca_oleh?: string
+          dibaca_pada?: string
+          laporan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "laporan_dibaca_laporan_id_fkey"
+            columns: ["laporan_id"]
+            isOneToOne: true
+            referencedRelation: "laporan"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "laporan_dibaca_laporan_id_fkey"
+            columns: ["laporan_id"]
+            isOneToOne: true
+            referencedRelation: "v_laporan_belum_ditanggapi"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       laporan_pimpasa: {
         Row: {
           created_at: string
@@ -304,7 +337,8 @@ export type Database = {
           kantor_id: string
           pdf_path: string | null
           pegawai_id: string
-          petugas_pengganti: boolean
+          petugas_pengganti: boolean | null
+          petugas_pengganti_nama: string | null
           tanggal_kegiatan: string
           updated_at: string
           uraian_hasil: string
@@ -320,7 +354,8 @@ export type Database = {
           kantor_id: string
           pdf_path?: string | null
           pegawai_id: string
-          petugas_pengganti?: boolean
+          petugas_pengganti?: boolean | null
+          petugas_pengganti_nama?: string | null
           tanggal_kegiatan: string
           updated_at?: string
           uraian_hasil: string
@@ -336,7 +371,8 @@ export type Database = {
           kantor_id?: string
           pdf_path?: string | null
           pegawai_id?: string
-          petugas_pengganti?: boolean
+          petugas_pengganti?: boolean | null
+          petugas_pengganti_nama?: string | null
           tanggal_kegiatan?: string
           updated_at?: string
           uraian_hasil?: string
@@ -485,6 +521,7 @@ export type Database = {
         Row: {
           created_at: string
           dibuat_oleh: string | null
+          diproses_oleh: string | null
           id: string
           keterangan: string | null
           laporan_id: string
@@ -494,6 +531,7 @@ export type Database = {
         Insert: {
           created_at?: string
           dibuat_oleh?: string | null
+          diproses_oleh?: string | null
           id?: string
           keterangan?: string | null
           laporan_id: string
@@ -503,6 +541,7 @@ export type Database = {
         Update: {
           created_at?: string
           dibuat_oleh?: string | null
+          diproses_oleh?: string | null
           id?: string
           keterangan?: string | null
           laporan_id?: string
@@ -694,6 +733,7 @@ export type Database = {
           peringkat_respons: number
         }[]
       }
+      tandai_dibaca: { Args: { p_laporan_id: string }; Returns: undefined }
       tetapkan_dbi: {
         Args: { p_desa_id: string }
         Returns: undefined

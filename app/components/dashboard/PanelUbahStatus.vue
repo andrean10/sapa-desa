@@ -9,7 +9,7 @@ import type { Enums } from '~~/shared/types/database.types'
 // Panel ubah status (PRD 7.3): hanya pilihan yang sah menurut alur; keterangan wajib untuk status final + konfirmasi.
 type Status = Enums<'status_laporan'>
 const ALUR: Record<Status, Status[]> = { diterima: ['diverifikasi', 'ditolak'], diverifikasi: ['ditindaklanjuti', 'ditolak'], ditindaklanjuti: ['selesai'], selesai: [], ditolak: [] }
-const properti = defineProps<{ statusKini: Status; menyimpan: boolean; pesan?: string; namaPetugas?: string; modeAdmin?: boolean }>()
+const properti = defineProps<{ statusKini: Status; menyimpan: boolean; pesan?: string; diprosesOleh?: string; modeAdmin?: boolean }>()
 const emit = defineEmits<{ simpan: [status: Status, keterangan: string] }>()
 
 const pilihan = computed(() => ALUR[properti.statusKini])
@@ -52,9 +52,8 @@ function konfirmasi() {
         <Textarea id="keterangan-status" v-model="keterangan" maxlength="1000" rows="4" :required="wajibKeterangan" :aria-invalid="Boolean(galatLokal)" aria-describedby="bantuan-keterangan" />
         <div id="bantuan-keterangan" class="flex justify-between gap-3 text-xs text-muted-foreground"><span>Jangan menuliskan identitas orang asing atau data sensitif.</span><span class="tabular-nums">{{ keterangan.length }}/1000</span></div>
       </div>
-      <div v-if="!modeAdmin" class="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-sm">
-        <UserRoundCheck class="size-4 text-sukses" aria-hidden="true" /><span class="text-muted-foreground">Bertugas atas nama</span><strong class="font-medium">{{ namaPetugas || 'Belum dipilih' }}</strong>
-        <NuxtLink class="ml-auto text-xs font-medium text-primary" to="/upt/pilih-petugas">{{ TEKS_UMUM.gantiPetugas }}</NuxtLink>
+      <div v-if="!modeAdmin && diprosesOleh" class="flex flex-wrap items-center gap-2 rounded-lg bg-muted/50 px-3 py-2 text-sm">
+        <UserRoundCheck class="size-4 text-sukses" aria-hidden="true" /><span class="text-muted-foreground">Dicatat sebagai</span><strong class="font-medium">{{ diprosesOleh }}</strong>
       </div>
       <p v-if="galatLokal || pesan" class="rounded-md bg-bahaya-muda px-3 py-2 text-sm text-destructive" role="alert">{{ galatLokal || pesan }}</p>
       <Button type="submit" :variant="tujuan === 'ditolak' ? 'destructive' : 'default'" :disabled="!tujuan || menyimpan">{{ menyimpan ? 'Menyimpan…' : 'Simpan status' }}</Button>

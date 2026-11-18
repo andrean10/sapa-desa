@@ -14,7 +14,7 @@ onMounted(async () => {
   impersonasi.value = typeof route.query.impersonasi === 'string' ? route.query.impersonasi : null
   try {
     const profil = await useApi()<{ peran: 'admin'|'kanwil'|'upt' }>('/api/auth/me')
-    await navigateTo(profil.peran === 'upt' ? '/upt/pilih-petugas' : '/kanwil')
+    await navigateTo(profil.peran === 'upt' ? '/upt' : '/kanwil')
   } catch (galat) {
     impersonasi.value = null
     status.value = (galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Profil akun belum dapat dimuat. Silakan masuk kembali.'

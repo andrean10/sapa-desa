@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ChevronsUpDown, KeyRound, LogOut, UserRoundCheck } from '@lucide/vue'
+import { ChevronsUpDown, KeyRound, LogOut } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 import { SidebarMenuButton } from '~/components/ui/sidebar'
 import { APP_NAME } from '~~/shared/config/app'
 import { PERAN_PENGGUNA, TEKS_UMUM } from '~~/shared/config/teks'
 
-const properti = withDefaults(defineProps<{ tampilan?: 'header' | 'sidebar'; namaPetugas?: string }>(), { tampilan: 'header', namaPetugas: '' })
+const properti = withDefaults(defineProps<{ tampilan?: 'header' | 'sidebar' }>(), { tampilan: 'header' })
 defineEmits<{ keluar: [] }>()
 const { profil } = useAuth()
 const inisial = computed(() => (profil.value?.nama_tampil ?? APP_NAME).split(/\s+/).slice(0, 2).map(kata => kata[0]).join('').toUpperCase())
@@ -35,13 +35,8 @@ const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === pro
           <span class="rounded-full bg-primary/8 px-2 py-0.5 text-xs font-semibold text-primary">{{ labelPeran }}</span>
         </div>
       </DropdownMenuLabel>
-      <template v-if="profil?.peran === 'upt'">
-        <DropdownMenuSeparator />
-        <div class="px-2 py-1.5 text-xs text-muted-foreground">Bertugas atas nama<p class="mt-0.5 truncate text-sm font-medium text-foreground">{{ namaPetugas || 'Belum dipilih' }}</p></div>
-      </template>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem v-if="profil?.peran === 'upt'" as-child><NuxtLink to="/upt/pilih-petugas" class="no-underline"><UserRoundCheck />{{ TEKS_UMUM.gantiPetugas }}</NuxtLink></DropdownMenuItem>
         <DropdownMenuItem as-child><NuxtLink to="/akun/password" class="no-underline"><KeyRound />{{ TEKS_UMUM.gantiPassword }}</NuxtLink></DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, ShieldAlert, UserRoundCheck } from '@lucide/vue'
+import { Eye, ShieldAlert } from '@lucide/vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar'
 import { Separator } from '~/components/ui/separator'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb'
@@ -7,9 +7,8 @@ import { Button } from '~/components/ui/button'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
 import { APP_NAME } from '~~/shared/config/app'
 import { buatGayaTemaDashboard } from '~~/shared/config/tema'
-import { TEKS_UMUM } from '~~/shared/config/teks'
 
-const { profil, keluar, pegawaiBertugasId, daftarPegawai } = useAuth()
+const { profil, keluar } = useAuth()
 const akunImpersonasi = useCookie<string | null>('sapa-impersonasi')
 const konfigurasi = useRuntimeConfig()
 const route = useRoute()
@@ -30,13 +29,6 @@ const remahRoti = computed(() => {
   return { induk: { label: aktif.item.label, href: aktif.item.href }, judul }
 })
 
-const namaPegawai = ref('')
-watchEffect(async () => {
-  if (!pegawaiBertugasId.value || profil.value?.peran !== 'upt') { namaPegawai.value = ''; return }
-  const daftar = await daftarPegawai().catch(() => [])
-  namaPegawai.value = daftar.find(item => item.id === pegawaiBertugasId.value)?.nama ?? ''
-})
-
 const konfirmasiLogoutTerbuka = ref(false)
 async function logout() {
   konfirmasiLogoutTerbuka.value = false
@@ -51,7 +43,7 @@ useHead({
 
 <template>
   <SidebarProvider>
-    <AppSidebar variant="inset" :nama-petugas="namaPegawai" @keluar="konfirmasiLogoutTerbuka = true" />
+    <AppSidebar variant="inset" @keluar="konfirmasiLogoutTerbuka = true" />
     <SidebarInset class="min-w-0">
       <header class="sticky top-0 z-20 flex h-14 min-w-0 shrink-0 items-center gap-2 border-b bg-background/85 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:px-4 md:rounded-t-xl lg:px-6">
         <SidebarTrigger class="-ml-1 size-8 shrink-0" />
@@ -68,9 +60,6 @@ useHead({
             <BreadcrumbItem class="min-w-0"><BreadcrumbPage class="block truncate font-medium">{{ remahRoti.judul }}</BreadcrumbPage></BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-        <NuxtLink v-if="profil?.peran === 'upt'" to="/upt/pilih-petugas" class="hidden max-w-64 items-center gap-1.5 rounded-full border bg-card px-3 py-1 text-xs text-muted-foreground no-underline transition hover:border-primary/40 hover:text-foreground md:inline-flex" :title="TEKS_UMUM.gantiPetugas">
-          <UserRoundCheck class="size-3.5 shrink-0 text-sukses" aria-hidden="true" /><span class="truncate">Bertugas: <strong class="font-medium text-foreground">{{ namaPegawai || 'Pilih petugas' }}</strong></span>
-        </NuxtLink>
         <div v-if="lihatSebagaiUpt" class="relative flex shrink-0 items-center">
           <Eye class="pointer-events-none absolute left-2.5 z-10 size-3.5 text-muted-foreground" aria-hidden="true" />
           <label for="lihat-sebagai-upt" class="sr-only">Lihat sebagai UPT</label>
@@ -79,7 +68,7 @@ useHead({
             <NativeSelectOption v-for="kantor in opsiKantor" :key="kantor.id" :value="kantor.id">{{ kantor.nama_singkat }}</NativeSelectOption>
           </NativeSelect>
         </div>
-        <MenuPengguna :nama-petugas="namaPegawai" @keluar="konfirmasiLogoutTerbuka = true" />
+        <MenuPengguna @keluar="konfirmasiLogoutTerbuka = true" />
       </header>
       <AlertDialog v-model:open="konfirmasiLogoutTerbuka">
         <AlertDialogContent>

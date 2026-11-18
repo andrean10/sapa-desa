@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Building2, CalendarDays, Download, FileText, ImageIcon, MapPinned, UserRound, Users } from '@lucide/vue'
+import { Building2, CalendarDays, Download, FileText, ImageIcon, MapPinned, UserRound, UserRoundCog, Users } from '@lucide/vue'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import type { Tables } from '~~/shared/types/database.types'
@@ -19,7 +19,7 @@ const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`ka
     <div v-else-if="data" class="grid items-start gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(300px,1fr)]">
       <article class="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         <header class="border-b bg-linear-to-br from-primary/[0.05] to-transparent p-5">
-          <div class="flex flex-wrap items-center gap-2"><span class="rounded-md bg-emas/15 px-2 py-0.5 text-xs font-semibold text-emas-foreground">{{ data.jenis }}</span><span v-if="data.petugas_pengganti" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Petugas pengganti</span></div>
+          <div class="flex flex-wrap items-center gap-2"><span class="rounded-md bg-emas/15 px-2 py-0.5 text-xs font-semibold text-emas-foreground">{{ data.jenis }}</span><span v-if="data.petugas_pengganti_nama" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Dilakukan petugas pengganti</span></div>
           <h1 class="mt-2 text-xl font-semibold text-primary">Kegiatan di {{ data.desa }}</h1>
           <p class="mt-1 text-sm text-muted-foreground">{{ formatTanggalWib(data.tanggal_kegiatan) }} · {{ data.kantor }}</p>
         </header>
@@ -35,7 +35,8 @@ const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`ka
             <div class="flex gap-3"><CalendarDays class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Tanggal kegiatan</dt><dd class="font-medium">{{ formatTanggalWib(data.tanggal_kegiatan) }}</dd></div></div>
             <div class="flex gap-3"><Building2 class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">UPT</dt><dd class="font-medium">{{ data.kantor }}</dd></div></div>
             <div class="flex gap-3"><MapPinned class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Desa binaan</dt><dd class="font-medium">{{ data.desa }}</dd></div></div>
-            <div class="flex gap-3"><UserRound class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Petugas</dt><dd class="font-medium">{{ data.pegawai }}</dd></div></div>
+            <div v-if="data.petugas_pengganti_nama" class="flex gap-3"><UserRoundCog class="mt-0.5 size-4 text-peringatan" aria-hidden="true" /><div><dt class="text-muted-foreground">Petugas Pengganti</dt><dd class="font-medium">{{ data.petugas_pengganti_nama }}</dd></div></div>
+            <div class="flex gap-3"><UserRound class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Petugas PIMPASA</dt><dd class="font-medium">{{ data.pegawai }}</dd></div></div>
             <div class="flex gap-3"><Users class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Jumlah peserta</dt><dd class="font-medium tabular-nums">{{ data.jumlah_peserta }} orang</dd></div></div>
           </dl>
         </section>

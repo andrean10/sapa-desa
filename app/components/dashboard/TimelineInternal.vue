@@ -4,7 +4,7 @@ import { formatTanggalWaktuWib } from '~~/shared/utils/waktu'
 
 // Timeline internal petugas: menampilkan "oleh {petugas}" (tidak pernah tampil ke masyarakat).
 // Butir Ditolak ditonjolkan agar alasan penolakan mudah dibaca (PRD 8.4).
-defineProps<{ items: { id: string; status: Enums<'status_laporan'>; keterangan: string | null; created_at: string; nama_pegawai: string | null }[] }>()
+defineProps<{ items: { id: string; status: Enums<'status_laporan'>; keterangan: string | null; created_at: string; nama_pegawai: string | null; diproses_oleh?: string | null }[] }>()
 </script>
 
 <template>
@@ -17,7 +17,7 @@ defineProps<{ items: { id: string; status: Enums<'status_laporan'>; keterangan: 
       <div class="min-w-0" :class="item.status === 'ditolak' ? 'rounded-lg border border-destructive/30 bg-bahaya-muda p-3' : ''">
         <div class="flex flex-wrap items-center justify-between gap-2"><DashboardLencanaStatus :status="item.status" /><time :datetime="item.created_at" class="text-xs text-muted-foreground">{{ formatTanggalWaktuWib(item.created_at) }}</time></div>
         <p v-if="item.keterangan" class="mt-2 text-sm leading-6 whitespace-pre-wrap">{{ item.keterangan }}</p>
-        <p class="mt-1 text-xs text-muted-foreground">oleh {{ item.status === 'diterima' && !item.nama_pegawai ? 'Sistem' : item.nama_pegawai ?? 'Admin' }}</p>
+        <p class="mt-1 text-xs text-muted-foreground">oleh {{ item.diproses_oleh ?? item.nama_pegawai ?? (item.status === 'diterima' ? 'Sistem' : 'Admin') }}</p>
       </div>
     </li>
   </ol>

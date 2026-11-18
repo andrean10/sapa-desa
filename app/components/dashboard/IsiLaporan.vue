@@ -23,7 +23,7 @@ export type IsiLaporanData = {
   laporan_sebelumnya_id: string | null
   laporan_sebelumnya: { id: string; kode_pelacakan: string } | null
 }
-const properti = defineProps<{ data: IsiLaporanData; basisTautan: string }>()
+const properti = defineProps<{ data: IsiLaporanData; basisTautan: string; tampilkanDibaca?: boolean; dibacaPada?: string | null }>()
 const fotoTerbuka = ref(false)
 const lokasi = computed(() => [properti.data.lokasi.desa, properti.data.lokasi.kecamatan, properti.data.lokasi.kabupaten].filter(Boolean).join(', ') || 'Lokasi tidak tersedia')
 
@@ -42,6 +42,7 @@ async function salinKode() {
           <Button variant="ghost" size="icon-sm" aria-label="Salin kode laporan" @click="salinKode"><Copy class="size-4" /></Button>
         </div>
         <p class="text-sm text-muted-foreground">Masuk {{ formatTanggalWaktuWib(data.created_at) }}<template v-if="data.kantor"> · {{ data.kantor }}</template></p>
+        <p v-if="tampilkanDibaca"><DashboardLencanaDibaca :dibaca-pada="dibacaPada" /></p>
       </div>
       <div class="flex items-center gap-2"><DashboardLencanaJenis :jenis="data.jenis_terlapor" /><DashboardLencanaStatus :status="data.status" /></div>
     </header>

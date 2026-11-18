@@ -13,6 +13,7 @@ import {
 } from "@lucide/vue";
 import { toast } from "vue-sonner";
 import { BATAS_FILE } from "~~/shared/config/batas-file";
+import { labelPemrosesAduan } from "~~/shared/utils/jabatan";
 import { tanggalHariIniWib } from "~~/shared/utils/waktu";
 import { kompresFoto } from "~/utils/foto";
 
@@ -31,7 +32,6 @@ const emit = defineEmits<{ tersimpan: []; tutup: [] }>();
 const { opsi, detail, buat, unggah, bersihkan, ubah } = useKegiatanUpt();
 // Tanpa await: form ini dibuka di dalam dialog, dan setup async di sana butuh <Suspense>. Data tampil reaktif saat sudah siap.
 const { data: profilKantor } = useProfilUpt();
-const { pegawaiBertugasId } = useAuth();
 
 const pilihan = ref<{
   desa: { desa_id: string; desa: string; kecamatan: string }[];
@@ -48,6 +48,7 @@ const isian = reactive({
   tanggal_kegiatan: tanggalHariIniWib(),
   desa_id: props.desaIdAwal,
   pegawai_id: "",
+  petugas_pengganti_nama: "",
   jenis_kegiatan_id: "",
   jumlah_peserta: 0,
   uraian_hasil: "",
@@ -74,29 +75,49 @@ const infoKompres = ref("");
 const pratinjauPdf = ref("");
 
 const modeUbah = computed(() => Boolean(props.id));
-const pegawaiPengganti = computed(
-  () =>
-    isian.desa_id &&
-    isian.pegawai_id &&
-    !pilihan.value.penugasan.some(
-      (item) =>
-        item.desa_id === isian.desa_id &&
-        item.pegawai_id === isian.pegawai_id &&
-        item.tanggal_mulai <= isian.tanggal_kegiatan &&
-        (!item.tanggal_selesai ||
-          item.tanggal_selesai >= isian.tanggal_kegiatan),
-    ),
+// Petugas hanya boleh PIMPASA yang ditugaskan di desa itu pada tanggal kegiatan (SK Kanwil bersifat tetap).
+// Yang menggantikan karena berhalangan ditulis bebas di "Petugas Pengganti". Aturan ini juga dijaga database.
+const petugasPimpasa = computed(() =>
+  isian.desa_id
+    ? pilihan.value.pegawai.filter((pegawai) =>
+        pilihan.value.penugasan.some(
+          (item) =>
+            item.desa_id === isian.desa_id &&
+            item.pegawai_id === pegawai.id &&
+            item.tanggal_mulai <= isian.tanggal_kegiatan &&
+            (!item.tanggal_selesai ||
+              item.tanggal_selesai >= isian.tanggal_kegiatan),
+        ),
+      )
+    : [],
+);
+const tanpaPimpasa = computed(
+  () => Boolean(isian.desa_id) && !memuat.value && petugasPimpasa.value.length === 0,
+);
+const jabatanPemroses = computed(() => labelPemrosesAduan(profilKantor.value?.kantor?.nama));
+const pegawaiAsli = ref("");
+// Satu PIMPASA: terpilih otomatis dan dikunci. Beberapa: pilih salah satu. Saat mengubah laporan lama, petugas aslinya dipertahankan.
+watch(
+  [() => isian.desa_id, () => isian.tanggal_kegiatan, petugasPimpasa],
+  () => {
+    const daftar = petugasPimpasa.value;
+    if (daftar.length === 1) isian.pegawai_id = daftar[0]!.id;
+    else if (
+      !daftar.some((item) => item.id === isian.pegawai_id) &&
+      !(modeUbah.value && isian.pegawai_id === pegawaiAsli.value)
+    )
+      isian.pegawai_id = "";
+  },
 );
 
 onMounted(async () => {
   try {
     pilihan.value = await opsi();
-    isian.pegawai_id =
-      pilihan.value.pegawai.find((item) => item.id === pegawaiBertugasId.value)
-        ?.id ?? "";
     if (props.id) {
       const kegiatan = await detail(props.id);
       Object.assign(isian, kegiatan);
+      isian.petugas_pengganti_nama = kegiatan.petugas_pengganti_nama ?? "";
+      pegawaiAsli.value = kegiatan.pegawai_id;
       lampiranTersimpan.value = {
         foto_url: kegiatan.foto_url,
         pdf_url: kegiatan.pdf_url,
@@ -226,6 +247,7 @@ async function simpan() {
       jenis_kegiatan_id: isian.jenis_kegiatan_id,
       jumlah_peserta: isian.jumlah_peserta,
       uraian_hasil: isian.uraian_hasil,
+      petugas_pengganti_nama: isian.petugas_pengganti_nama.trim(),
       ...(isian.foto_path && { foto_path: isian.foto_path }),
       ...(isian.pdf_path && { pdf_path: isian.pdf_path }),
     };
@@ -351,24 +373,33 @@ async function simpan() {
                 <FieldLabel for="kegiatan-petugas"
                   ><Users
                     class="size-4 text-muted-foreground"
-                  />Petugas</FieldLabel
+                  />Petugas PIMPASA</FieldLabel
                 >
                 <NativeSelect
                   id="kegiatan-petugas"
                   v-model="isian.pegawai_id"
                   class="h-11"
                   required
+                  :disabled="!isian.desa_id || petugasPimpasa.length <= 1"
                 >
-                  <NativeSelectOption value=""
-                    >Pilih petugas</NativeSelectOption
-                  >
+                  <NativeSelectOption value="">{{
+                    !isian.desa_id
+                      ? "Pilih desa binaan terlebih dahulu"
+                      : petugasPimpasa.length
+                        ? "Pilih petugas"
+                        : "Belum ada PIMPASA aktif"
+                  }}</NativeSelectOption>
                   <NativeSelectOption
-                    v-for="item in pilihan.pegawai"
+                    v-for="item in petugasPimpasa"
                     :key="item.id"
                     :value="item.id"
                     >{{ item.nama }}</NativeSelectOption
                   >
                 </NativeSelect>
+                <FieldDescription
+                  >Hanya PIMPASA yang ditugaskan di desa ini (sesuai SK
+                  Kanwil).</FieldDescription
+                >
               </Field>
               <Field>
                 <FieldLabel for="kegiatan-peserta">Jumlah peserta</FieldLabel>
@@ -384,15 +415,36 @@ async function simpan() {
                 />
               </Field>
             </div>
-            <Alert v-if="pegawaiPengganti">
+            <Alert v-if="tanpaPimpasa" variant="destructive">
               <TriangleAlert />
-              <AlertTitle>Petugas pengganti</AlertTitle>
+              <AlertTitle>Belum ada PIMPASA aktif</AlertTitle>
               <AlertDescription
-                >Petugas ini bukan PIMPASA aktif pada desa dan tanggal yang
-                dipilih. Sistem akan mencatatnya sebagai petugas
-                pengganti.</AlertDescription
+                >Desa ini belum memiliki PIMPASA yang bertugas pada tanggal
+                tersebut. Hubungi Kanwil untuk penugasan PIMPASA.</AlertDescription
               >
             </Alert>
+            <Field>
+              <FieldLabel for="kegiatan-pengganti"
+                >Petugas Pengganti
+                <span class="font-normal text-muted-foreground"
+                  >(opsional)</span
+                ></FieldLabel
+              >
+              <Input
+                id="kegiatan-pengganti"
+                v-model="isian.petugas_pengganti_nama"
+                class="h-11"
+                maxlength="150"
+                autocomplete="off"
+                placeholder="Nama petugas pengganti"
+              />
+              <FieldDescription
+                >Isi hanya bila PIMPASA berhalangan (cuti, sakit, dan
+                sebagainya) dan kegiatan dilakukan petugas lain atas perintah
+                {{ jabatanPemroses }}. Kosongkan bila PIMPASA sendiri yang
+                terjun.</FieldDescription
+              >
+            </Field>
           </FieldGroup>
         </FieldSet>
 
@@ -449,8 +501,8 @@ async function simpan() {
                   @change="pilihFoto"
                 />
                 <FieldDescription
-                  >JPEG, PNG, atau WebP. Maksimal 3 MB. Foto yang lebih besar
-                  dikecilkan otomatis.</FieldDescription
+                  >JPEG, PNG, atau WebP. Ukuran foto disesuaikan otomatis
+                  saat diunggah.</FieldDescription
                 >
                 <p
                   v-if="galatFoto"
@@ -585,7 +637,7 @@ async function simpan() {
         @click="emit('tutup')"
         >Batal</Button
       >
-      <Button type="submit" :disabled="memuat || sibuk">
+      <Button type="submit" :disabled="memuat || sibuk || tanpaPimpasa">
         <LoaderCircle v-if="sibuk" class="size-4 animate-spin" />{{
           sibuk
             ? "Menyimpan…"

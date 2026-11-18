@@ -1,22 +1,18 @@
 <script setup lang="ts">
 import { toast } from 'vue-sonner'
+import { labelPemrosesAduan } from '~~/shared/utils/jabatan'
 import { Skeleton } from '~/components/ui/skeleton'
 import type { Enums } from '~~/shared/types/database.types'
 
 definePageMeta({ layout: 'dashboard', title: 'Detail Laporan' })
 const route = useRoute()
 const { detail, ubahStatus } = useLaporanUpt()
-const { daftarPegawai, pegawaiBertugasId } = useAuth()
 const { data, pending, error, refresh } = await useAsyncData(`upt-laporan-${route.params.id}`, () => detail(String(route.params.id)), { lazy: true })
 const menyimpan = ref(false)
 const pesan = ref('')
-const namaPetugas = ref('')
-const riwayat = computed(() => (data.value?.riwayat_status ?? []).map(item => ({ id: item.id, status: item.status, keterangan: item.keterangan, created_at: item.created_at, nama_pegawai: item.nama_pegawai })))
-onMounted(async () => {
-  if (!pegawaiBertugasId.value) return
-  const daftar = await daftarPegawai().catch(() => [])
-  namaPetugas.value = daftar.find(item => item.id === pegawaiBertugasId.value)?.nama ?? ''
-})
+// Akun UPT dipakai bersama pimpinan: perubahan status dicatat sebagai jabatan, bukan nama orang.
+const diprosesOleh = computed(() => labelPemrosesAduan(data.value?.kantor))
+const riwayat = computed(() => (data.value?.riwayat_status ?? []).map(item => ({ id: item.id, status: item.status, keterangan: item.keterangan, created_at: item.created_at, nama_pegawai: item.nama_pegawai, diproses_oleh: item.diproses_oleh })))
 
 async function simpanStatus(status: Enums<'status_laporan'>, keterangan: string) {
   if (menyimpan.value) return
@@ -35,9 +31,9 @@ async function simpanStatus(status: Enums<'status_laporan'>, keterangan: string)
     <div v-else-if="data" class="grid items-start gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
       <DashboardIsiLaporan :data="data" basis-tautan="/upt/laporan" />
       <div class="grid gap-5 xl:sticky xl:top-20">
-        <DashboardPanelUbahStatus :status-kini="data.status" :menyimpan="menyimpan" :pesan="pesan" :nama-petugas="namaPetugas" @simpan="simpanStatus" />
+        <DashboardPanelUbahStatus :status-kini="data.status" :menyimpan="menyimpan" :pesan="pesan" :diproses-oleh="diprosesOleh" @simpan="simpanStatus" />
         <section class="rounded-xl border border-border/80 bg-card shadow-xs">
-          <header class="border-b px-5 py-4"><h2 class="font-semibold">Riwayat status</h2><p class="text-sm text-muted-foreground">Keterangan tampil juga kepada pelapor; nama petugas tidak.</p></header>
+          <header class="border-b px-5 py-4"><h2 class="font-semibold">Riwayat status</h2><p class="text-sm text-muted-foreground">Keterangan tampil juga kepada pelapor; pejabat yang memproses tidak.</p></header>
           <div class="p-5"><DashboardTimelineInternal :items="riwayat" /></div>
         </section>
       </div>

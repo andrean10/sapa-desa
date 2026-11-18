@@ -1,9 +1,9 @@
-import { createError, getQuery, getRequestHeader, getRouterParam, readBody, readMultipartFormData, type H3Event } from 'h3'
+import { createError, getQuery, getRouterParam, readBody, readMultipartFormData, type H3Event } from 'h3'
 import { z } from 'zod'
 import { JENIS_TERLAPOR, STATUS_LAPORAN } from '../../shared/config/teks'
 import { profilSesi } from './auth.controller'
 import { buatClientSesiUser } from '../utils/supabase'
-import { ambilDashboardUpt, ambilDesaPenugasanAktif, ambilNamaPenugasanUpt, ambilProfilKantorUpt, bersihkanLampiranKegiatan, buatSignedUrlFotoLaporan, buatSignedUrlLampiranUpt, daftarKegiatanUpt, daftarLaporanUpt, daftarPegawaiUpt, detailKegiatanUpt, detailLaporanUpt, hapusKegiatanUpt, opsiKegiatanUpt, tambahKegiatanUpt, tambahPegawaiUpt, ubahKegiatanUpt, ubahPegawaiUpt, ubahStatusLaporanUpt, unggahLampiranKegiatanUpt } from '../models/upt.model'
+import { tandaiDibacaUpt, ambilDashboardUpt, ambilDesaPenugasanAktif, ambilNamaPenugasanUpt, ambilProfilKantorUpt, bersihkanLampiranKegiatan, buatSignedUrlFotoLaporan, buatSignedUrlLampiranUpt, daftarKegiatanUpt, daftarLaporanUpt, daftarPegawaiUpt, detailKegiatanUpt, detailLaporanUpt, hapusKegiatanUpt, opsiKegiatanUpt, tambahKegiatanUpt, tambahPegawaiUpt, ubahKegiatanUpt, ubahPegawaiUpt, ubahStatusLaporanUpt, unggahLampiranKegiatanUpt } from '../models/upt.model'
 import { tanggalHariIniWib } from '../../shared/utils/waktu'
 import { BATAS_FILE } from '../../shared/config/batas-file'
 import type { Enums } from '../../shared/types/database.types'
@@ -42,8 +42,6 @@ const skemaUbahStatus = z.object({
 export async function simpanStatusLaporanUpt(event: H3Event) {
   const profil = await profilSesi(event)
   if (profil.peran !== 'upt') throw createError({ statusCode: 403, statusMessage: 'Hanya UPT yang dapat mengubah status laporan.' })
-  const pegawaiId = getRequestHeader(event, 'x-bertugas-id')
-  if (!pegawaiId) throw createError({ statusCode: 400, statusMessage: 'Pilih petugas yang sedang bertugas.' })
   const laporanId = getRouterParam(event, 'id')
   if (!laporanId || !z.string().uuid().safeParse(laporanId).success) throw createError({ statusCode: 400, statusMessage: 'ID laporan tidak valid.' })
   const parsed = skemaUbahStatus.safeParse(await readBody(event))
@@ -52,7 +50,7 @@ export async function simpanStatusLaporanUpt(event: H3Event) {
     throw createError({ statusCode: 400, statusMessage: 'Keterangan wajib diisi untuk status ini.' })
   }
   const hasil = await ubahStatusLaporanUpt(buatClientSesiUser(event), {
-    laporanId, status: parsed.data.status, keterangan: parsed.data.keterangan, pegawaiId
+    laporanId, status: parsed.data.status, keterangan: parsed.data.keterangan
   })
   if (hasil.error) {
     const message = hasil.error.message
@@ -111,6 +109,8 @@ export async function detailLaporanUptController(event: H3Event) {
   const hasil = await detailLaporanUpt(buatClientSesiUser(event), laporanId)
   if (hasil.laporan.error || hasil.riwayat.error || hasil.desa?.error || hasil.kecamatan?.error || hasil.kabupaten?.error || hasil.kantor?.error || hasil.pegawai.error || hasil.laporanSebelumnya?.error) throw createError({ statusCode: 503, statusMessage: 'Detail laporan belum dapat dimuat.' })
   if (!hasil.laporan.data) throw createError({ statusCode: 404, statusMessage: 'Laporan tidak ditemukan.' })
+  // Dibuka UPT pemilik = dibaca (hanya pertama kali). Gagal mencatat tidak boleh menghalangi UPT membaca aduan.
+  await tandaiDibacaUpt(buatClientSesiUser(event), laporanId).catch(() => undefined)
   const { foto_path, ...laporan } = hasil.laporan.data
   let foto_url: string | null = null
   if (foto_path) {
@@ -207,6 +207,8 @@ const skemaKegiatan = z.object({
   jenis_kegiatan_id: z.string().uuid(),
   jumlah_peserta: z.coerce.number().int().min(0).max(100000),
   uraian_hasil: z.string().trim().min(10).max(5000),
+  // Nama petugas yang menggantikan PIMPASA (atas perintah KASI INTELDAKIM). Kosong = PIMPASA sendiri yang terjun.
+  petugas_pengganti_nama: z.string().trim().max(150).optional(),
   foto_path: z.string().optional(),
   pdf_path: z.string().optional()
 }).strict()

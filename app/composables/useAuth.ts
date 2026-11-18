@@ -1,5 +1,5 @@
 import { toast } from 'vue-sonner'
-import type { PegawaiPilihan, ProfilAkun } from '~~/shared/types/auth'
+import type { ProfilAkun } from '~~/shared/types/auth'
 import { AUTH_EMAIL_DOMAIN, MASA_BERLAKU_PROFIL_MS } from '~~/shared/config/app'
 import { TEKS_UMUM } from '~~/shared/config/teks'
 
@@ -7,7 +7,6 @@ export function useAuth() {
   const api = useApi()
   const profil = useState<ProfilAkun | null>('profil-akun', () => null)
   const profilDimuatPada = useState<number>('profil-dimuat-pada', () => 0)
-  const pegawaiBertugasId = useCookie<string | null>('sapa-bertugas-id', { path: '/', sameSite: 'lax' })
   const akunImpersonasi = useCookie<string | null>('sapa-impersonasi', { path: '/', sameSite: 'lax' })
 
   async function masuk(username: string, password: string) {
@@ -24,17 +23,10 @@ export function useAuth() {
       throw new Error('Username atau password salah.')
     }
 
-    // Petugas bertugas milik sesi sebelumnya tidak boleh terbawa ke akun baru di browser yang sama.
-    pegawaiBertugasId.value = null
     try {
       profil.value = await api<ProfilAkun>('/api/auth/me')
       profilDimuatPada.value = Date.now()
-      return {
-        profil: profil.value,
-        pegawai: profil.value.peran === 'upt'
-          ? await api<PegawaiPilihan[]>('/api/auth/pegawai-aktif')
-          : []
-      }
+      return { profil: profil.value }
     } catch (galat) {
       await buatClientBrowser().auth.signOut()
       profil.value = null
@@ -73,10 +65,6 @@ export function useAuth() {
     }
   }
 
-  async function daftarPegawai() {
-    return await api<PegawaiPilihan[]>('/api/auth/pegawai-aktif')
-  }
-
   async function gantiPassword(passwordSaatIni: string, passwordBaru: string) {
     return await api<{ berhasil: true }>('/api/auth/password', {
       method: 'PATCH',
@@ -88,14 +76,9 @@ export function useAuth() {
     await buatClientBrowser().auth.signOut()
     profil.value = null
     profilDimuatPada.value = 0
-    pegawaiBertugasId.value = null
     akunImpersonasi.value = null
     await navigateTo('/masuk')
   }
 
-  function pilihPegawai(id: string) {
-    pegawaiBertugasId.value = id
-  }
-
-  return { profil, pegawaiBertugasId, masuk, muatProfil, daftarPegawai, gantiPassword, keluar, pilihPegawai }
+  return { profil, masuk, muatProfil, gantiPassword, keluar }
 }

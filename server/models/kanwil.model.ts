@@ -97,7 +97,7 @@ export async function daftarLaporanKanwil(client: SupabaseClient<Database>, hala
 export async function daftarKegiatanKanwil(client: SupabaseClient<Database>, halaman: number, filter: {
   kantorId?: string; hanyaDiganti?: boolean; dari?: string; sampai?: string; desaId?: string; jenisId?: string; pegawaiId?: string
 } = {}) {
-  let query = client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, created_at, kantor_id', { count: 'exact' }).order('tanggal_kegiatan', { ascending: false }).range((halaman - 1) * 20, halaman * 20 - 1)
+  let query = client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, petugas_pengganti_nama, created_at, kantor_id', { count: 'exact' }).order('tanggal_kegiatan', { ascending: false }).range((halaman - 1) * 20, halaman * 20 - 1)
   if (filter.kantorId) query = query.eq('kantor_id', filter.kantorId)
   if (filter.hanyaDiganti) query = query.eq('petugas_pengganti', true)
   if (filter.dari) query = query.gte('tanggal_kegiatan', filter.dari)

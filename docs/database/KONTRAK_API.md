@@ -77,10 +77,10 @@ Tidak ada nama, alamat, isi laporan, maupun petugas. Jangan menambahkannya.
 - Foto: server memverifikasi laporan terbaca lewat `sesi-user`, lalu membuat signed URL dari bucket `foto-laporan` dengan `service`.
 
 ### 4.2 Ubah status
-`rpc('ubah_status_laporan', { p_laporan_id, p_status, p_keterangan, p_pegawai_id })`
+`rpc('ubah_status_laporan', { p_laporan_id, p_status, p_keterangan })` (`p_pegawai_id` masih diterima tetapi **tidak lagi dikirim**)
 
 - Boleh: `upt` dan `admin`. **Kanwil tidak boleh.** Harus `sesi-user` (service role ditolak karena tanpa identitas).
-- `p_pegawai_id` **wajib** untuk UPT: pegawai aktif dan satu kantor dengan laporan (isi dari pilihan "bertugas atas nama").
+- Untuk UPT, perubahan otomatis dicatat di `riwayat_status.diproses_oleh` sebagai `KASI INTELDAKIM {NAMA UPT}` dan menandai laporan dibaca. Tidak ada pemilihan petugas. Untuk admin, `diproses_oleh` kosong (UI: "Admin").
 - Alur status (loncat dan mundur ditolak):
 
 | Dari | Ke |
@@ -95,9 +95,17 @@ Tidak ada nama, alamat, isi laporan, maupun petugas. Jangan menambahkannya.
 - Satu transaksi: update `laporan.status` + insert `riwayat_status`. Jangan update `laporan.status` langsung.
 - Status `diterima` dibuat sistem, jangan dikirim.
 
+### 4.2a Tandai dibaca (khusus UPT, dipanggil server)
+
+`rpc('tandai_dibaca', { p_laporan_id })` dengan client sesi user, saat akun UPT membuka detail aduan (`GET /api/upt/laporan/[id]`).
+
+- Hanya berdampak untuk `upt` pemilik laporan; peran lain dan laporan kantor lain **diabaikan tanpa galat**.
+- Idempotent: yang tercatat hanya pembukaan **pertama**. Kegagalan mencatat tidak boleh menghalangi UPT membaca aduan.
+- Pembacaan penanda: `from('laporan_dibaca').select('laporan_id, dibaca_pada').in('laporan_id', ids)` hanya oleh Kanwil/admin (RLS menolak akun lain). Endpoint server Kanwil melampirkan `dibaca_pada` pada daftar laporan, detail, dan pantauan; endpoint UPT **tidak pernah** memuatnya.
+
 ### 4.3 Pegawai kantornya
 - Baca/tambah/ubah langsung di tabel `pegawai` dengan `kantor_id` = kantor akun. Nonaktifkan dengan `aktif = false`. Tidak bisa pindah kantor dan tidak bisa dinonaktifkan selagi punya penugasan aktif (ditolak trigger; minta Kanwil mengakhiri penugasan dulu).
-- Dropdown "bertugas atas nama": `from('pegawai').select('id, nama').eq('aktif', true).order('nama')`.
+- Pegawai dipakai untuk penugasan PIMPASA dan dropdown petugas pada laporan kegiatan (dibatasi ke PIMPASA desa itu, dihitung dari `desa_binaan_pegawai`).
 
 ### 4.4 Laporan kegiatan PIMPASA
 Insert dengan `sesi-user`:
@@ -115,7 +123,7 @@ from('laporan_pimpasa').insert({
 })
 ```
 
-**Jangan kirim** `kantor_id`, `dibuat_oleh`, `petugas_pengganti`. `petugas_pengganti` dihitung trigger dari data penugasan; UI hanya menampilkan lencana "digantikan". Jika ingin menandai di form, itu hanya informasi UI, bukan nilai yang dikirim.
+**Jangan kirim** `kantor_id`, `dibuat_oleh`, `petugas_pengganti` (kolom turunan). `pegawai_id` wajib PIMPASA yang ditugaskan di desa itu pada `tanggal_kegiatan` (ditolak trigger bila tidak). `petugas_pengganti_nama` (teks bebas, opsional, maks. 150) dikirim hanya bila ada pengganti; kosong berarti PIMPASA sendiri yang terjun.
 
 - Edit: UPT boleh mengubah isi laporan kantornya (desa dan kantor tidak bisa diganti).
 - **Hapus**: UPT hanya bisa jika `created_at` kurang dari N menit lalu (N = `pengaturan.batas_menit_hapus_laporan`, default 10). Lewat itu, hanya admin. Setelah baris terhapus, **server menghapus file** di Storage dengan `service` (akun user tidak punya policy hapus file).
@@ -231,7 +239,7 @@ export type LaporanBaru = Omit<
   'id' | 'kantor_id' | 'kode_pelacakan' | 'status' | 'created_at' | 'updated_at'
 >
 
-/** Isian laporan kegiatan PIMPASA; kantor_id, dibuat_oleh, petugas_pengganti diisi database */
+/** Isian laporan kegiatan PIMPASA; kantor_id, dibuat_oleh, petugas_pengganti (turunan) diisi database */
 export type LaporanPimpasaBaru = Omit<
   TablesInsert<'laporan_pimpasa'>,
   'id' | 'kantor_id' | 'dibuat_oleh' | 'petugas_pengganti' | 'created_at' | 'updated_at'

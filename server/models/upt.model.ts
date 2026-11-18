@@ -17,14 +17,23 @@ export async function ubahStatusLaporanUpt(client: SupabaseClient<Database>, inp
   laporanId: string
   status: Enums<'status_laporan'>
   keterangan?: string
-  pegawaiId?: string
 }) {
   return await client.rpc('ubah_status_laporan', {
     p_laporan_id: input.laporanId,
     p_status: input.status,
-    p_keterangan: input.keterangan,
-    ...(input.pegawaiId && { p_pegawai_id: input.pegawaiId })
+    p_keterangan: input.keterangan
   })
+}
+
+/** Mencatat bahwa UPT pemilik membuka detail aduan (hanya yang pertama). Kanwil/admin diabaikan oleh fungsi database. */
+export async function tandaiDibacaUpt(client: SupabaseClient<Database>, laporanId: string) {
+  return await client.rpc('tandai_dibaca', { p_laporan_id: laporanId })
+}
+
+/** Waktu pertama dibaca UPT, dipakai HANYA oleh Kanwil/admin (RLS menolak akun lain). Kunci: laporan_id. */
+export async function ambilWaktuDibaca(client: SupabaseClient<Database>, laporanIds: string[]) {
+  if (!laporanIds.length) return { data: [] as { laporan_id: string; dibaca_pada: string }[], error: null }
+  return await client.from('laporan_dibaca').select('laporan_id, dibaca_pada').in('laporan_id', laporanIds)
 }
 
 export async function daftarLaporanUpt(client: SupabaseClient<Database>, halaman: number, filter: {
@@ -84,7 +93,7 @@ export async function daftarLaporanUpt(client: SupabaseClient<Database>, halaman
 export async function detailLaporanUpt(client: SupabaseClient<Database>, laporanId: string) {
   const [laporan, riwayat] = await Promise.all([
     client.from('laporan').select('*').eq('id', laporanId).maybeSingle(),
-    client.from('riwayat_status').select('id, status, keterangan, created_at, pegawai_id').eq('laporan_id', laporanId).order('created_at')
+    client.from('riwayat_status').select('id, status, keterangan, created_at, pegawai_id, diproses_oleh').eq('laporan_id', laporanId).order('created_at')
   ])
   if (laporan.error || !laporan.data) return { laporan, riwayat, desa: null, kecamatan: null, kabupaten: null, kantor: null, pegawai: { data: [], error: null } }
   const [desa, kantor, pegawai, laporanSebelumnya] = await Promise.all([
@@ -179,7 +188,7 @@ export async function ambilNamaPenugasanUpt(client: SupabaseClient<Database>, pe
 
 export async function daftarKegiatanUpt(client: SupabaseClient<Database>) {
   const hasil = await client.from('laporan_pimpasa')
-    .select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, created_at')
+    .select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, petugas_pengganti_nama, created_at')
     .order('tanggal_kegiatan', { ascending: false })
   const pengaturan = await client.from('pengaturan').select('nilai').eq('kunci', 'batas_menit_hapus_laporan').maybeSingle()
   if (hasil.error || pengaturan.error) return { data: null, error: hasil.error ?? pengaturan.error }
@@ -218,7 +227,7 @@ export async function tambahKegiatanUpt(client: SupabaseClient<Database>, data: 
 }
 
 export async function detailKegiatanUpt(client: SupabaseClient<Database>, id: string) {
-  return await client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, kantor_id')
+  return await client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, petugas_pengganti_nama, kantor_id')
     .eq('id', id).maybeSingle()
 }
 

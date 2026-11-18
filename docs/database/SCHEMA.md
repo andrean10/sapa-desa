@@ -107,7 +107,7 @@ Akun: `admin`, `kanwil_riau`, `imigrasi_pekanbaru`, `imigrasi_siak`, `imigrasi_d
 
 ### 4.6 `pegawai`
 
-Daftar nama petugas untuk dropdown "bertugas atas nama". Tidak punya login.
+Daftar pegawai kantor (dipakai untuk penugasan PIMPASA dan dropdown petugas pada laporan kegiatan, dibatasi ke PIMPASA desa itu). Tidak punya login.
 
 | Kolom | Tipe | | Keterangan |
 |---|---|---|---|
@@ -175,11 +175,24 @@ Catatan tipe TypeScript: tipe `Insert` menandai `kantor_id` dan `kode_pelacakan`
 | laporan_id | uuid | M, FK → laporan | |
 | status | status_laporan | M | |
 | keterangan | text | O | maksimal 1000 karakter, **tampil publik ke pelapor** |
-| pegawai_id | uuid | O, FK → pegawai | petugas atas nama. Kosong untuk `diterima` |
+| pegawai_id | uuid | O, FK → pegawai | **tidak lagi diisi** (UPT tidak memilih petugas); hanya baris lama yang berisi. Kosong untuk `diterima` |
+| diproses_oleh | text | O | snapshot jabatan pemroses, diisi `ubah_status_laporan` untuk UPT: `KASI INTELDAKIM {NAMA UPT}` (mis. `KASI INTELDAKIM SIAK`; nama UPT = `kantor_imigrasi.nama_singkat` tanpa awalan "Kanim", huruf besar). Kosong untuk `diterima` dan perubahan oleh admin. **Tidak ada di hasil `lacak_laporan`** (tidak tampil ke masyarakat) |
 | dibuat_oleh | uuid | O, FK → profiles | akun yang mengubah. Kosong hanya untuk `diterima` (CHECK) |
 | created_at | timestamptz | | waktu di sisi kiri garis timeline |
 
 **Permanen**: trigger `riwayat_status_kunci` menolak update dan delete oleh siapa pun.
+
+### 4.9a `laporan_dibaca` (penanda dibaca, hanya pemantauan Kanwil/admin)
+
+| Kolom | Tipe | | Keterangan |
+|---|---|---|---|
+| laporan_id | uuid | PK, FK → laporan (on delete cascade) | |
+| dibaca_pada | timestamptz | default `now()` | waktu **pertama** akun UPT pemilik membuka detail aduan |
+| dibaca_oleh | uuid | M | `auth.uid()` akun UPT (akun kantor dipakai bersama, jadi tidak mengidentifikasi orang) |
+
+- RLS aktif; **select hanya `admin` dan `kanwil`**. Tanpa policy insert/update/delete: satu-satunya jalur tulis adalah fungsi `tandai_dibaca()` dan `ubah_status_laporan()` (SECURITY DEFINER).
+- Hanya akun `upt` pemilik laporan yang tercatat; Kanwil dan admin yang membuka detail **tidak** menandai.
+- Mengubah status oleh UPT otomatis mengisi baris ini bila belum ada, sehingga tidak ada laporan berstatus `diverifikasi` yang tercatat belum dibaca.
 
 ### 4.10 `jenis_kegiatan`
 
@@ -199,14 +212,15 @@ Data awal (7): Deteksi Dini, Lainnya, Konsultasi Masyarakat, Pemantauan Wilayah,
 | tanggal_kegiatan | date | M | tidak boleh di masa depan |
 | kantor_id | uuid | FK → kantor_imigrasi | **diisi dari akun login** (kiriman klien diabaikan) |
 | desa_id | text | M, FK → desa_kelurahan | harus DBI dan di wilayah kerja kantor itu. **Perhatikan nama kolom: `desa_id`, bukan `desa_kelurahan_id`** |
-| pegawai_id | uuid | M, FK → pegawai | aktif dan satu kantor. Boleh rekan sekantor (bukan hanya PIMPASA resmi desa itu) |
 | dibuat_oleh | uuid | FK → profiles | **diisi dari akun login** |
 | jenis_kegiatan_id | uuid | M, FK → jenis_kegiatan | |
 | jumlah_peserta | integer | M | 0–100000 |
 | uraian_hasil | text | M | 10–5000 karakter (uraian, hasil, tindak lanjut) |
 | foto_path | text | O | path di bucket `foto-kegiatan`, maksimal 1 foto |
 | pdf_path | text | O | path di bucket `laporan-pdf` |
-| petugas_pengganti | boolean | **dihitung trigger** | `true` bila pegawai tidak punya penugasan berlaku di desa itu pada tanggal kegiatan. UI hanya menampilkan sebagai lencana "digantikan" |
+| pegawai_id | uuid | FK → pegawai, NOT NULL | **wajib PIMPASA yang ditugaskan di desa itu pada `tanggal_kegiatan`** (dijaga trigger `laporan_pimpasa_cek`), aktif dan satu kantor |
+| petugas_pengganti_nama | text | opsional, maks. 150 | nama petugas yang menggantikan PIMPASA (teks bebas, atas perintah KASI INTELDAKIM). Spasi saja dijadikan NULL. NULL = PIMPASA sendiri yang terjun; UI menyembunyikannya |
+| petugas_pengganti | boolean | **kolom turunan** (`petugas_pengganti_nama is not null`), read-only | dipertahankan sementara agar kode lama tetap terbaca; akan dihapus pada migrasi pembersihan |
 
 Trigger `laporan_pimpasa_cek` memaksakan semua aturan di atas, termasuk: path file harus diawali folder `kantor_id` akun, dan `desa_id`/`kantor_id` tidak bisa diganti saat update.
 
@@ -280,6 +294,7 @@ Konvensi path: `{kantor_id}/{uuid}.{ext}` dengan nama file **unik**. Tidak ada p
 | pegawai | – | kantornya: baca, tambah, ubah | semua: baca, tambah, ubah | semua + mutasi antar kantor |
 | desa_binaan_pegawai | – | kantornya: baca | semua: baca, tambah, ubah | semua: baca, tambah, ubah |
 | laporan, riwayat_status | – | baca kantornya | baca semua | baca semua |
+| laporan_dibaca | – | – (tidak bisa baca) | baca | baca |
 | laporan_pimpasa | – | baca/tambah/ubah kantornya; hapus kantornya dalam N menit | baca semua (read-only) | baca, tambah, ubah, hapus kapan saja |
 | jenis_kegiatan | – | baca | baca, tambah, ubah | baca, tambah, ubah |
 | pengaturan | – | baca | baca, ubah (kecuali `validasi_lokasi_aktif`) | baca, ubah semua |
@@ -295,6 +310,7 @@ Konvensi path: `{kantor_id}/{uuid}.{ext}` dengan nama file **unik**. Tidak ada p
 |---|---|
 | semua | `id` (default), `created_at`, `updated_at` |
 | laporan | `kode_pelacakan`, `kantor_id`, `status` |
-| riwayat_status | seluruh baris dibuat oleh trigger/fungsi |
-| laporan_pimpasa | `kantor_id`, `dibuat_oleh`, `petugas_pengganti` |
+| riwayat_status | seluruh baris dibuat oleh trigger/fungsi (termasuk `diproses_oleh`) |
+| laporan_dibaca | seluruh baris dibuat fungsi `tandai_dibaca` / `ubah_status_laporan` |
+| laporan_pimpasa | `kantor_id`, `dibuat_oleh`, `petugas_pengganti` (turunan) |
 | desa_binaan_pegawai | `kantor_id` (diisi trigger dari kantor pegawai), `tanggal_mulai` (default hari ini WIB), `alasan_berakhir` hanya saat menutup |

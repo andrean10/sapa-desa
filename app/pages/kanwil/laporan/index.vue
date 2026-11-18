@@ -73,7 +73,7 @@ const bukaDetail = (id: string) => navigateTo(`/kanwil/laporan/${id}`)
       </div>
       <template v-else>
         <Table class="hidden min-w-[900px] md:table">
-          <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>Masuk</TableHead><TableHead>UPT</TableHead><TableHead>Lokasi</TableHead><TableHead>Jenis</TableHead><TableHead>Status</TableHead><TableHead class="w-10"><span class="sr-only">Buka</span></TableHead></TableRow></TableHeader>
+          <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>Masuk</TableHead><TableHead>UPT</TableHead><TableHead>Lokasi</TableHead><TableHead>Jenis</TableHead><TableHead>Status</TableHead><TableHead>Dibaca UPT</TableHead><TableHead class="w-10"><span class="sr-only">Buka</span></TableHead></TableRow></TableHeader>
           <TableBody>
             <TableRow v-for="item in data.data" :key="item.id" class="group cursor-pointer" @click="bukaDetail(item.id)">
               <TableCell><NuxtLink :to="`/kanwil/laporan/${item.id}`" class="font-mono text-[0.8rem] font-semibold tracking-wide text-primary no-underline group-hover:underline" @click.stop>{{ item.kode_pelacakan }}</NuxtLink></TableCell>
@@ -82,6 +82,7 @@ const bukaDetail = (id: string) => navigateTo(`/kanwil/laporan/${id}`)
               <TableCell><p>{{ item.desa }}</p><p class="text-xs text-muted-foreground">Kec. {{ item.kecamatan }}</p></TableCell>
               <TableCell><DashboardLencanaJenis :jenis="item.jenis_terlapor" /></TableCell>
               <TableCell><DashboardLencanaStatus :status="item.status" /></TableCell>
+              <TableCell><DashboardLencanaDibaca :dibaca-pada="item.dibaca_pada" /></TableCell>
               <TableCell><ChevronRight class="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" /></TableCell>
             </TableRow>
           </TableBody>
@@ -92,6 +93,7 @@ const bukaDetail = (id: string) => navigateTo(`/kanwil/laporan/${id}`)
               <span class="flex items-center justify-between gap-3"><span class="font-mono text-sm font-semibold text-primary">{{ item.kode_pelacakan }}</span><DashboardLencanaStatus :status="item.status" /></span>
               <span class="text-sm"><strong class="font-medium">{{ item.kantor }}</strong> · {{ item.desa }}, {{ item.kecamatan }}</span>
               <span class="flex items-center justify-between text-xs text-muted-foreground"><DashboardWaktuRelatif :waktu="item.created_at" /><DashboardLencanaJenis :jenis="item.jenis_terlapor" /></span>
+              <DashboardLencanaDibaca :dibaca-pada="item.dibaca_pada" />
             </NuxtLink>
           </li>
         </ul>

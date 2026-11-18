@@ -147,7 +147,7 @@ async function konfirmasiHapus(id: string) {
               <TableCell>{{ item.desa }}</TableCell>
               <TableCell><span class="rounded-md bg-muted px-2 py-0.5 text-xs font-medium">{{ item.jenis }}</span></TableCell>
               <TableCell class="text-right tabular-nums">{{ item.jumlah_peserta }}</TableCell>
-              <TableCell><div class="flex flex-wrap items-center gap-2"><span>{{ item.pegawai }}</span><span v-if="item.petugas_pengganti" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Digantikan</span></div></TableCell>
+              <TableCell><div class="flex flex-wrap items-center gap-2"><span>{{ item.pegawai }}</span><span v-if="item.petugas_pengganti_nama" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Digantikan</span></div><p v-if="item.petugas_pengganti_nama" class="mt-0.5 text-xs text-muted-foreground">Pengganti: {{ item.petugas_pengganti_nama }}</p></TableCell>
               <TableCell><div class="flex gap-1.5"><span v-if="item.foto_path" class="inline-flex size-7 items-center justify-center rounded-md bg-info-muda text-info" title="Foto dokumentasi"><Image class="size-3.5" /><span class="sr-only">Foto</span></span><span v-if="item.pdf_path" class="inline-flex size-7 items-center justify-center rounded-md bg-bahaya-muda text-destructive" title="Laporan PDF"><FileText class="size-3.5" /><span class="sr-only">PDF</span></span><span v-if="!item.foto_path && !item.pdf_path" class="text-muted-foreground">—</span></div></TableCell>
               <TableCell>
                 <div class="flex items-center justify-end gap-1">
@@ -164,7 +164,7 @@ async function konfirmasiHapus(id: string) {
         </Table>
         <ul class="divide-y md:hidden">
           <li v-for="item in terlihat" :key="item.id" class="grid gap-2 px-4 py-3.5">
-            <div class="flex items-start justify-between gap-3"><div><p class="font-medium">{{ item.desa }}</p><p class="text-xs text-muted-foreground">{{ formatTanggalWib(item.tanggal_kegiatan) }} · {{ item.jenis }}</p></div><span v-if="item.petugas_pengganti" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Digantikan</span></div>
+            <div class="flex items-start justify-between gap-3"><div><p class="font-medium">{{ item.desa }}</p><p class="text-xs text-muted-foreground">{{ formatTanggalWib(item.tanggal_kegiatan) }} · {{ item.jenis }}</p></div><span v-if="item.petugas_pengganti_nama" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Digantikan</span></div>
             <p class="text-sm text-muted-foreground">{{ item.pegawai }} · {{ item.jumlah_peserta }} peserta</p>
             <div class="flex items-center justify-between gap-2"><span v-if="sisaMenit(item) > 0" class="text-xs text-muted-foreground">Dapat dihapus {{ sisaMenit(item) }} menit lagi</span><Button size="sm" variant="outline" class="ml-auto" @click="bukaUbah(item.id)">Ubah laporan</Button></div>
           </li>

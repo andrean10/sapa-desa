@@ -150,7 +150,6 @@ Grafik memakai komponen chart bawaan shadcn-vue.
 
 | Rute | Halaman |
 |---|---|
-| `/upt/pilih-petugas` | Bertugas atas nama siapa |
 | `/upt` | Dashboard |
 | `/upt/laporan` | Daftar laporan masyarakat |
 | `/upt/laporan/[id]` | Detail dan ubah status |
@@ -184,7 +183,6 @@ Admin dan Kanwil memakai tata letak yang sama; admin punya kelompok menu tambaha
 
 - Belum login membuka rute petugas → arahkan ke `/masuk?redirect=<rute asal>`.
 - Peran tidak sesuai (mis. UPT membuka `/kanwil`) → arahkan ke beranda perannya dengan toast "Anda tidak memiliki akses ke halaman itu." (halaman `/403` untuk akses langsung).
-- Akun UPT yang belum memilih petugas → arahkan ke `/upt/pilih-petugas`. Pengecualian: `/akun/password`, dan `/upt/pegawai` saat daftar pegawai aktif masih kosong.
 - Profil `aktif = false` → akhiri sesi, kembali ke `/masuk` dengan pesan "Akun Anda dinonaktifkan. Hubungi admin."
 - Sesi habis di tengah kerja → toast "Sesi berakhir, silakan masuk lagi", arahkan ke `/masuk?redirect=...`. Data form yang belum tersimpan tidak hilang tanpa peringatan (konfirmasi sebelum meninggalkan halaman bila form berubah).
 
@@ -331,15 +329,13 @@ Komponen `TimelineStatus` (HyperUI timeline), satu komponen untuk dua tempat. Se
 - Email dibentuk dari username dan domain di config (KONTRAK_API bagian 3a). Pengguna **tidak** mengetik domain.
 - Teks kecil: "Lupa password? Hubungi admin." Tidak ada tautan reset mandiri.
 - Galat: "Username atau password salah." (satu pesan, tidak membedakan penyebab). Akun nonaktif: "Akun Anda dinonaktifkan. Hubungi admin." Terlalu banyak percobaan: "Terlalu banyak percobaan. Coba lagi beberapa menit lagi."
-- Setelah berhasil: UPT → `/upt/pilih-petugas`; Kanwil dan admin → `/kanwil`. Jika ada parameter `redirect` dan sesuai peran, ikuti.
+- Setelah berhasil: UPT → `/upt`; Kanwil dan admin → `/kanwil`. Jika ada parameter `redirect` dan sesuai peran, ikuti.
 
-### 5.2 Pilih petugas `/upt/pilih-petugas`
+### 5.2 Tidak ada pemilihan petugas saat login
 
-- Kartu "Bertugas atas nama siapa?" dengan penjelasan satu kalimat: "Nama Anda akan dicatat pada setiap perubahan yang dilakukan."
-- Daftar pegawai aktif kantor (nama, urut abjad) sebagai kotak pilihan yang dapat dicari. Tombol **Lanjut** aktif setelah memilih.
-- Pilihan disimpan di sesi dan dipakai untuk: `p_pegawai_id` saat mengubah status, nilai awal petugas pada form kegiatan, dan header `x-bertugas-id` pada semua request (KONTRAK_API bagian 3a).
-- Daftar kosong: "Belum ada pegawai terdaftar di kantor Anda." dengan tombol **Tambah pegawai** (menuju `/upt/pegawai`).
-- Pilihan berlaku sampai keluar. Header dashboard selalu menampilkan petugas aktif dengan tautan **Ganti petugas**.
+Akun UPT dipakai bersama oleh pimpinan (KASI INTELDAKIM) dan staf, jadi **tidak ada** halaman "bertugas atas nama". Pegawai hanya dipilih di dua tempat:
+- **Laporan kegiatan PIMPASA** (7.5): dropdown berisi PIMPASA yang ditugaskan di desa itu pada tanggal kegiatan.
+- **Ubah status aduan**: tidak memilih siapa pun. Perubahan dicatat otomatis sebagai `KASI INTELDAKIM {NAMA UPT}` (nama UPT = bagian nama kantor setelah "TPI", mis. "KASI INTELDAKIM SIAK"). Jabatan ini belum final dan akan dikonfirmasi pimpinan; lokasinya satu konstanta (`JABATAN_PEMROSES_ADUAN`) dan satu fungsi database.
 
 ---
 
@@ -348,7 +344,7 @@ Komponen `TimelineStatus` (HyperUI timeline), satu komponen untuk dua tempat. Se
 Tampilan desktop-first (shadcn), tetap dapat dipakai di tablet.
 
 - **Sidebar** biru tua (kolaps menjadi ikon; di HP menjadi panel geser). Nama aplikasi di atas, menu sesuai peran, item aktif diberi penanda emas.
-- **Bilah atas**: judul halaman, remah roti (breadcrumb), dan menu pengguna: nama tampil, lencana peran, nama kantor (UPT), **Ganti password**, **Keluar**. Untuk UPT: lencana "Bertugas: {nama}" dengan tautan Ganti petugas.
+- **Bilah atas**: judul halaman, remah roti (breadcrumb), dan menu pengguna: nama tampil, lencana peran, nama kantor (UPT), **Ganti password**, **Keluar**.
 - **Area banner global** di bawah bilah atas:
   - **Saklar lokasi mati** (khusus tampilan admin): banner merah "Validasi lokasi dimatikan. Laporan dari luar Riau dapat masuk. Hidupkan kembali setelah pengujian." Data dari `dashboard_admin_status` (KONTRAK_API 5.1).
   - **Mode uji coba**: bila `NUXT_PUBLIC_APP_MODE = test`, banner kuning "MODE UJI COBA". Env ini hanya memunculkan banner, tidak mengubah hak akses.
@@ -436,11 +432,11 @@ Dua kolom di desktop (konten kiri, timeline dan aksi kanan); satu kolom di layar
 - **Laporan lanjutan**: bila `laporan_sebelumnya_id` terisi dan laporannya dapat dibaca, tampilkan tautan ke laporan itu; bila tidak dapat dibaca, tampilkan hanya kode.
 
 **Kolom kanan: timeline dan ubah status**
-- **Timeline internal**: komponen yang sama dengan 4.6, ditambah baris "oleh {nama petugas}" di setiap butir (petugas hanya tampil di sisi internal ini, **tidak pernah** di halaman masyarakat).
+- **Timeline internal**: komponen yang sama dengan 4.6, ditambah baris "oleh {pemroses}" di setiap butir (mis. "oleh KASI INTELDAKIM SIAK"; "Sistem" untuk butir Diterima dan "Admin" bila diubah admin). Pemroses hanya tampil di sisi internal ini, **tidak pernah** di halaman masyarakat.
 - **Panel Ubah status** (untuk UPT; admin memakainya di halaman 8.4; Kanwil hanya membaca):
   - Pilihan status hanya yang **sah menurut alur** (KONTRAK_API 4.2): Diterima → Diverifikasi atau Ditolak; Diverifikasi → Ditindaklanjuti atau Ditolak; Ditindaklanjuti → Selesai. Status final (Selesai, Ditolak): panel diganti teks "Laporan sudah final dan tidak dapat diubah."
   - Kolom **Keterangan**, dengan label "Keterangan (dapat dilihat oleh pelapor)" dan penghitung 0/1000. **Wajib** untuk Ditolak dan Selesai, opsional untuk lainnya. Teks bantu: "Jangan menuliskan identitas orang asing atau data sensitif."
-  - Baris tetap "Bertugas atas nama: {nama}" (dari 5.2) dengan tautan Ganti petugas.
+  - Baris informasi "Dicatat sebagai {KASI INTELDAKIM {NAMA UPT}}" (tanpa pilihan petugas).
   - Tombol **Simpan status**. Untuk Ditolak dan Selesai tampil dialog konfirmasi: "Status ini final dan tidak dapat diubah lagi. Lanjutkan?"
   - Setelah berhasil: toast "Status diperbarui", timeline dimuat ulang, panel menyesuaikan status baru.
   - Pemetaan galat: "Laporan tidak ditemukan" (laporan sudah dihapus atau bukan milik kantor), "Keterangan wajib diisi untuk status ini", loncatan status tidak sah (muat ulang halaman dan tampilkan status terbaru).
@@ -448,7 +444,7 @@ Dua kolom di desktop (konten kiri, timeline dan aksi kanan); satu kolom di layar
 ### 7.4 Daftar laporan kegiatan `/upt/kegiatan`
 
 - Filter: bulan atau rentang tanggal (default bulan ini), desa, jenis kegiatan, petugas.
-- Tabel: Tanggal · Desa · Jenis · Peserta · Petugas (dengan lencana **"Digantikan"** bila `petugas_pengganti`) · Lampiran (ikon foto dan PDF bila ada) · Aksi.
+- Tabel: Tanggal · Desa · Jenis · Peserta · Petugas (dengan lencana **"Digantikan"** dan baris "Pengganti: {nama}" bila Petugas Pengganti terisi) · Lampiran (ikon foto dan PDF bila ada) · Aksi.
 - **Aksi**: Lihat/Ubah, dan **Hapus** yang hanya tampil selama jendela hapus (`batas_menit_hapus_laporan`, default 10 menit dari `created_at`), dengan keterangan hitung mundur "Dapat dihapus {n} menit lagi". Setelah jendela habis tombol Hapus **hilang**; koreksi lewat Ubah.
 - Hapus: dialog konfirmasi "Hapus laporan ini? Tindakan ini tidak dapat dibatalkan." Setelah baris terhapus, server menghapus file di Storage (KONTRAK_API 4.4). Hasil 0 baris terhapus → "Laporan tidak dapat dihapus karena batas waktu hapus sudah lewat."
 - Tombol **Buat Laporan Kegiatan** di atas tabel.
@@ -461,7 +457,8 @@ Dua kolom di desktop (konten kiri, timeline dan aksi kanan); satu kolom di layar
 | 1 | Tanggal kegiatan | tanggal | wajib; awal = hari ini (WIB); tidak boleh melewati hari ini |
 | 2 | Kantor | teks tampilan | nama kantor dari akun; bukan isian |
 | 3 | Desa binaan | dropdown | wajib; hanya desa binaan di wilayah kantor (`dashboard_upt_desa_binaan`); menampilkan nama desa dan kecamatan. Terisi otomatis bila datang dari `?desa=` |
-| 4 | Petugas | dropdown | wajib; pegawai aktif kantor; awal = petugas aktif (5.2). **Pratinjau lencana "Digantikan"** muncul bila pegawai terpilih bukan PIMPASA berlaku di desa itu; ini hanya informasi, **tidak dikirim** (nilainya dihitung database) |
+| 4 | Petugas PIMPASA | dropdown | wajib; hanya PIMPASA yang ditugaskan di desa terpilih pada tanggal kegiatan (SK Kanwil). Satu petugas: terpilih otomatis dan dropdown dikunci. Dua atau lebih: dipilih. Tidak ada PIMPASA aktif: peringatan "Hubungi Kanwil" dan tombol simpan nonaktif. Aturan yang sama dijaga trigger database |
+| 4a | Petugas Pengganti | teks bebas | opsional, maks. 150 karakter, **tanpa dropdown**. Diisi hanya bila PIMPASA berhalangan (cuti, sakit, dll.) dan kegiatan dilakukan petugas lain atas perintah KASI INTELDAKIM; kosong berarti PIMPASA sendiri yang terjun. Petugas Pengganti tidak harus pegawai kantor |
 | 5 | Jenis kegiatan | dropdown | wajib; hanya jenis aktif |
 | 6 | Jumlah peserta | angka | wajib; bilangan bulat 0–100000 |
 | 7 | Uraian, hasil, dan tindak lanjut | area teks | wajib; 10–5000 karakter; penghitung |
@@ -470,7 +467,7 @@ Dua kolom di desktop (konten kiri, timeline dan aksi kanan); satu kolom di layar
 
 Alur simpan:
 1. Unggah file (bila ada) lebih dulu dengan sesi pengguna ke `{kantor_id}/{uuid}.{ext}` (nama unik), dengan bilah kemajuan per berkas.
-2. Setelah semua berhasil, simpan baris laporan (jangan kirim `kantor_id`, `dibuat_oleh`, `petugas_pengganti`).
+2. Setelah semua berhasil, simpan baris laporan (jangan kirim `kantor_id`, `dibuat_oleh`; `petugas_pengganti_nama` dikirim bila diisi).
 3. Jika langkah 2 gagal, minta server menghapus file yang sudah terunggah. Tombol dikunci selama proses (cegah kirim ganda).
 4. Berhasil: kembali ke `/upt/kegiatan` dengan toast "Laporan kegiatan tersimpan."
 
@@ -534,17 +531,19 @@ Tiga tab, dengan pemilih periode yang sama (default **bulan berjalan**; pilihan 
 Tabel dari `v_laporan_belum_ditanggapi`: Kode · UPT · Kabupaten/Kota · Kecamatan · Desa · Jenis · Masuk · Hari kerja berjalan · Batas. Lencana "Terlambat {n} hari kerja" (merah), urut paling lama dulu; filter UPT. Teks di atas tabel: "Laporan berstatus Diterima yang belum ditanggapi lebih dari {batas_hari} hari kerja (tidak termasuk Sabtu, Minggu, dan hari libur)." Klik baris → detail laporan (baca saja untuk Kanwil; admin dapat ubah status, lihat 8.4). Teguran kepada atasan UPT dilakukan Kanwil secara manual di luar aplikasi.
 
 Opsional **[tidak wajib versi pertama]**: tombol "Salin ringkasan" yang menyalin teks jumlah laporan terlambat per UPT.
+Kolom **Dibaca UPT** membedakan laporan yang **belum dibaca sama sekali** (lebih serius) dari yang sudah dibaca tetapi belum ditanggapi.
 
 ### 8.4 Laporan masyarakat `/kanwil/laporan` dan detail
 
 Sama dengan 7.2 dan 7.3 dengan perbedaan:
 - Mencakup semua UPT; ada kolom dan filter **UPT**.
-- **Panel Ubah status** tampil hanya untuk **admin**, dengan aturan yang sama seperti 7.3 (pilihan status sesuai alur, keterangan wajib untuk Ditolak dan Selesai, konfirmasi untuk status final). Admin **tidak** memilih "bertugas atas nama": `p_pegawai_id` dikosongkan, dan butir timeline-nya tampil "oleh Admin". Untuk **Kanwil** tidak ada panel (baca saja).
+- **Panel Ubah status** tampil hanya untuk **admin**, dengan aturan yang sama seperti 7.3 (pilihan status sesuai alur, keterangan wajib untuk Ditolak dan Selesai, konfirmasi untuk status final). Butir timeline-nya tampil "oleh Admin" (`p_pegawai_id` kosong). Untuk **Kanwil** tidak ada panel (baca saja).
+- **Penanda dibaca (seperti centang WhatsApp), khusus pemantauan Kanwil dan admin.** Daftar laporan punya kolom "Dibaca UPT"; detail menampilkan lencana yang sama di kepala. "Belum dibaca UPT" (centang tunggal, kuning) atau "Dibaca UPT · {waktu}" (centang ganda, biru). Tercatat **pertama kali** akun UPT pemilik membuka detail aduan (atau mengubah statusnya); Kanwil dan admin yang membuka tidak menandai. Penanda ini **tidak pernah** tampil di halaman UPT maupun publik, dan tabelnya tidak dapat dibaca akun UPT (RLS).
 - Timeline internal menonjolkan **keterangan penolakan**: butir berstatus Ditolak memakai latar `Latar bahaya` agar alasan penolakan mudah dibaca Kanwil.
 
 ### 8.5 Laporan kegiatan `/kanwil/kegiatan` dan detail
 
-Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, foto, dan PDF (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
+Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, foto, dan PDF. **Petugas Pengganti** tampil **di atas** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
 
 ### 8.6 Desa binaan `/kanwil/desa-binaan`
 
@@ -715,11 +714,11 @@ Jangan dibuat tanpa permintaan baru dari pemilik project:
 - [ ] `/informasi` memakai akordeon satu-terbuka; jawaban tidak dirender sebagai HTML.
 
 **UPT**
-- [ ] Setelah login wajib memilih petugas; nama tampil di header dan dikirim sebagai `x-bertugas-id`.
+- [ ] Login UPT langsung ke dashboard (tanpa pilih petugas); perubahan status dicatat sebagai `KASI INTELDAKIM {NAMA UPT}`.
 - [ ] Dashboard menampilkan 5 kartu, daftar perlu tindakan (dengan sisa atau terlambat), tabel desa binaan, dan tren; **tanpa peringkat antar-UPT**.
 - [ ] Daftar laporan tidak menampilkan nama dan alamat pelapor; detail menampilkannya.
 - [ ] Panel ubah status hanya menawarkan status yang sah; keterangan wajib untuk Ditolak dan Selesai; konfirmasi untuk status final.
-- [ ] Laporan kegiatan: file diunggah lebih dulu, baris dibuat tanpa `kantor_id`, `dibuat_oleh`, `petugas_pengganti`; hapus hanya selama jendela waktu dengan hitung mundur.
+- [ ] Laporan kegiatan: file diunggah lebih dulu, baris dibuat tanpa `kantor_id`, `dibuat_oleh`; hapus hanya selama jendela waktu dengan hitung mundur.
 - [ ] Nonaktifkan pegawai yang masih bertugas ditolak dengan pesan yang jelas.
 
 **Kanwil dan admin**
@@ -744,7 +743,7 @@ Kerjakan bertahap; selesaikan dan uji satu tahap sebelum lanjut.
 |---|---|
 | 1. Kerangka | Struktur folder MVC, `shared/config` (app, tema, teks, batas file), client Supabase (browser, sesi pengguna, service role), utilitas WIB, `.env.example`, tata letak publik dan dashboard, middleware rute |
 | 2. Masyarakat | Landing, `/informasi`, `/lapor` (lokasi, kirim, dialog), `/lacak` |
-| 3. Login dan UPT | `/masuk`, pilih petugas, ganti password, dashboard UPT, laporan masyarakat (daftar, detail, ubah status), laporan kegiatan, pegawai, profil |
+| 3. Login dan UPT | `/masuk`, ganti password, dashboard UPT, laporan masyarakat (daftar, detail, ubah status), laporan kegiatan, pegawai, profil |
 | 4. Kanwil | Dashboard, peringkat, pantauan, laporan baca saja, desa binaan, penugasan, wilayah kerja, FAQ, pengaturan |
 | 5. Admin dan penutup | Status sistem, akun, impersonasi, aktivasi log dan halaman log, polesan, pemeriksaan kriteria penerimaan |
 

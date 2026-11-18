@@ -62,6 +62,12 @@ export const LABEL_MENU = {
   log: 'Log aktivitas'
 } as const
 
+/** Jabatan yang dicatat saat akun UPT mengubah status aduan (akun dipakai bersama pimpinan). Nilai di riwayat_status.diproses_oleh dibuat database dengan teks yang sama. */
+export const JABATAN_PEMROSES_ADUAN = 'KASI INTELDAKIM'
+
+/** Penanda "dibaca" hanya untuk pemantauan Kanwil dan admin; tidak pernah ditampilkan ke UPT maupun masyarakat. */
+export const LABEL_DIBACA = { sudah: 'Dibaca UPT', belum: 'Belum dibaca UPT' } as const
+
 export const NAVIGASI_PUBLIK = [
   { label: 'Beranda', href: '/' },
   { label: 'Informasi', href: '/informasi' },
@@ -159,7 +165,7 @@ export const TEKS_LAPORAN_PUBLIK = {
   lokasiDiLuarRiau: 'Lokasi Anda terdeteksi di luar Provinsi Riau. Aduan hanya dapat dikirim dari wilayah Riau.',
   terlaluBanyak: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
   kodeSebelumnyaTidakAda: 'Kode aduan sebelumnya tidak ditemukan. Periksa penulisannya atau kosongkan kolom itu.',
-  fotoDitolak: 'Foto harus berformat JPEG, PNG, atau WebP dan berukuran maksimal 3 MB.',
+  fotoDitolak: 'Foto harus berformat JPEG, PNG, atau WebP. Jika foto terlalu besar dan tidak dapat dikecilkan otomatis, pilih foto lain.',
   desaTidakValid: 'Desa atau kelurahan yang dipilih tidak valid. Pilih ulang dari daftar.',
   sukses: 'Aduan berhasil dikirim',
   simpanKode: 'Simpan kode ini. Anda memerlukannya untuk memantau aduan.',
@@ -198,7 +204,6 @@ export const TEKS_UMUM = {
   dataKosong: 'Belum ada data untuk ditampilkan.',
   keluar: 'Logout',
   gantiPassword: 'Ganti password',
-  gantiPetugas: 'Ganti petugas',
   aksesDitolak: 'Anda tidak memiliki akses ke halaman itu.',
   akunNonaktif: 'Akun Anda dinonaktifkan. Hubungi admin.',
   terlaluBanyakPercobaan: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',

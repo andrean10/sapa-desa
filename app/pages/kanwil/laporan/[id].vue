@@ -11,7 +11,8 @@ type DetailLaporan = Omit<Tables<'laporan'>, 'foto_path'> & {
   kantor: string | null
   lokasi: { desa: string | null; kecamatan: string | null; kabupaten: string | null }
   laporan_sebelumnya: { id: string; kode_pelacakan: string } | null
-  riwayat_status: { id: string; status: Enums<'status_laporan'>; keterangan: string | null; created_at: string; nama_pegawai: string | null }[]
+  dibaca_pada: string | null
+  riwayat_status: { id: string; status: Enums<'status_laporan'>; keterangan: string | null; created_at: string; nama_pegawai: string | null; diproses_oleh: string | null }[]
 }
 const api = useApi()
 const { data, pending, error, refresh } = await useAsyncData<DetailLaporan>(`kanwil-laporan-${route.params.id}`, () => api<DetailLaporan>(`/api/kanwil/laporan/${route.params.id}`), { lazy: true })
@@ -40,7 +41,7 @@ async function simpanStatus(status: Enums<'status_laporan'>, keterangan: string)
     <div v-if="pending" class="grid gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]"><Skeleton class="h-[28rem] rounded-xl" /><Skeleton class="h-80 rounded-xl" /></div>
     <DashboardStateGalat v-else-if="error" pesan="Detail belum dapat dimuat." deskripsi="Periksa koneksi atau akses laporan." @coba="refresh()" />
     <div v-else-if="data" class="grid items-start gap-5 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,1fr)]">
-      <DashboardIsiLaporan :data="data" basis-tautan="/kanwil/laporan" />
+      <DashboardIsiLaporan :data="data" basis-tautan="/kanwil/laporan" tampilkan-dibaca :dibaca-pada="data.dibaca_pada" />
       <div class="grid gap-5 xl:sticky xl:top-20">
         <DashboardPanelUbahStatus v-if="profil?.peran === 'admin'" :status-kini="data.status" :menyimpan="sedangSimpan" :pesan="pesan" mode-admin @simpan="simpanStatus" />
         <p v-else class="flex items-center gap-2 rounded-xl border bg-info-muda/60 px-4 py-3 text-sm text-info"><Eye class="size-4 shrink-0" aria-hidden="true" />Kanwil hanya dapat membaca laporan. Status ditangani oleh UPT.</p>

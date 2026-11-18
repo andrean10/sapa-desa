@@ -1,6 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
-import { getRequestHeader, parseCookies, setCookie, type H3Event } from 'h3'
+import { parseCookies, setCookie, type H3Event } from 'h3'
 import type { Database } from '../../shared/types/database.types'
 
 /** Client anon untuk pembacaan data publik dari server. */
@@ -19,7 +19,6 @@ export function buatClientAnonimo(event?: H3Event) {
 /** Client sesi user; token dipulihkan dari cookie dan RLS tetap berlaku. */
 export function buatClientSesiUser(event: H3Event) {
   const config = useRuntimeConfig(event)
-  const pegawaiId = getRequestHeader(event, 'x-bertugas-id')
 
   return createServerClient<Database>(
     config.public.supabaseUrl,
@@ -34,8 +33,7 @@ export function buatClientSesiUser(event: H3Event) {
             setCookie(event, name, value, options)
           }
         }
-      },
-      ...(pegawaiId && { global: { headers: { 'x-bertugas-id': pegawaiId } } })
+      }
     }
   )
 }

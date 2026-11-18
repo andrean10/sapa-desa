@@ -4,7 +4,7 @@ import { profilSesi } from './auth.controller'
 import { ambilDashboardKanwil, ambilPeringkatKanwil, ambilStatusAdmin, buatPenugasanKanwil, daftarDesaBinaanKanwil, daftarFaqKanwil, daftarKegiatanKanwil, daftarKantorKanwil, daftarLaporanKanwil, daftarPengaturanKanwil, daftarPantauanKanwil, daftarPenugasanKanwil, daftarWilayahKerjaKanwil, daftarWilayahPilihanKanwil, hapusFaqKanwil, pilihanFilterKegiatanKanwil, simpanNilaiPengaturanKanwil, simpanValidasiLokasiAdmin, tulisFaqKanwil, tulisJenisKegiatanKanwil, ubahPenugasanKanwil, ubahStatusDbiKanwil, ubahUrutanFaqKanwil, ubahWilayahKanwil } from '../models/kanwil.model'
 import { tanggalHariIniWib } from '../../shared/utils/waktu'
 import { z } from 'zod'
-import { ambilDashboardUpt, buatSignedUrlFotoLaporan, buatSignedUrlLampiranUpt, detailKegiatanUpt, detailLaporanUpt, ubahStatusLaporanUpt } from '../models/upt.model'
+import { ambilDashboardUpt, ambilWaktuDibaca, buatSignedUrlFotoLaporan, buatSignedUrlLampiranUpt, detailKegiatanUpt, detailLaporanUpt, ubahStatusLaporanUpt } from '../models/upt.model'
 import { daftarAkunAdmin, daftarKantorAdmin } from '../models/admin.model'
 import type { Enums } from '../../shared/types/database.types'
 import { JENIS_TERLAPOR, STATUS_LAPORAN } from '../../shared/config/teks'
@@ -28,7 +28,10 @@ export async function daftarLaporanKanwilController(event: H3Event) {
   const client = buatClientSesiUser(event)
   const [hasil, kantor] = await Promise.all([daftarLaporanKanwil(client, halaman, { kantorId, status: status as Enums<'status_laporan'>[], jenis: jenis as Enums<'jenis_terlapor'> | undefined, dari, sampai, cari, terlambat }), daftarKantorKanwil(client)])
   if (hasil.error || kantor.error) throw createError({ statusCode: 503, statusMessage: 'Daftar laporan belum dapat dimuat.' })
-  return { data: hasil.data ?? [], total: hasil.count ?? 0, halaman, kantor: kantor.data ?? [] }
+  const dibaca = await ambilWaktuDibaca(client, (hasil.data ?? []).map(item => item.id))
+  if (dibaca.error) throw createError({ statusCode: 503, statusMessage: 'Daftar laporan belum dapat dimuat.' })
+  const waktuDibaca = new Map((dibaca.data ?? []).map(item => [item.laporan_id, item.dibaca_pada]))
+  return { data: (hasil.data ?? []).map(item => ({ ...item, dibaca_pada: waktuDibaca.get(item.id) ?? null })), total: hasil.count ?? 0, halaman, kantor: kantor.data ?? [] }
 }
 
 export async function dashboardUptLihatKanwil(event: H3Event) {
@@ -74,7 +77,8 @@ export async function detailLaporanKanwilController(event: H3Event) {
   const { foto_path, ...laporan } = hasil.laporan.data
   const foto = foto_path ? await buatSignedUrlFotoLaporan(foto_path) : null
   if (foto?.error) throw createError({ statusCode: 503, statusMessage: 'Foto laporan belum dapat dimuat.' })
-  return { ...laporan, foto_url: foto?.data.signedUrl ?? null, lokasi: { desa: hasil.desa?.data?.nama ?? null, kecamatan: hasil.kecamatan?.data?.nama ?? null, kabupaten: hasil.kabupaten?.data?.nama ?? null }, kantor: hasil.kantor?.data?.nama ?? null, laporan_sebelumnya: hasil.laporanSebelumnya?.data ?? null, riwayat_status: (hasil.riwayat.data ?? []).map(item => ({ ...item, nama_pegawai: hasil.pegawai.data?.find(p => p.id === item.pegawai_id)?.nama ?? null })) }
+  const dibaca = await ambilWaktuDibaca(buatClientSesiUser(event), [id])
+  return { ...laporan, dibaca_pada: dibaca.data?.[0]?.dibaca_pada ?? null, foto_url: foto?.data.signedUrl ?? null, lokasi: { desa: hasil.desa?.data?.nama ?? null, kecamatan: hasil.kecamatan?.data?.nama ?? null, kabupaten: hasil.kabupaten?.data?.nama ?? null }, kantor: hasil.kantor?.data?.nama ?? null, laporan_sebelumnya: hasil.laporanSebelumnya?.data ?? null, riwayat_status: (hasil.riwayat.data ?? []).map(item => ({ ...item, nama_pegawai: hasil.pegawai.data?.find(p => p.id === item.pegawai_id)?.nama ?? null })) }
 }
 
 export async function daftarKegiatanKanwilController(event: H3Event) {
@@ -215,7 +219,10 @@ export async function pantauanKanwil(event: H3Event) {
     client.from('pengaturan').select('nilai').eq('kunci', 'batas_hari_tanggap').maybeSingle()
   ])
   if (pantauan.error || kantor.error || pengaturan.error) throw createError({ statusCode: 503, statusMessage: 'Pantauan laporan belum dapat dimuat.' })
-  return { data: pantauan.data ?? [], kantor: kantor.data ?? [], batasHari: Number(pengaturan.data?.nilai ?? 7) }
+  const dibaca = await ambilWaktuDibaca(client, (pantauan.data ?? []).flatMap(item => item.id ? [item.id] : []))
+  if (dibaca.error) throw createError({ statusCode: 503, statusMessage: 'Pantauan laporan belum dapat dimuat.' })
+  const waktuDibaca = new Map((dibaca.data ?? []).map(item => [item.laporan_id, item.dibaca_pada]))
+  return { data: (pantauan.data ?? []).map(item => ({ ...item, dibaca_pada: item.id ? waktuDibaca.get(item.id) ?? null : null })), kantor: kantor.data ?? [], batasHari: Number(pengaturan.data?.nilai ?? 7) }
 }
 
 function pastikanBerhasil<T extends { error: { message: string } | null; data?: unknown }>(hasil: T, aksi: string) {

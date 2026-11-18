@@ -30,11 +30,11 @@ Dependency dipasang oleh Codex. Pilih versi stabil yang kompatibel dengan Nuxt d
 | masyarakat | tidak ada (anonim) | HyperUI | kirim laporan, lacak laporan dengan kode, baca FAQ |
 | `upt` | username + password | shadcn | laporan kantornya sendiri, ubah status, laporan kegiatan PIMPASA, kelola pegawai kantornya, profil kantor |
 | `kanwil` | username + password | shadcn | baca semua, dashboard dan peringkat, kelola desa binaan/penugasan/wilayah kerja/FAQ/jenis kegiatan/hari libur/pengaturan (kecuali saklar lokasi). **Tidak bisa** mengubah status laporan |
-| `admin` | username + password | shadcn | semua hak Kanwil + **ubah status laporan** (database mengizinkan; `p_pegawai_id` boleh kosong untuk admin), saklar lokasi, mutasi pegawai, hapus laporan kegiatan, lihat log, status sistem |
+| `admin` | username + password | shadcn | semua hak Kanwil + **ubah status laporan** (database mengizinkan; `p_pegawai_id` kosong), saklar lokasi, mutasi pegawai, hapus laporan kegiatan, lihat log, status sistem |
 
 Alur login:
 1. Form login meminta **username** saja. Email dibentuk `${username}@${AUTH_EMAIL_DOMAIN}` (nilai dari konfigurasi global, jangan ditulis di banyak tempat). Tidak ada email asli yang terkirim dan tidak ada "lupa password" mandiri.
-2. Untuk peran `upt`, setelah login **wajib** memilih "bertugas atas nama" dari daftar `pegawai` aktif kantornya. Pilihan disimpan di sesi, dipakai sebagai `p_pegawai_id` saat ubah status, dan dikirim sebagai header `x-bertugas-id` pada request ke Supabase (dipakai pencatat log kelak).
+2. Untuk peran `upt`, login langsung masuk dashboard; **tidak ada pemilihan petugas**, karena akun kantor dipakai bersama (termasuk pimpinan, KASI INTELDAKIM). Perubahan status aduan oleh UPT otomatis dicatat sebagai `KASI INTELDAKIM {NAMA UPT}` (kolom `riwayat_status.diproses_oleh`). Petugas baru dipilih saat membuat **laporan kegiatan PIMPASA**, dan hanya dari PIMPASA yang ditugaskan di desa itu. Header `x-bertugas-id` sudah tidak dipakai.
 3. Pendaftaran akun publik **dimatikan** (`DISABLE_SIGNUP=true` di Supabase). Akun dibuat admin lewat Admin API dari server.
 
 ## 4. Struktur folder dan pola MVC

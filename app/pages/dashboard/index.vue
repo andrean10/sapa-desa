@@ -8,7 +8,6 @@
       <section class="mt-8 rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
         <h2 class="text-xl font-extrabold text-primary">{{ namaPeran }}</h2>
         <p class="mt-3 leading-7 text-muted">Akses akun berhasil diverifikasi. Modul dashboard sesuai peran akan tersedia pada tahap berikutnya.</p>
-        <p v-if="profil?.peran === 'upt'" class="mt-4 text-foreground">Bertugas atas nama: <strong>{{ namaPegawai || 'pegawai terpilih' }}</strong></p>
       </section>
       <AlertDialog v-model:open="konfirmasiLogoutTerbuka"><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Logout dari SAPA DESA?</AlertDialogTitle><AlertDialogDescription>Anda perlu login kembali untuk melanjutkan pekerjaan.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="logout">Logout</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
     </div>
@@ -16,22 +15,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { APP_NAME } from '~~/shared/config/app'
 import { PERAN_PENGGUNA } from '~~/shared/config/teks'
 
-const { profil, keluar, pegawaiBertugasId, daftarPegawai } = useAuth()
+const { profil, keluar } = useAuth()
 const konfirmasiLogoutTerbuka = ref(false)
-const namaPegawai = ref('')
 const namaPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === profil.value?.peran)?.label ?? 'Akun')
 async function logout() {
   konfirmasiLogoutTerbuka.value = false
   await keluar()
 }
 
-onMounted(async () => {
-  if (profil.value?.peran !== 'upt' || !pegawaiBertugasId.value) return
-  const pegawai = await daftarPegawai().catch(() => [])
-  namaPegawai.value = pegawai.find(item => item.id === pegawaiBertugasId.value)?.nama ?? ''
-})
 </script>

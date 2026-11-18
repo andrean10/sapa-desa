@@ -44,8 +44,8 @@ const bukaDetail = (id: string | null) => { if (id) void navigateTo(`/kanwil/lap
       <div v-if="pending" class="p-4"><DashboardStateMemuat :baris="6" /></div>
       <div v-else-if="error" class="p-4"><DashboardStateGalat pesan="Pantauan belum dapat dimuat." @coba="refresh()" /></div>
       <div v-else-if="!data.data.length" class="p-4"><DashboardStateKosong judul="Tidak ada laporan yang terlambat ditanggapi." deskripsi="Semua laporan ditanggapi sesuai batas waktu." :ikon="CircleCheckBig" /></div>
-      <Table v-else class="min-w-[1000px]">
-        <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>UPT</TableHead><TableHead>Lokasi</TableHead><TableHead>Jenis</TableHead><TableHead>Masuk</TableHead><TableHead class="text-right">Hari kerja berjalan</TableHead><TableHead>Keterlambatan</TableHead><TableHead class="w-10"><span class="sr-only">Buka</span></TableHead></TableRow></TableHeader>
+      <Table v-else class="min-w-[1100px]">
+        <TableHeader><TableRow><TableHead>Kode</TableHead><TableHead>UPT</TableHead><TableHead>Lokasi</TableHead><TableHead>Jenis</TableHead><TableHead>Masuk</TableHead><TableHead>Dibaca UPT</TableHead><TableHead class="text-right">Hari kerja berjalan</TableHead><TableHead>Keterlambatan</TableHead><TableHead class="w-10"><span class="sr-only">Buka</span></TableHead></TableRow></TableHeader>
         <TableBody>
           <TableRow v-for="(item, index) in data.data" :key="item.id ?? index" class="group cursor-pointer" @click="bukaDetail(item.id)">
             <TableCell><NuxtLink class="font-mono text-[0.8rem] font-semibold tracking-wide text-primary no-underline group-hover:underline" :to="`/kanwil/laporan/${item.id}`" @click.stop>{{ item.kode_pelacakan }}</NuxtLink></TableCell>
@@ -53,6 +53,7 @@ const bukaDetail = (id: string | null) => { if (id) void navigateTo(`/kanwil/lap
             <TableCell><p>{{ item.desa }}</p><p class="text-xs text-muted-foreground">Kec. {{ item.kecamatan }} · {{ item.kabupaten }}</p></TableCell>
             <TableCell><DashboardLencanaJenis :jenis="item.jenis_terlapor" /></TableCell>
             <TableCell class="text-muted-foreground"><DashboardWaktuRelatif v-if="item.masuk_pada" :waktu="item.masuk_pada" /><span v-else>—</span></TableCell>
+            <TableCell><DashboardLencanaDibaca :dibaca-pada="item.dibaca_pada" /></TableCell>
             <TableCell class="text-right tabular-nums">{{ item.hari_kerja_berjalan ?? '—' }} <span class="text-xs text-muted-foreground">/ {{ item.batas_hari ?? data.batasHari }}</span></TableCell>
             <TableCell><DashboardLencanaBatas :sisa="-terlambat(item.hari_kerja_berjalan, item.batas_hari)" /></TableCell>
             <TableCell><ChevronRight class="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary" aria-hidden="true" /></TableCell>

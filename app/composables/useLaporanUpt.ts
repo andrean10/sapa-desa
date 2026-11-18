@@ -6,7 +6,7 @@ type LaporanUptDetail = Omit<Tables<'laporan'>, 'foto_path'> & {
   lokasi: { desa: string | null; kecamatan: string | null; kabupaten: string | null }
   kantor: string | null
   laporan_sebelumnya: Pick<Tables<'laporan'>, 'id' | 'kode_pelacakan'> | null
-  riwayat_status: (Pick<Tables<'riwayat_status'>, 'id' | 'status' | 'keterangan' | 'created_at' | 'pegawai_id'> & { nama_pegawai: string | null })[]
+  riwayat_status: (Pick<Tables<'riwayat_status'>, 'id' | 'status' | 'keterangan' | 'created_at' | 'pegawai_id' | 'diproses_oleh'> & { nama_pegawai: string | null })[]
 }
 
 export function useLaporanUpt() {
