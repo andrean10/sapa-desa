@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Eye, EyeOff } from '@lucide/vue'
-import { PUBLIC_BRAND_NAME } from '~~/shared/config/app'
+import { ArrowLeft, Eye, EyeOff } from '@lucide/vue'
+import { APP_NAME, APP_TAGLINE, FOTO_LANDING, PUBLIC_BRAND_NAME } from '~~/shared/config/app'
 import type { PeranAplikasi } from '~~/shared/config/app'
 import { TEKS_LOGIN } from '~~/shared/config/teks'
 import { Button } from '~/components/ui/button'
@@ -48,38 +48,61 @@ async function submitLogin() {
 </script>
 
 <template>
-  <main class="flex min-h-svh items-start justify-center bg-background px-5 py-8 sm:items-center sm:px-8 sm:py-12">
-    <section class="w-full max-w-md">
-      <div class="bg-card p-6 shadow-card sm:p-10">
-        <NuxtLink to="/" class="mx-auto mb-8 flex w-fit max-w-full items-center gap-3 text-primary no-underline sm:mb-10" :aria-label="PUBLIC_BRAND_NAME">
-          <img class="size-14 shrink-0 object-contain sm:size-16" src="/images/logo.webp" alt="" width="64" height="64">
-          <span class="text-[0.68rem] font-black leading-[1.2] tracking-[.07em] sm:text-xs">SISTEM PELAPORAN<br>PEMANTAUAN AKTIFITAS<br>DESA BINAAN IMIGRASI</span>
+  <main class="grid min-h-svh bg-background lg:grid-cols-2">
+    <section class="flex flex-col px-5 py-6 sm:px-10 lg:px-16">
+      <NuxtLink to="/" class="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-muted-foreground no-underline transition hover:text-primary">
+        <ArrowLeft class="size-4" aria-hidden="true" />Kembali ke beranda
+      </NuxtLink>
+
+      <div class="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
+        <NuxtLink to="/" class="mb-8 flex w-fit max-w-full items-center gap-3 text-primary no-underline" :aria-label="PUBLIC_BRAND_NAME">
+          <img class="size-14 shrink-0 object-contain" src="/images/logo.webp" alt="" width="56" height="56">
+          <span class="text-[0.68rem] leading-[1.25] font-black tracking-[.07em]">SISTEM PELAPORAN<br>PEMANTAUAN AKTIFITAS<br>DESA BINAAN IMIGRASI</span>
         </NuxtLink>
+
         <div v-if="memeriksaSesi" class="grid place-items-center gap-4 py-10 text-center" role="status" aria-live="polite">
           <Spinner class="size-8 text-primary" />
           <div><p class="text-lg font-extrabold text-primary">{{ TEKS_LOGIN.memeriksaSesi }}</p><p class="mt-1 text-sm text-muted-foreground">{{ TEKS_LOGIN.memeriksaSesiBantuan }}</p></div>
         </div>
         <template v-else>
-        <h1 class="mb-7 text-left text-3xl font-black tracking-tight text-primary">Login</h1>
+          <h1 class="text-2xl font-extrabold tracking-tight">{{ TEKS_LOGIN.judul }}</h1>
+          <p class="mt-1.5 mb-7 text-sm text-muted-foreground">{{ TEKS_LOGIN.pengantar }}</p>
           <form @submit.prevent="submitLogin">
             <FieldGroup class="gap-5">
               <Field>
-                <FieldLabel class="text-sm font-bold text-primary" for="username">{{ TEKS_LOGIN.username }}</FieldLabel>
-                <Input id="username" v-model="username" class="h-12 rounded-xl border-input bg-background px-4 text-base shadow-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+                <FieldLabel class="text-sm font-semibold" for="username">{{ TEKS_LOGIN.username }}</FieldLabel>
+                <Input id="username" v-model="username" class="h-11 bg-card px-3.5 text-base shadow-none md:text-sm" autocomplete="username" autocapitalize="none" spellcheck="false" required />
               </Field>
               <Field>
-                <FieldLabel class="text-sm font-bold text-primary" for="password">{{ TEKS_LOGIN.password }}</FieldLabel>
-                <div class="relative"><Input id="password" v-model="password" class="h-12 rounded-xl border-input bg-background px-4 pr-12 text-base shadow-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20" :type="passwordTerlihat ? 'text' : 'password'" autocomplete="current-password" required /><Button class="absolute right-1 top-1 size-10" variant="ghost" size="icon" type="button" :aria-label="passwordTerlihat ? TEKS_LOGIN.sembunyikan : TEKS_LOGIN.tampilkan" @click="passwordTerlihat = !passwordTerlihat"><EyeOff v-if="passwordTerlihat" /><Eye v-else /></Button></div>
+                <FieldLabel class="text-sm font-semibold" for="password">{{ TEKS_LOGIN.password }}</FieldLabel>
+                <div class="relative">
+                  <Input id="password" v-model="password" class="h-11 bg-card px-3.5 pr-12 text-base shadow-none md:text-sm" :type="passwordTerlihat ? 'text' : 'password'" autocomplete="current-password" required />
+                  <Button class="absolute top-1 right-1 size-9" variant="ghost" size="icon" type="button" :aria-label="passwordTerlihat ? TEKS_LOGIN.sembunyikan : TEKS_LOGIN.tampilkan" @click="passwordTerlihat = !passwordTerlihat"><EyeOff v-if="passwordTerlihat" /><Eye v-else /></Button>
+                </div>
               </Field>
               <Field>
-                <Button class="min-h-12 w-full rounded-xl text-base font-bold" size="lg" type="submit" :disabled="sedangMemproses">{{ sedangMemproses ? TEKS_LOGIN.memproses : TEKS_LOGIN.masuk }}</Button>
-                <p v-if="pesanError" class="text-sm text-destructive" role="alert">{{ pesanError }}</p>
+                <p v-if="pesanError" class="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" role="alert">{{ pesanError }}</p>
+                <Button class="h-11 w-full text-sm font-semibold" size="lg" type="submit" :disabled="sedangMemproses">
+                  <Spinner v-if="sedangMemproses" class="size-4" />{{ sedangMemproses ? TEKS_LOGIN.memproses : TEKS_LOGIN.masuk }}
+                </Button>
               </Field>
             </FieldGroup>
           </form>
-        <p class="mt-6 text-sm leading-5 text-muted-foreground">{{ TEKS_LOGIN.bantuan }}</p>
+          <p class="mt-6 text-center text-sm text-muted-foreground">{{ TEKS_LOGIN.bantuan }}</p>
         </template>
       </div>
     </section>
+
+    <!-- Panel pendamping: hanya desktop, dekoratif -->
+    <aside class="relative hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between" aria-hidden="true">
+      <div class="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-primary-foreground/10" />
+      <div class="pointer-events-none absolute -bottom-32 -left-20 size-96 rounded-full bg-primary-foreground/5" />
+      <div class="relative z-10 p-12 xl:p-16">
+        <p class="text-xs font-bold tracking-[.2em] uppercase opacity-80">{{ APP_NAME }}</p>
+        <h2 class="mt-4 max-w-md text-3xl leading-tight font-extrabold xl:text-4xl">Mendampingi desa binaan, melayani aduan masyarakat.</h2>
+        <p class="mt-3 max-w-md text-sm leading-relaxed opacity-80">{{ APP_TAGLINE }}</p>
+      </div>
+      <img class="relative z-10 mx-auto max-h-[62%] w-auto object-contain object-bottom" :src="FOTO_LANDING.pimpasa.src" alt="" :width="FOTO_LANDING.pimpasa.lebar" :height="FOTO_LANDING.pimpasa.tinggi">
+    </aside>
   </main>
 </template>
