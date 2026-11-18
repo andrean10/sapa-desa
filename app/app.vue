@@ -9,6 +9,7 @@
 </template>
 
 <script setup lang="ts">
+import 'vue-sonner/style.css'
 import { buatGayaTema } from '~~/shared/config/tema'
 
 useHead({
