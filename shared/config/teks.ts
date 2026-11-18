@@ -231,8 +231,8 @@ export const LABEL_FORM = {
 } as const
 
 export const TEKS_LOGIN = {
-  judul: 'Masuk petugas',
-  pengantar: 'Gunakan akun yang diberikan oleh administrator.',
+  judul: 'Login',
+  pengantar: 'Selamat datang kembali. Silakan masuk untuk melanjutkan.',
   username: 'Username',
   password: 'Kata sandi',
   bantuan: 'Lupa password? Hubungi admin.',
