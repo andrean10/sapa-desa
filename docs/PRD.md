@@ -194,7 +194,7 @@ Prinsip: **mobile-first** (lebar dasar 360 px), tombol dan target sentuh minimal
 
 ### 4.1 Layout publik
 
-- **Header** (melekat di atas, latar blur): logo SAPA DESA dan nama sistem (di HP cukup "SAPA DESA"), menu **Beranda · Informasi · Aduan Masyarakat · Cek Aduan** di kanan (tanpa tombol terpisah). Di HP menu menjadi hamburger berisi semua tautan ditambah **PIMPASA · Masuk petugas**.
+- **Header** (melekat di atas, latar blur): logo SAPA DESA dan nama sistem (di HP cukup "SAPA DESA"), menu **Beranda · Informasi · Aduan Masyarakat · Cek Aduan** di kanan (tanpa tombol terpisah). Di HP menu menjadi hamburger berisi semua tautan ditambah **PIMPASA · Login**.
 - **Footer** (biru tua, garis aksen emas): logo + deskripsi layanan + logo instansi; kolom **Jelajahi** (tautan menu + tombol PIMPASA untuk petugas); kolom **Hubungi kami** (alamat, telepon, email, Instagram, TikTok dari `KONTAK_INSTANSI` di `shared/config/app.ts`). Di `/informasi` footer diawali blok ajakan "Ada yang ingin Anda sampaikan?" dengan tombol Aduan Masyarakat dan Cek Aduan.
 - Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan tautan lewat media sosial.
 - Rute petugas (`/upt/*`, `/kanwil/*`, `/admin/*`, `/masuk`, `/akun/*`) diberi `noindex`.

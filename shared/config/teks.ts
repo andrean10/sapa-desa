@@ -210,7 +210,7 @@ export const TEKS_UMUM = {
   sesiBerakhir: 'Sesi berakhir, silakan masuk lagi.',
   keteranganPublik: 'Keterangan ini dapat dilihat oleh pelapor',
   modeUjiCoba: 'MODE UJI COBA',
-  identitasPetugas: 'Masuk petugas',
+  identitasPetugas: 'Login',
   navigasiUtama: 'Navigasi utama',
   bukaMenu: 'Buka menu',
   tutup: 'Tutup'
