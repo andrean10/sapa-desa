@@ -196,7 +196,7 @@ Prinsip: **mobile-first** (lebar dasar 360 px), tombol dan target sentuh minimal
 
 ### 4.1 Layout publik
 
-- **Header** (melekat di atas, latar blur): logo SAPA DESA dan nama sistem (di HP cukup "SAPA DESA"), menu tengah **Beranda · Informasi · Cek Aduan**, dan tombol emas **Aduan Masyarakat** di kanan (di HP dipendekkan menjadi "Aduan"). Di HP menu menjadi hamburger berisi semua tautan ditambah **PIMPASA · Masuk petugas**.
+- **Header** (melekat di atas, latar blur): logo SAPA DESA dan nama sistem (di HP cukup "SAPA DESA"), menu **Beranda · Informasi · Aduan Masyarakat · Cek Aduan** di kanan (tanpa tombol terpisah). Di HP menu menjadi hamburger berisi semua tautan ditambah **PIMPASA · Masuk petugas**.
 - **Footer** (biru tua, garis aksen emas): logo + deskripsi layanan + logo instansi; kolom **Jelajahi** (tautan menu + tombol PIMPASA untuk petugas); kolom **Hubungi kami** (alamat, telepon, email, Instagram, TikTok dari `KONTAK_INSTANSI` di `shared/config/app.ts`). Di `/informasi` footer diawali blok ajakan "Ada yang ingin Anda sampaikan?" dengan tombol Aduan Masyarakat dan Cek Aduan.
 - Tag meta untuk berbagi di media sosial (judul, deskripsi singkat, gambar) di `/`, karena pimpinan bisa menyebarkan tautan lewat media sosial.
 - Rute petugas (`/upt/*`, `/kanwil/*`, `/admin/*`, `/masuk`, `/akun/*`) diberi `noindex`.
@@ -208,9 +208,9 @@ Tujuan: pengunjung yang mencari SAPA DESA lewat mesin pencari (tanpa QR) memaham
 
 | Bagian | Isi |
 |---|---|
-| Hero PIMPASA | Latar terang. Kiri: label "Program Desa Binaan Imigrasi", judul **PIMPASA** + "Petugas Imigrasi Pembina Desa", paragraf pengantar, **satu tombol "PIMPASA"** (biru tua) menuju `/masuk` dengan catatan "Khusus petugas". Kanan: foto petugas PIMPASA (**cutout transparan**) di depan lingkaran biru muda, dengan kartu melayang: jumlah desa binaan, jumlah kantor imigrasi dan kabupaten/kota, serta daftar kegiatan PIMPASA |
+| Hero PIMPASA | Latar terang. Kiri: label "Program Desa Binaan Imigrasi", judul **PIMPASA** + "Petugas Imigrasi Pembina Desa", paragraf pengantar, **satu tombol "PIMPASA"** (biru tua) menuju `/masuk`. Hero dibuat tinggi (min. ±50 rem di desktop). Kanan: foto petugas PIMPASA (**cutout transparan**) di depan lingkaran biru muda, dengan kartu melayang: jumlah desa binaan, jumlah kantor imigrasi dan kabupaten/kota, serta daftar kegiatan PIMPASA |
 | Logo instansi | Pita putih di bawah hero: nama kantor wilayah dan logo dari `LOGO_INSTANSI` |
-| Aduan Masyarakat | Foto kiri (kartu melayang contoh kode aduan), kanan: judul "Ada yang ingin Anda sampaikan untuk desa Anda?", pengantar, tiga poin centang, dua tombol: **Aduan Masyarakat** (emas, ikon, ke `/lapor`) dan **Cek Aduan** (biru tua, ikon, ke `/lacak`) |
+| Aduan Masyarakat | Foto kiri (kartu melayang contoh kode aduan), kanan (tanpa label kecil di atas judul): judul "Ada yang ingin Anda sampaikan untuk desa Anda?", pengantar, tiga poin centang, dua tombol: **Aduan Masyarakat** (emas, ikon, ke `/lapor`) dan **Cek Aduan** (biru tua, ikon, ke `/lacak`) |
 | Alur dan tata cara aduan | 3 kartu bernomor dengan ikon: isi aduan di HP, petugas setempat menindaklanjuti, pantau dengan kode aduan |
 | Informasi keimigrasian | Pintasan 5 pertanyaan FAQ pertama dan tombol "Lihat semua informasi" ke `/informasi` |
 

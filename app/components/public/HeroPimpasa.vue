@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, BadgeCheck, CircleCheck, Landmark, Lock, MapPinned, ShieldCheck } from '@lucide/vue'
+import { ArrowRight, BadgeCheck, CircleCheck, Landmark, MapPinned, ShieldCheck } from '@lucide/vue'
 import { FOTO_LANDING } from '~~/shared/config/app'
 import { TEKS_LANDING } from '~~/shared/config/teks'
 import { formatAngkaIndonesia } from '~~/shared/utils/angka'
@@ -10,26 +10,25 @@ const { data: statistik } = useStatistikPublik()
 </script>
 
 <template>
-  <section class="relative isolate overflow-hidden bg-linear-to-b from-info-muda/70 via-info-muda/25 to-background" aria-labelledby="judul-landing">
+  <section class="relative isolate overflow-hidden lg:min-h-[min(50rem,calc(100svh-4.5rem))] bg-linear-to-b from-info-muda/70 via-info-muda/25 to-background" aria-labelledby="judul-landing">
     <div class="pointer-events-none absolute -top-40 -left-32 -z-10 size-[28rem] rounded-full bg-card/70 blur-3xl" aria-hidden="true" />
-    <div class="mx-auto grid max-w-7xl items-center gap-10 px-5 pt-10 pb-0 sm:px-8 sm:pt-14 lg:grid-cols-[1.05fr_.95fr] lg:gap-6 lg:pt-8 lg:pb-0">
-      <div class="relative z-10 max-w-2xl pb-2 lg:pb-16">
+    <div class="mx-auto grid max-w-7xl items-center gap-10 px-5 pt-14 pb-0 sm:px-8 sm:pt-20 lg:min-h-[inherit] lg:grid-cols-[1.05fr_.95fr] lg:gap-6 lg:pt-16 lg:pb-0">
+      <div class="relative z-10 max-w-2xl pb-4 lg:pb-24">
         <p class="inline-flex items-center gap-2 rounded-full border border-info/15 bg-card/80 px-3.5 py-1.5 text-sm font-semibold text-info shadow-xs backdrop-blur"><BadgeCheck class="size-4" aria-hidden="true" />{{ teks.label }}</p>
         <h1 id="judul-landing" class="mt-6 text-primary">
-          <span class="block text-6xl leading-none font-extrabold tracking-tight sm:text-7xl lg:text-[5.5rem]">{{ teks.nama }}</span>
+          <span class="block text-6xl leading-none font-extrabold tracking-tight sm:text-7xl lg:text-[6.25rem]">{{ teks.nama }}</span>
           <span class="mt-3 block text-2xl leading-tight font-bold sm:text-3xl lg:text-4xl">{{ teks.kepanjangan }}</span>
         </h1>
         <p class="mt-6 max-w-xl text-base leading-8 text-muted-foreground sm:text-lg">{{ teks.pengantar }}</p>
-        <div class="mt-9 flex flex-col items-start gap-3">
+        <div class="mt-10">
           <NuxtLink to="/masuk" class="group inline-flex min-h-14 items-center gap-3 rounded-full bg-primary px-8 py-3.5 text-lg font-extrabold tracking-wide text-primary-foreground no-underline shadow-lg shadow-primary/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-primary/30 focus-visible:ring-4 focus-visible:ring-ring/40 focus-visible:outline-none active:translate-y-0">
             <ShieldCheck class="size-5 text-emas" aria-hidden="true" />{{ teks.tombol }}<ArrowRight class="size-5 transition-transform group-hover:translate-x-1" aria-hidden="true" />
           </NuxtLink>
-          <p class="flex items-center gap-1.5 text-sm text-muted-foreground"><Lock class="size-3.5" aria-hidden="true" />{{ teks.catatanTombol }}</p>
         </div>
       </div>
 
       <div class="relative mx-auto w-full max-w-[32rem] lg:max-w-none">
-        <div class="relative mx-auto aspect-[4/4.4] w-full max-w-[30rem] sm:aspect-[4/4.2] lg:ml-auto lg:max-w-[34rem]">
+        <div class="relative mx-auto aspect-[4/5] w-full max-w-[30rem] sm:aspect-[4/5] lg:ml-auto lg:max-w-[36rem] lg:self-end">
           <div class="absolute top-[3%] -right-[14%] aspect-square w-[104%] rounded-full bg-linear-to-b from-info-muda to-info-muda/30 ring-1 ring-info/10 lg:-right-[18%]" aria-hidden="true" />
           <span class="absolute top-[3%] left-[6%] size-7 rounded-t-full bg-emas" aria-hidden="true" />
           <span class="absolute top-[18%] left-[2%] size-3 rounded-full bg-info/60" aria-hidden="true" />

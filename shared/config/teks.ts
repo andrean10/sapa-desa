@@ -76,7 +76,6 @@ export const TEKS_LANDING = {
     kepanjangan: 'Petugas Imigrasi Pembina Desa',
     pengantar: 'Petugas imigrasi hadir di desa binaan untuk mendampingi masyarakat: memberi penyuluhan keimigrasian, memantau keberadaan dan kegiatan orang asing, serta menjadi penghubung aduan warga ke kantor imigrasi setempat.',
     tombol: 'PIMPASA',
-    catatanTombol: 'Khusus petugas. Masuk dengan akun yang diberikan administrator.',
     kartu: {
       desaBinaan: 'Desa Binaan Imigrasi',
       kantor: 'Kantor Imigrasi melayani',
@@ -86,7 +85,6 @@ export const TEKS_LANDING = {
     }
   },
   aduan: {
-    label: 'Aduan Masyarakat',
     judul: 'Ada yang ingin Anda sampaikan untuk desa Anda?',
     pengantar: 'Sampaikan aduan keimigrasian dari wilayah Riau dan pantau tindak lanjutnya dengan kode aduan.',
     poin: [
