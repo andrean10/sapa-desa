@@ -77,6 +77,6 @@ export const LOGO_INSTANSI = [
  * (PNG/WebP). Selama berkas belum ada, landing menampilkan ilustrasi pengganti.
  */
 export const FOTO_LANDING = {
-  pimpasa: { src: '/images/landing/pimpasa-petugas.png', alt: 'Petugas Imigrasi Pembina Desa (PIMPASA)', lebar: 720, tinggi: 900 },
-  aduan: { src: '/images/landing/aduan-masyarakat.png', alt: 'Petugas imigrasi melayani aduan masyarakat', lebar: 720, tinggi: 720 }
+  pimpasa: { src: '/images/landing/pimpasa-petugas.webp', alt: 'Petugas Imigrasi Pembina Desa (PIMPASA)', lebar: 720, tinggi: 900 },
+  aduan: { src: '/images/landing/aduan-masyarakat.webp', alt: 'Petugas imigrasi melayani aduan masyarakat', lebar: 720, tinggi: 720 }
 } as const

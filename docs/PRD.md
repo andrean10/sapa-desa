@@ -215,7 +215,7 @@ Tujuan: pengunjung yang mencari SAPA DESA lewat mesin pencari (tanpa QR) memaham
 | Informasi keimigrasian | Pintasan 5 pertanyaan FAQ pertama dan tombol "Lihat semua informasi" ke `/informasi` |
 
 - **Angka kartu hero** (`desaBinaan`, `kantor`, `kabupaten`) diambil dari `GET /api/publik/statistik`, yang hanya menghitung baris di tabel yang boleh dibaca `anon` (`desa_kelurahan` dengan `dbi = true`, `kantor_imigrasi` aktif, `kabupaten`). Hasil di-cache server 1 jam. Bila gagal dimuat, kartu angka disembunyikan (tidak menampilkan angka palsu).
-- **Foto**: taruh `pimpasa-petugas.png` dan `aduan-masyarakat.png` (PNG/WebP, latar transparan untuk hero) di `public/images/landing/`. Nama dan ukuran ada di `FOTO_LANDING`. Selama berkas belum ada, tampil ilustrasi pengganti berukuran sama.
+- **Foto**: taruh `pimpasa-petugas.png` dan `aduan-masyarakat.png` (WebP, latar transparan untuk hero) di `public/images/landing/`. Nama dan ukuran ada di `FOTO_LANDING`. Selama berkas belum ada, tampil ilustrasi pengganti berukuran sama.
 - Keadaan: bila FAQ kosong setelah dimuat, bagian "Informasi keimigrasian" **disembunyikan**. Saat memuat tampil skeleton; bila gagal, pesan dan tombol "Coba lagi".
 - Animasi kartu melayang dimatikan saat pengguna memilih `prefers-reduced-motion`.
 
