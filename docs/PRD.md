@@ -608,7 +608,7 @@ Dikerjakan lewat jalur server dan Admin API (KONTRAK_API bagian 7):
 - Tabel akun: Username · Nama tampil · Peran · Kantor · Aktif.
 - **Buat akun**: username (huruf kecil), nama tampil, peran, kantor (wajib hanya untuk UPT), password awal. **Password tidak pernah ditampilkan ulang atau disimpan.**
 - **Reset password**: admin memasukkan password baru; setelah itu tidak ditampilkan lagi.
-- **Nonaktifkan/Aktifkan** akun.
+- **Status akun** lewat saklar (switch) di kolom Status: menonaktifkan meminta konfirmasi, mengaktifkan kembali langsung diproses; tampilan dan kartu ringkasan berubah seketika. Saklar akun sendiri terkunci.
 - **Masuk sebagai** (impersonasi, untuk pengujian): membuka sesi di jendela baru dengan banner "Anda masuk sebagai {akun}"; setiap impersonasi tercatat di log saat log aktif.
 
 ### 9.3 Log aktivitas `/admin/log` *(tahap akhir)*

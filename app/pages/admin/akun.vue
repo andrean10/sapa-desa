@@ -4,8 +4,9 @@ import { KeyRound, LogIn, MoreHorizontal, Power, Search, ShieldCheck, UserPlus, 
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { NativeSelect, NativeSelectOption } from '~/components/ui/native-select'
+import { Switch } from '~/components/ui/switch'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '~/components/ui/alert-dialog'
 import { PERAN_PENGGUNA } from '~~/shared/config/teks'
 
@@ -46,9 +47,14 @@ async function buat() {
   } catch (e) { toast.error(pesanGalat(e, 'Akun gagal dibuat.')) }
   finally { busy.value = false }
 }
+// data dari useAsyncData bersifat shallow: mengubah properti di dalamnya tidak memicu render, jadi objeknya diganti utuh.
+function perbaruiStatusLokal(id: string, aktif: boolean) {
+  if (!data.value) return
+  data.value = { ...data.value, akun: data.value.akun.map(item => item.id === id ? { ...item, aktif } : item) }
+}
 async function setAktif(akun: Akun) {
   busy.value = akun.id
-  try { await api(`/api/admin/akun/${akun.id}/aktif`, { method: 'PATCH', body: { aktif: !akun.aktif } }); const baris = data.value?.akun.find(item => item.id === akun.id); if (baris) baris.aktif = !akun.aktif; toast.success('Status akun diperbarui.') }
+  try { await api(`/api/admin/akun/${akun.id}/aktif`, { method: 'PATCH', body: { aktif: !akun.aktif } }); perbaruiStatusLokal(akun.id, !akun.aktif); toast.success('Status akun diperbarui.') }
   catch (galat) { toast.error(pesanGalat(galat, 'Status akun gagal diperbarui.')) } finally { busy.value = false }
 }
 const passwordBaru = ref('')
@@ -68,6 +74,11 @@ async function konfirmasiTindakan() {
   dialogKonfirmasi.value = false
   if (tindakan.jenis === 'aktif') await setAktif(tindakan.akun)
   else await reset(tindakan.akun)
+}
+// Menonaktifkan berdampak (akun kehilangan akses) sehingga dikonfirmasi; mengaktifkan kembali langsung diproses.
+function ubahStatus(akun: Akun) {
+  if (akun.aktif) minta('aktif', akun)
+  else void setAktif(akun)
 }
 async function masukSebagai(akun: Akun) {
   const tab = window.open('about:blank', '_blank')
@@ -104,7 +115,12 @@ async function masukSebagai(akun: Akun) {
             <TableCell><p class="font-medium">{{ akun.nama_tampil }}</p><p class="font-mono text-xs text-muted-foreground">{{ akun.username }}</p></TableCell>
             <TableCell><span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="akun.peran === 'admin' ? 'bg-primary text-primary-foreground' : akun.peran === 'kanwil' ? 'bg-emas/20 text-emas-foreground' : 'bg-info-muda text-info'">{{ labelPeran(akun.peran) }}</span></TableCell>
             <TableCell class="text-muted-foreground">{{ akun.kantor_id ? namaKantor[akun.kantor_id] ?? '—' : '—' }}</TableCell>
-            <TableCell><span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-semibold" :class="akun.aktif ? 'bg-sukses-muda text-sukses' : 'bg-muted text-muted-foreground'"><span class="size-1.5 rounded-full bg-current" />{{ akun.aktif ? 'Aktif' : 'Nonaktif' }}</span></TableCell>
+            <TableCell>
+              <div class="flex items-center gap-2.5">
+                <Switch :model-value="akun.aktif" :disabled="akun.id === profil?.id || busy === akun.id" :aria-label="`${akun.aktif ? 'Nonaktifkan' : 'Aktifkan'} akun ${akun.username}`" @update:model-value="ubahStatus(akun)" />
+                <span class="text-sm font-medium" :class="akun.aktif ? 'text-sukses' : 'text-muted-foreground'">{{ akun.aktif ? 'Aktif' : 'Nonaktif' }}</span>
+              </div>
+            </TableCell>
             <TableCell class="text-right">
               <span v-if="akun.id === profil?.id" class="text-xs text-muted-foreground">Akun Anda</span>
               <DropdownMenu v-else>
@@ -112,8 +128,6 @@ async function masukSebagai(akun: Akun) {
                 <DropdownMenuContent align="end" class="w-48">
                   <DropdownMenuItem :disabled="!akun.aktif" @select="masukSebagai(akun)"><LogIn />Masuk sebagai</DropdownMenuItem>
                   <DropdownMenuItem @select="minta('password', akun)"><KeyRound />Reset password</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem :class="akun.aktif ? 'text-destructive focus:bg-bahaya-muda focus:text-destructive' : ''" @select="minta('aktif', akun)"><Power :class="akun.aktif ? 'text-destructive' : ''" />{{ akun.aktif ? 'Nonaktifkan' : 'Aktifkan' }}</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </TableCell>
