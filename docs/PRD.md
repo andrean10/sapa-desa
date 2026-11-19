@@ -505,7 +505,7 @@ Di atas: **pemilih periode** yang berlaku untuk semua bagian halaman: Bulan ini 
 - **Dalam periode terpilih** (penanda berisi rentang tanggal): *Aduan masyarakat*: Aduan masuk · Selesai · Ditolak; *Kegiatan PIMPASA*: Kegiatan dilaporkan · Desa tanpa kegiatan (dari total desa binaan saat ini, dengan bilah).
 - Istilah: **"Aduan"** untuk laporan dari masyarakat dan **"Kegiatan"** untuk laporan kegiatan PIMPASA, supaya kata "laporan" tidak dipakai untuk dua hal.
 
-**b. Tabel per UPT** (`dashboard_kanwil_per_upt`): satu baris per UPT. Kolom: UPT · Laporan masuk · Belum ditanggapi · Terlambat · Sedang ditangani · Direspon · Kegiatan · Desa binaan · Desa tanpa kegiatan. Kolom dapat diurutkan. Sel **Terlambat > 0** diberi warna merah. Klik baris → `/kanwil/upt/[kantorId]`.
+**b. Tabel per UPT** (`dashboard_kanwil_per_upt`): satu baris per UPT. Kolom dikelompokkan dengan judul kelompok di atas tabel: **Kondisi saat ini** (Belum ditanggapi · Terlambat · Ditangani · Desa binaan) lalu **Dalam periode terpilih** (Aduan masuk · Direspon · Kegiatan · Tanpa kegiatan). Kolom UPT di paling kiri. Kolom dapat diurutkan. Sel **Terlambat > 0** diberi warna merah. Klik baris → `/kanwil/upt/[kantorId]`.
 
 **c. Tren** (`dashboard_kanwil_tren`): laporan per bulan (WNA/WNI bertumpuk), kegiatan per bulan, proporsi WNA/WNI, kegiatan per jenis. Perilaku periode sama seperti 7.1d: dua grafik per bulan selalu 6 bulan yang berakhir di akhir periode; pemilih periode memengaruhi proporsi dan kegiatan per jenis.
 
