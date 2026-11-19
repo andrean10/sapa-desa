@@ -33,5 +33,7 @@ export async function gantiPassword(event: H3Event) {
   if (verifikasi.error || !verifikasi.data.user) throw createError({ statusCode: 400, statusMessage: 'Password saat ini tidak sesuai.' })
   const hasil = await client.auth.updateUser({ password: input.data.passwordBaru })
   if (hasil.error) throw createError({ statusCode: 400, statusMessage: 'Password baru belum dapat disimpan.' })
+  // Perangkat lain ikut keluar (sesi ini tetap). Kegagalan di sini tidak membatalkan penggantian yang sudah berhasil.
+  await client.auth.signOut({ scope: 'others' }).catch(() => undefined)
   return { berhasil: true }
 }

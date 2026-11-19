@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { AUTH_EMAIL_DOMAIN } from '../../shared/config/app'
 import { profilSesi } from './auth.controller'
 import { buatClientServiceRole } from '../utils/supabase'
-import { apakahAdminAktifTerakhir, buatAkunAdmin, linkImpersonasiAdmin, resetPasswordAkunAdmin, ubahAkunAktifAdmin } from '../models/admin.model'
+import { apakahAdminAktifTerakhir, buatAkunAdmin, cabutSemuaSesiAkun, linkImpersonasiAdmin, resetPasswordAkunAdmin, ubahAkunAktifAdmin } from '../models/admin.model'
 
 async function pastikanAdmin(event: H3Event) {
   const profil = await profilSesi(event)
@@ -27,7 +27,11 @@ export async function resetPassword(event: H3Event) {
   if (!id || !z.string().uuid().safeParse(id).success || !parsed.success) throw createError({ statusCode: 400, statusMessage: 'Data reset password tidak valid.' })
   const { error } = await resetPasswordAkunAdmin(buatClientServiceRole(), id, parsed.data.password)
   if (error) throw createError({ statusCode: 422, statusMessage: 'Password gagal diperbarui.' })
-  return { berhasil: true }
+  // Semua perangkat akun ini harus login ulang dengan password baru. Gagal mencabut sesi tidak membatalkan reset.
+  const service = buatClientServiceRole()
+  const akun = await service.from('profiles').select('username').eq('id', id).maybeSingle()
+  const sesiDicabut = akun.data ? await cabutSemuaSesiAkun(service, `${akun.data.username}@${AUTH_EMAIL_DOMAIN}`, parsed.data.password).catch(() => false) : false
+  return { berhasil: true, sesiDicabut }
 }
 
 export async function ubahAktif(event: H3Event) {

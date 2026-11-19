@@ -32,6 +32,14 @@ export async function resetPasswordAkunAdmin(service: SupabaseClient<Database>, 
   return service.auth.admin.updateUserById(id, { password })
 }
 
+/** Mencabut semua sesi akun (semua perangkat). Admin API hanya menerima JWT, jadi masuk sekali dengan password baru lalu cabut seluruh sesinya. Akun nonaktif (diblokir) tidak perlu: tidak bisa memperbarui sesi. */
+export async function cabutSemuaSesiAkun(service: SupabaseClient<Database>, email: string, password: string) {
+  const masuk = await service.auth.signInWithPassword({ email, password })
+  if (masuk.error || !masuk.data.session) return false
+  const keluar = await service.auth.admin.signOut(masuk.data.session.access_token, 'global')
+  return !keluar.error
+}
+
 export async function ubahAkunAktifAdmin(service: SupabaseClient<Database>, id: string, aktif: boolean) {
   const hasil = await service.from('profiles').update({ aktif }).eq('id', id).select('id').maybeSingle()
   if (hasil.error || !hasil.data) return hasil

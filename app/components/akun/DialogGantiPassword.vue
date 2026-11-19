@@ -38,7 +38,7 @@ async function simpan() {
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle class="flex items-center gap-2"><KeyRound class="size-5 text-muted-foreground" aria-hidden="true" />{{ TEKS_UMUM.gantiPassword }}</DialogTitle>
-        <DialogDescription>Minimal 8 karakter, berbeda dari password saat ini, dan tidak sama dengan username.</DialogDescription>
+        <DialogDescription>Minimal 8 karakter, berbeda dari password saat ini, dan tidak sama dengan username. Perangkat lain yang sedang login akan keluar otomatis.</DialogDescription>
       </DialogHeader>
       <form id="form-ganti-password" @submit.prevent="simpan">
         <FieldGroup>

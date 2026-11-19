@@ -140,7 +140,7 @@ async function masukSebagai(akun: Akun) {
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{{ tindakanKonfirmasi?.jenis === 'password' ? `Reset password ${tindakanKonfirmasi?.akun.username}?` : tindakanKonfirmasi?.akun.aktif ? 'Nonaktifkan akun?' : 'Aktifkan akun?' }}</AlertDialogTitle>
-          <AlertDialogDescription>{{ tindakanKonfirmasi?.jenis === 'password' ? 'Password baru tidak akan ditampilkan kembali.' : tindakanKonfirmasi?.akun.aktif ? `Akun ${tindakanKonfirmasi?.akun.username} akan kehilangan akses SAPA DESA.` : `Akun ${tindakanKonfirmasi?.akun.username} akan dapat mengakses SAPA DESA kembali.` }}</AlertDialogDescription>
+          <AlertDialogDescription>{{ tindakanKonfirmasi?.jenis === 'password' ? 'Password baru tidak akan ditampilkan kembali. Akun ini akan keluar dari semua perangkat dan harus login ulang.' : tindakanKonfirmasi?.akun.aktif ? `Akun ${tindakanKonfirmasi?.akun.username} akan kehilangan akses SAPA DESA.` : `Akun ${tindakanKonfirmasi?.akun.username} akan dapat mengakses SAPA DESA kembali.` }}</AlertDialogDescription>
         </AlertDialogHeader>
         <label v-if="tindakanKonfirmasi?.jenis === 'password'" class="grid gap-1.5 text-sm font-medium">Password baru<AkunInputPassword v-model="passwordBaru" minlength="8" autocomplete="new-password" /></label>
         <AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction :disabled="!!busy || (tindakanKonfirmasi?.jenis === 'password' && passwordBaru.length < 8)" :class="tindakanKonfirmasi?.jenis === 'aktif' && tindakanKonfirmasi.akun.aktif ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''" @click.prevent="konfirmasiTindakan">Konfirmasi</AlertDialogAction></AlertDialogFooter>
