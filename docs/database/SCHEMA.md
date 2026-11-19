@@ -50,6 +50,7 @@ Desa binaan **bukan tabel terpisah**: itu `desa_kelurahan` dengan `dbi = true`.
 | kode | text | M, unique | `pekanbaru`, `dumai`, `siak`, `bengkalis`, `inhil`, `meranti`, `rohil` |
 | nama | text | M | contoh "Kantor Imigrasi Kelas I TPI Dumai" |
 | nama_singkat | text | M | contoh "Kanim Dumai" |
+| huruf_kode | char(1) | M, unique, `^[A-Z]$` | huruf awal kode pelacakan aduan: Pekanbaru `P`, Dumai `D`, Rokan Hilir `R`, Bengkalis `B`, Siak `S`, Indragiri Hilir `I`, Kepulauan Meranti `M` |
 | aktif | boolean | default true | |
 
 ### 4.2 `kabupaten` (publik)
@@ -146,7 +147,7 @@ Aturan:
 | Kolom | Tipe | | Keterangan |
 |---|---|---|---|
 | id | uuid | PK | |
-| kode_pelacakan | text | unique, **diisi trigger** | format `SD-XXXX-XXXX` |
+| kode_pelacakan | text | unique, **diisi trigger** | format `XXX000` (check `^[A-Z]{3}[0-9]{3}$`): `kantor_imigrasi.huruf_kode` + 2 huruf A–Z acak + 3 digit acak, mis. `PZA512`. Dibuat `private.buat_kode_pelacakan(huruf)`, dicoba ulang maks. 10 kali bila bentrok |
 | nama_pelapor | text | M | 1–150 karakter |
 | alamat_pelapor | text | M | 1–500 karakter |
 | desa_kelurahan_id | text | M, FK → desa_kelurahan | kecamatan dan kabupaten ikut lewat relasi |
@@ -176,7 +177,7 @@ Catatan tipe TypeScript: tipe `Insert` menandai `kantor_id` dan `kode_pelacakan`
 | status | status_laporan | M | |
 | keterangan | text | O | maksimal 1000 karakter, **tampil publik ke pelapor** |
 | pegawai_id | uuid | O, FK → pegawai | **tidak lagi diisi** (UPT tidak memilih petugas); hanya baris lama yang berisi. Kosong untuk `diterima` |
-| diproses_oleh | text | O | snapshot jabatan pemroses, diisi `ubah_status_laporan` untuk UPT: `KASI INTELDAKIM {NAMA UPT}` (mis. `KASI INTELDAKIM SIAK`; nama UPT = `kantor_imigrasi.nama_singkat` tanpa awalan "Kanim", huruf besar). Kosong untuk `diterima` dan perubahan oleh admin. **Tidak ada di hasil `lacak_laporan`** (tidak tampil ke masyarakat) |
+| diproses_oleh | text | O | snapshot jabatan pemroses, diisi `ubah_status_laporan` untuk UPT: `Humas Imigrasi {NAMA UPT}` (mis. `Humas Imigrasi Siak`; nama UPT = `kantor_imigrasi.nama_singkat` tanpa awalan "Kanim"). Kosong untuk `diterima` dan perubahan oleh admin. **Tidak ada di hasil `lacak_laporan`** (tidak tampil ke masyarakat) |
 | dibuat_oleh | uuid | O, FK → profiles | akun yang mengubah. Kosong hanya untuk `diterima` (CHECK) |
 | created_at | timestamptz | | waktu di sisi kiri garis timeline |
 
@@ -220,7 +221,6 @@ Data awal (7): Deteksi Dini, Lainnya, Konsultasi Masyarakat, Pemantauan Wilayah,
 | pdf_path | text | O | path di bucket `laporan-pdf` |
 | pegawai_id | uuid | FK → pegawai, NOT NULL | **wajib PIMPASA yang ditugaskan di desa itu pada `tanggal_kegiatan`** (dijaga trigger `laporan_pimpasa_cek`), aktif dan satu kantor |
 | petugas_pengganti_nama | text | opsional, maks. 150 | nama petugas yang menggantikan PIMPASA (teks bebas, atas perintah KASI INTELDAKIM). Spasi saja dijadikan NULL. NULL = PIMPASA sendiri yang terjun; UI menyembunyikannya |
-| petugas_pengganti | boolean | **kolom turunan** (`petugas_pengganti_nama is not null`), read-only | dipertahankan sementara agar kode lama tetap terbaca; akan dihapus pada migrasi pembersihan |
 
 Trigger `laporan_pimpasa_cek` memaksakan semua aturan di atas, termasuk: path file harus diawali folder `kantor_id` akun, dan `desa_id`/`kantor_id` tidak bisa diganti saat update.
 
@@ -312,5 +312,5 @@ Konvensi path: `{kantor_id}/{uuid}.{ext}` dengan nama file **unik**. Tidak ada p
 | laporan | `kode_pelacakan`, `kantor_id`, `status` |
 | riwayat_status | seluruh baris dibuat oleh trigger/fungsi (termasuk `diproses_oleh`) |
 | laporan_dibaca | seluruh baris dibuat fungsi `tandai_dibaca` / `ubah_status_laporan` |
-| laporan_pimpasa | `kantor_id`, `dibuat_oleh`, `petugas_pengganti` (turunan) |
+| laporan_pimpasa | `kantor_id`, `dibuat_oleh` |
 | desa_binaan_pegawai | `kantor_id` (diisi trigger dari kantor pegawai), `tanggal_mulai` (default hari ini WIB), `alasan_berakhir` hanya saat menutup |

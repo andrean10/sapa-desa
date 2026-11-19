@@ -269,7 +269,7 @@ Urutan dan label (label boleh disempurnakan, tetapi isi dan urutan tetap):
 | 6 | Siapa yang Anda laporkan? | dropdown | wajib; "Warga Negara Asing (WNA)" atau "Warga Negara Indonesia (WNI)" |
 | 7 | Apa yang ingin Anda laporkan? | area teks | wajib, 10–5000 karakter; tinggi awal ±8 baris, dapat digulir ke atas dan bawah; penghitung karakter "0/5000" |
 | 8 | Foto pendukung (opsional) | unggah file | maksimal **1** foto, JPEG/PNG/WebP, ≤ 3 MB |
-| 9 | Ini tindak lanjut laporan sebelumnya? (opsional) | bagian lipat | berisi satu kolom "Kode laporan sebelumnya" berpola `SD-XXXX-XXXX` |
+| 9 | Ini tindak lanjut laporan sebelumnya? (opsional) | bagian lipat | berisi satu kolom "Kode laporan sebelumnya" berpola 3 huruf + 3 angka (mis. `PZA512`) |
 
 Foto: di HP, tombol "Pilih foto atau ambil dengan kamera" (`accept="image/*"`). Foto yang lebih besar dari batas **dikompres otomatis di browser** (perkecil sisi terpanjang sekitar 1600 px, kualitas bertahap) sebelum diunggah; jika tetap melebihi 3 MB, tolak dengan pesan jelas. Tampilkan pratinjau kecil dengan tombol "Hapus foto".
 
@@ -302,7 +302,7 @@ Setelah berhasil, tampilkan dialog (HyperUI) yang tidak tertutup oleh klik di lu
 
 ### 4.5 Cek status `/lacak`
 
-- Satu kolom isian "Kode laporan" dengan contoh `SD-7KQ2-M9XP`. Otomatis huruf besar, spasi dibuang, tanda hubung disisipkan otomatis. Tombol **Cek Status**.
+- Satu kolom isian "Kode laporan" dengan contoh `PZA512`. Otomatis huruf besar; spasi dan tanda hubung dibuang; hanya 3 huruf lalu 3 angka (maks. 6 karakter) yang diterima. Tombol **Cek Status**.
 - Jika dibuka dengan `?kode=`, langsung mencari.
 - **Hasil**: kartu berisi kode, nama kantor yang menangani, waktu laporan dikirim, status saat ini (lencana warna + penjelasan ramah dari 2.2), dan **timeline** (4.6). Tombol "Muat ulang".
 - Tidak ditemukan: "Kode tidak ditemukan. Periksa kembali penulisan kode Anda." (satu pesan umum, tidak membedakan penyebab).
@@ -335,7 +335,7 @@ Komponen `TimelineStatus` (HyperUI timeline), satu komponen untuk dua tempat. Se
 
 Akun UPT dipakai bersama oleh pimpinan (KASI INTELDAKIM) dan staf, jadi **tidak ada** halaman "bertugas atas nama". Pegawai hanya dipilih di dua tempat:
 - **Laporan kegiatan PIMPASA** (7.5): dropdown berisi PIMPASA yang ditugaskan di desa itu pada tanggal kegiatan.
-- **Ubah status aduan**: tidak memilih siapa pun. Perubahan dicatat otomatis sebagai `KASI INTELDAKIM {NAMA UPT}` (nama UPT = bagian nama kantor setelah "TPI", mis. "KASI INTELDAKIM SIAK"). Jabatan ini belum final dan akan dikonfirmasi pimpinan; lokasinya satu konstanta (`JABATAN_PEMROSES_ADUAN`) dan satu fungsi database.
+- **Ubah status aduan**: tidak memilih siapa pun. Perubahan dicatat otomatis sebagai `Humas Imigrasi {NAMA UPT}` (nama UPT = bagian nama kantor setelah "TPI", mis. "Humas Imigrasi Siak"). Lokasinya satu konstanta (`JABATAN_PEMROSES_ADUAN`) dan satu fungsi database (`ubah_status_laporan`).
 
 ---
 
@@ -390,7 +390,7 @@ Pertanyaan yang harus terjawab dalam sekali lihat: **apa yang harus saya tindak,
 
 | Kolom | Isi |
 |---|---|
-| Kode | `SD-XXXX-XXXX` |
+| Kode | `XXX000` (huruf pertama = kode UPT, mis. `PZA512`) |
 | Lokasi | Desa, Kecamatan |
 | Jenis | lencana WNA/WNI |
 | Masuk | tanggal (waktu relatif "3 hari lalu" dengan tooltip tanggal lengkap) |
@@ -432,11 +432,11 @@ Dua kolom di desktop (konten kiri, timeline dan aksi kanan); satu kolom di layar
 - **Laporan lanjutan**: bila `laporan_sebelumnya_id` terisi dan laporannya dapat dibaca, tampilkan tautan ke laporan itu; bila tidak dapat dibaca, tampilkan hanya kode.
 
 **Kolom kanan: timeline dan ubah status**
-- **Timeline internal**: komponen yang sama dengan 4.6, ditambah baris "oleh {pemroses}" di setiap butir (mis. "oleh KASI INTELDAKIM SIAK"; "Sistem" untuk butir Diterima dan "Admin" bila diubah admin). Pemroses hanya tampil di sisi internal ini, **tidak pernah** di halaman masyarakat.
+- **Timeline internal**: komponen yang sama dengan 4.6, ditambah baris "oleh {pemroses}" di setiap butir (mis. "oleh Humas Imigrasi Siak"; "Sistem" untuk butir Diterima dan "Admin" bila diubah admin). Pemroses hanya tampil di sisi internal ini, **tidak pernah** di halaman masyarakat.
 - **Panel Ubah status** (untuk UPT; admin memakainya di halaman 8.4; Kanwil hanya membaca):
   - Pilihan status hanya yang **sah menurut alur** (KONTRAK_API 4.2): Diterima → Diverifikasi atau Ditolak; Diverifikasi → Ditindaklanjuti atau Ditolak; Ditindaklanjuti → Selesai. Status final (Selesai, Ditolak): panel diganti teks "Laporan sudah final dan tidak dapat diubah."
   - Kolom **Keterangan**, dengan label "Keterangan (dapat dilihat oleh pelapor)" dan penghitung 0/1000. **Wajib** untuk Ditolak dan Selesai, opsional untuk lainnya. Teks bantu: "Jangan menuliskan identitas orang asing atau data sensitif."
-  - Baris informasi "Dicatat sebagai {KASI INTELDAKIM {NAMA UPT}}" (tanpa pilihan petugas).
+  - Baris informasi "Dicatat sebagai {Humas Imigrasi {NAMA UPT}}" (tanpa pilihan petugas).
   - Tombol **Simpan status**. Untuk Ditolak dan Selesai tampil dialog konfirmasi: "Status ini final dan tidak dapat diubah lagi. Lanjutkan?"
   - Setelah berhasil: toast "Status diperbarui", timeline dimuat ulang, panel menyesuaikan status baru.
   - Pemetaan galat: "Laporan tidak ditemukan" (laporan sudah dihapus atau bukan milik kantor), "Keterangan wajib diisi untuk status ini", loncatan status tidak sah (muat ulang halaman dan tampilkan status terbaru).
@@ -538,7 +538,7 @@ Kolom **Dibaca UPT** membedakan laporan yang **belum dibaca sama sekali** (lebih
 Sama dengan 7.2 dan 7.3 dengan perbedaan:
 - Mencakup semua UPT; ada kolom dan filter **UPT**.
 - **Panel Ubah status** tampil hanya untuk **admin**, dengan aturan yang sama seperti 7.3 (pilihan status sesuai alur, keterangan wajib untuk Ditolak dan Selesai, konfirmasi untuk status final). Butir timeline-nya tampil "oleh Admin" (`p_pegawai_id` kosong). Untuk **Kanwil** tidak ada panel (baca saja).
-- **Penanda dibaca (seperti centang WhatsApp), khusus pemantauan Kanwil dan admin.** Daftar laporan punya kolom "Dibaca UPT"; detail menampilkan lencana yang sama di kepala. "Belum dibaca UPT" (centang tunggal, kuning) atau "Dibaca UPT · {waktu}" (centang ganda, biru). Tercatat **pertama kali** akun UPT pemilik membuka detail aduan (atau mengubah statusnya); Kanwil dan admin yang membuka tidak menandai. Penanda ini **tidak pernah** tampil di halaman UPT maupun publik, dan tabelnya tidak dapat dibaca akun UPT (RLS).
+- **Penanda dibaca (seperti centang WhatsApp), khusus pemantauan Kanwil dan admin.** Daftar laporan punya kolom "Dibaca UPT" dan tab cepat **Belum dibaca UPT** (parameter `belumDibaca=true`, hanya laporan yang belum pernah dibuka UPT; digabung dengan filter lain); detail menampilkan lencana yang sama di kepala. "Belum dibaca UPT" (centang tunggal, kuning) atau "Dibaca UPT · {waktu}" (centang ganda, biru). Tercatat **pertama kali** akun UPT pemilik membuka detail aduan (atau mengubah statusnya); Kanwil dan admin yang membuka tidak menandai. Penanda ini **tidak pernah** tampil di halaman UPT maupun publik, dan tabelnya tidak dapat dibaca akun UPT (RLS).
 - Timeline internal menonjolkan **keterangan penolakan**: butir berstatus Ditolak memakai latar `Latar bahaya` agar alasan penolakan mudah dibaca Kanwil.
 
 ### 8.5 Laporan kegiatan `/kanwil/kegiatan` dan detail
@@ -714,7 +714,7 @@ Jangan dibuat tanpa permintaan baru dari pemilik project:
 - [ ] `/informasi` memakai akordeon satu-terbuka; jawaban tidak dirender sebagai HTML.
 
 **UPT**
-- [ ] Login UPT langsung ke dashboard (tanpa pilih petugas); perubahan status dicatat sebagai `KASI INTELDAKIM {NAMA UPT}`.
+- [ ] Login UPT langsung ke dashboard (tanpa pilih petugas); perubahan status dicatat sebagai `Humas Imigrasi {NAMA UPT}`.
 - [ ] Dashboard menampilkan 5 kartu, daftar perlu tindakan (dengan sisa atau terlambat), tabel desa binaan, dan tren; **tanpa peringkat antar-UPT**.
 - [ ] Daftar laporan tidak menampilkan nama dan alamat pelapor; detail menampilkannya.
 - [ ] Panel ubah status hanya menawarkan status yang sah; keterangan wajib untuk Ditolak dan Selesai; konfirmasi untuk status final.

@@ -63,7 +63,7 @@ export const LABEL_MENU = {
 } as const
 
 /** Jabatan yang dicatat saat akun UPT mengubah status aduan (akun dipakai bersama pimpinan). Nilai di riwayat_status.diproses_oleh dibuat database dengan teks yang sama. */
-export const JABATAN_PEMROSES_ADUAN = 'KASI INTELDAKIM'
+export const JABATAN_PEMROSES_ADUAN = 'Humas Imigrasi'
 
 /** Penanda "dibaca" hanya untuk pemantauan Kanwil dan admin; tidak pernah ditampilkan ke UPT maupun masyarakat. */
 export const LABEL_DIBACA = { sudah: 'Dibaca UPT', belum: 'Belum dibaca UPT' } as const
@@ -180,7 +180,7 @@ export const TEKS_LACAK_PUBLIK = {
   judul: 'Cek status aduan',
   petunjuk: 'Masukkan kode pelacakan yang diberikan setelah aduan dikirim.',
   labelKode: 'Kode aduan',
-  contohKode: 'SD-7KQ2-M9XP',
+  contohKode: 'PZA512',
   cek: 'Cek Status',
   statusKini: 'Status saat ini',
   tidakDitemukan: 'Kode tidak ditemukan. Periksa kembali penulisan kode Anda.',
@@ -193,7 +193,7 @@ export const TEKS_LACAK_PUBLIK = {
   kantorPenanganan: 'Kantor penanganan',
   pembaruanTerakhir: 'Pembaruan terakhir',
   progres: 'Progres penanganan',
-  bantuanKode: 'Kode ada di layar setelah aduan terkirim, formatnya SD-XXXX-XXXX.'
+  bantuanKode: 'Kode ada di layar setelah aduan terkirim, berupa 3 huruf dan 3 angka, contoh PZA512.'
 } as const
 
 export const TEKS_UMUM = {

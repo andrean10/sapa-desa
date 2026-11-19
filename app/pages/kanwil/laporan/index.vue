@@ -13,33 +13,35 @@ const bacaStatus = (nilai: unknown) => Array.isArray(nilai) ? nilai.filter((item
 
 const halaman = ref(1)
 const kantorId = ref(bacaTeks(route.query.kantorId))
-const filter = reactive({ status: bacaStatus(route.query.status), jenis: '', dari: bacaTeks(route.query.dari), sampai: bacaTeks(route.query.sampai), cari: '', terlambat: route.query.terlambat === 'true' })
+const filter = reactive({ status: bacaStatus(route.query.status), jenis: '', dari: bacaTeks(route.query.dari), sampai: bacaTeks(route.query.sampai), cari: '', terlambat: route.query.terlambat === 'true', belumDibaca: route.query.belumDibaca === 'true' })
 const { data, pending, error, refresh } = await useDaftarLaporanKanwil(halaman, kantorId, filter)
 watch(filter, () => { halaman.value = 1 }, { deep: true })
 watch(kantorId, () => { halaman.value = 1 })
 
 // Tab cepat setara dengan kelompok di halaman UPT, dinyatakan sebagai kumpulan status.
-const TAB: (ItemSegmen & { status: string[]; terlambat?: boolean })[] = [
+const TAB: (ItemSegmen & { status: string[]; terlambat?: boolean; belumDibaca?: boolean })[] = [
   { value: 'semua', label: 'Semua', status: [] },
   { value: 'perlu', label: 'Belum ditanggapi', status: ['diterima'] },
   { value: 'ditangani', label: 'Sedang ditangani', status: ['diverifikasi', 'ditindaklanjuti'] },
   { value: 'final', label: 'Selesai & ditolak', status: ['selesai', 'ditolak'] },
-  { value: 'terlambat', label: 'Terlambat', status: [], terlambat: true }
+  { value: 'terlambat', label: 'Terlambat', status: [], terlambat: true },
+  { value: 'belum-dibaca', label: 'Belum dibaca UPT', status: [], belumDibaca: true }
 ]
 const tabAktif = computed(() => {
+  if (filter.belumDibaca && !filter.status.length && !filter.terlambat) return 'belum-dibaca'
   if (filter.terlambat && !filter.status.length) return 'terlambat'
   const kunci = [...filter.status].sort().join(',')
-  return TAB.find(item => !item.terlambat && [...item.status].sort().join(',') === kunci)?.value ?? ''
+  return TAB.find(item => !item.terlambat && !item.belumDibaca && [...item.status].sort().join(',') === kunci)?.value ?? ''
 })
 function pilihTab(value: string) {
   const tab = TAB.find(item => item.value === value)
-  if (tab) Object.assign(filter, { status: [...tab.status], terlambat: Boolean(tab.terlambat) })
+  if (tab) Object.assign(filter, { status: [...tab.status], terlambat: Boolean(tab.terlambat), belumDibaca: Boolean(tab.belumDibaca) })
 }
 const terlambatNonaktif = computed(() => filter.status.length > 0 && !filter.status.includes('diterima'))
 watch(terlambatNonaktif, (nonaktif) => { if (nonaktif) filter.terlambat = false })
 
-const adaFilter = computed(() => Boolean(filter.status.length || filter.jenis || filter.dari || filter.sampai || filter.cari || filter.terlambat || kantorId.value))
-function resetFilter() { Object.assign(filter, { status: [], jenis: '', dari: '', sampai: '', cari: '', terlambat: false }); kantorId.value = '' }
+const adaFilter = computed(() => Boolean(filter.status.length || filter.jenis || filter.dari || filter.sampai || filter.cari || filter.terlambat || filter.belumDibaca || kantorId.value))
+function resetFilter() { Object.assign(filter, { status: [], jenis: '', dari: '', sampai: '', cari: '', terlambat: false, belumDibaca: false }); kantorId.value = '' }
 const bukaDetail = (id: string) => navigateTo(`/kanwil/laporan/${id}`)
 </script>
 

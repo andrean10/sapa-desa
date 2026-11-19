@@ -18,7 +18,7 @@ const teks = TEKS_LANDING.aduan
           <div class="absolute inset-x-[14%] top-[8%] bottom-[6%]"><PublicLandingFoto :foto="FOTO_LANDING.aduan" /></div>
           <div class="absolute top-[22%] left-[-3%] animate-melayang rounded-2xl border border-border/60 bg-card p-3.5 shadow-xl shadow-primary/15 motion-reduce:animate-none sm:left-[-8%]">
             <p class="text-xs text-muted-foreground">{{ teks.kartuKode }}</p>
-            <p class="mt-0.5 font-mono text-sm font-bold tracking-wider text-primary">SD-7KQ2-M9XP</p>
+            <p class="mt-0.5 font-mono text-sm font-bold tracking-wider text-primary">PZA512</p>
             <div class="mt-2"><StatusBadge status="ditindaklanjuti" /></div>
           </div>
           <div class="absolute right-[-2%] bottom-[14%] flex animate-melayang items-center gap-3 rounded-2xl border border-border/60 bg-card py-3 pr-5 pl-3 shadow-xl shadow-primary/15 [animation-delay:1.5s] motion-reduce:animate-none sm:right-[-6%]">

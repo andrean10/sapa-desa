@@ -21,17 +21,15 @@ export async function daftarLaporanKanwilController(event: H3Event) {
   const sampai = typeof query.sampai === 'string' ? query.sampai : undefined
   const cariRaw = query.cari
   const terlambat = query.terlambat === 'true'
-  if (!Number.isInteger(halaman) || halaman < 1 || (kantorId && !z.string().uuid().safeParse(kantorId).success) || status.some(value => typeof value !== 'string' || !STATUS_LAPORAN.some(item => item.value === value)) || (jenis && !JENIS_TERLAPOR.some(item => item.value === jenis)) || (dari && !/^\d{4}-\d{2}-\d{2}$/.test(dari)) || (sampai && !/^\d{4}-\d{2}-\d{2}$/.test(sampai)) || (query.terlambat !== undefined && query.terlambat !== 'true' && query.terlambat !== 'false') || (cariRaw !== undefined && typeof cariRaw !== 'string')) throw createError({ statusCode: 400, statusMessage: 'Filter laporan tidak valid.' })
+  const belumDibaca = query.belumDibaca === 'true'
+  if (!Number.isInteger(halaman) || halaman < 1 || (query.belumDibaca !== undefined && query.belumDibaca !== 'true' && query.belumDibaca !== 'false') || (kantorId && !z.string().uuid().safeParse(kantorId).success) || status.some(value => typeof value !== 'string' || !STATUS_LAPORAN.some(item => item.value === value)) || (jenis && !JENIS_TERLAPOR.some(item => item.value === jenis)) || (dari && !/^\d{4}-\d{2}-\d{2}$/.test(dari)) || (sampai && !/^\d{4}-\d{2}-\d{2}$/.test(sampai)) || (query.terlambat !== undefined && query.terlambat !== 'true' && query.terlambat !== 'false') || (cariRaw !== undefined && typeof cariRaw !== 'string')) throw createError({ statusCode: 400, statusMessage: 'Filter laporan tidak valid.' })
   validasiPeriode(dari, sampai)
   if (dari && sampai && dari > sampai) throw createError({ statusCode: 400, statusMessage: 'Rentang tanggal tidak valid.' })
   const cari = typeof cariRaw === 'string' ? cariRaw.trim().replace(/[,%()]/g, '').slice(0, 100) : undefined
   const client = buatClientSesiUser(event)
-  const [hasil, kantor] = await Promise.all([daftarLaporanKanwil(client, halaman, { kantorId, status: status as Enums<'status_laporan'>[], jenis: jenis as Enums<'jenis_terlapor'> | undefined, dari, sampai, cari, terlambat }), daftarKantorKanwil(client)])
+  const [hasil, kantor] = await Promise.all([daftarLaporanKanwil(client, halaman, { kantorId, status: status as Enums<'status_laporan'>[], jenis: jenis as Enums<'jenis_terlapor'> | undefined, dari, sampai, cari, terlambat, belumDibaca }), daftarKantorKanwil(client)])
   if (hasil.error || kantor.error) throw createError({ statusCode: 503, statusMessage: 'Daftar laporan belum dapat dimuat.' })
-  const dibaca = await ambilWaktuDibaca(client, (hasil.data ?? []).map(item => item.id))
-  if (dibaca.error) throw createError({ statusCode: 503, statusMessage: 'Daftar laporan belum dapat dimuat.' })
-  const waktuDibaca = new Map((dibaca.data ?? []).map(item => [item.laporan_id, item.dibaca_pada]))
-  return { data: (hasil.data ?? []).map(item => ({ ...item, dibaca_pada: waktuDibaca.get(item.id) ?? null })), total: hasil.count ?? 0, halaman, kantor: kantor.data ?? [] }
+  return { data: hasil.data ?? [], total: hasil.count ?? 0, halaman, kantor: kantor.data ?? [] }
 }
 
 export async function dashboardUptLihatKanwil(event: H3Event) {

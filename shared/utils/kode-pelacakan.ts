@@ -1,17 +1,14 @@
-const KARAKTER_KODE = /[A-HJ-NP-Z2-9]/g
-
+/**
+ * Merapikan ketikan kode pelacakan: huruf besar, tanpa spasi/pemisah, maksimal 6 karakter.
+ * Pola: 3 huruf (huruf pertama = kode UPT) lalu 3 digit, mis. PZA512. Karakter yang tidak sesuai posisinya dibuang.
+ */
 export function formatInputKodePelacakan(nilai: string): string {
-  const hurufBesar = nilai.toUpperCase().replace(/[^A-Z0-9]/g, '')
-  const isi = (hurufBesar.startsWith('SD')
-    ? hurufBesar.slice(2)
-    : hurufBesar.startsWith('S')
-      ? hurufBesar.slice(1)
-      : hurufBesar)
-    .match(KARAKTER_KODE)
-    ?.join('')
-    .slice(0, 8) ?? ''
-
-  const bagianAwal = isi.slice(0, 4)
-  const bagianAkhir = isi.slice(4)
-  return `SD-${bagianAwal}${bagianAkhir ? `-${bagianAkhir}` : ''}`
+  const bersih = nilai.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  let hasil = ''
+  for (const karakter of bersih) {
+    const huruf = hasil.length < 3
+    if (huruf ? /[A-Z]/.test(karakter) : /\d/.test(karakter)) hasil += karakter
+    if (hasil.length === 6) break
+  }
+  return hasil
 }

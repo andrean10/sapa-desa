@@ -185,6 +185,7 @@ export type Database = {
         Row: {
           aktif: boolean
           created_at: string
+          huruf_kode: string
           id: string
           kode: string
           nama: string
@@ -194,6 +195,7 @@ export type Database = {
         Insert: {
           aktif?: boolean
           created_at?: string
+          huruf_kode: string
           id?: string
           kode: string
           nama: string
@@ -203,6 +205,7 @@ export type Database = {
         Update: {
           aktif?: boolean
           created_at?: string
+          huruf_kode?: string
           id?: string
           kode?: string
           nama?: string
@@ -337,7 +340,6 @@ export type Database = {
           kantor_id: string
           pdf_path: string | null
           pegawai_id: string
-          petugas_pengganti: boolean | null
           petugas_pengganti_nama: string | null
           tanggal_kegiatan: string
           updated_at: string
@@ -354,7 +356,6 @@ export type Database = {
           kantor_id: string
           pdf_path?: string | null
           pegawai_id: string
-          petugas_pengganti?: boolean | null
           petugas_pengganti_nama?: string | null
           tanggal_kegiatan: string
           updated_at?: string
@@ -371,7 +372,6 @@ export type Database = {
           kantor_id?: string
           pdf_path?: string | null
           pegawai_id?: string
-          petugas_pengganti?: boolean | null
           petugas_pengganti_nama?: string | null
           tanggal_kegiatan?: string
           updated_at?: string

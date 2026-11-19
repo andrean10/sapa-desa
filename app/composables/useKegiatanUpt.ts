@@ -6,7 +6,6 @@ type KegiatanUpt = {
   jenis_kegiatan_id: string
   jumlah_peserta: number
   uraian_hasil: string
-  petugas_pengganti: boolean | null
   petugas_pengganti_nama: string | null
   created_at: string
   foto_path: string | null
@@ -22,7 +21,7 @@ type OpsiKegiatanUpt = {
   penugasan: { pegawai_id: string; desa_id: string; tanggal_mulai: string; tanggal_selesai: string | null }[]
 }
 
-export type DetailKegiatanUpt = Pick<KegiatanUpt, 'id' | 'tanggal_kegiatan' | 'desa_id' | 'pegawai_id' | 'jenis_kegiatan_id' | 'jumlah_peserta' | 'uraian_hasil' | 'foto_path' | 'pdf_path' | 'petugas_pengganti' | 'petugas_pengganti_nama'> & { foto_url: string | null; pdf_url: string | null }
+export type DetailKegiatanUpt = Pick<KegiatanUpt, 'id' | 'tanggal_kegiatan' | 'desa_id' | 'pegawai_id' | 'jenis_kegiatan_id' | 'jumlah_peserta' | 'uraian_hasil' | 'foto_path' | 'pdf_path' | 'petugas_pengganti_nama'> & { foto_url: string | null; pdf_url: string | null }
 
 export function useKegiatanUpt() {
   const api = useApi()

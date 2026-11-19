@@ -41,7 +41,7 @@ Urutan di server:
 
 Yang dilakukan database sendiri saat insert:
 - Kantor tujuan dihitung dari desa → kabupaten dan dikunci.
-- Kode pelacakan dibuat (`SD-XXXX-XXXX`, tanpa karakter `0 O 1 I`).
+- Kode pelacakan dibuat (`XXX000`: huruf kantor (`kantor_imigrasi.huruf_kode`) + 2 huruf A–Z acak + 3 digit acak, mis. `PZA512`; unik, dicoba ulang bila bentrok).
 - **Lokasi dicek**: di luar Riau ditolak dengan error `22023` dan pesan `Lokasi pelapor berada di luar Provinsi Riau`. Toleransi dan saklar ada di tabel `pengaturan`.
 - Baris timeline pertama `diterima` dibuat otomatis.
 
@@ -80,7 +80,7 @@ Tidak ada nama, alamat, isi laporan, maupun petugas. Jangan menambahkannya.
 `rpc('ubah_status_laporan', { p_laporan_id, p_status, p_keterangan })` (`p_pegawai_id` masih diterima tetapi **tidak lagi dikirim**)
 
 - Boleh: `upt` dan `admin`. **Kanwil tidak boleh.** Harus `sesi-user` (service role ditolak karena tanpa identitas).
-- Untuk UPT, perubahan otomatis dicatat di `riwayat_status.diproses_oleh` sebagai `KASI INTELDAKIM {NAMA UPT}` dan menandai laporan dibaca. Tidak ada pemilihan petugas. Untuk admin, `diproses_oleh` kosong (UI: "Admin").
+- Untuk UPT, perubahan otomatis dicatat di `riwayat_status.diproses_oleh` sebagai `Humas Imigrasi {NAMA UPT}` dan menandai laporan dibaca. Tidak ada pemilihan petugas. Untuk admin, `diproses_oleh` kosong (UI: "Admin").
 - Alur status (loncat dan mundur ditolak):
 
 | Dari | Ke |
@@ -123,7 +123,7 @@ from('laporan_pimpasa').insert({
 })
 ```
 
-**Jangan kirim** `kantor_id`, `dibuat_oleh`, `petugas_pengganti` (kolom turunan). `pegawai_id` wajib PIMPASA yang ditugaskan di desa itu pada `tanggal_kegiatan` (ditolak trigger bila tidak). `petugas_pengganti_nama` (teks bebas, opsional, maks. 150) dikirim hanya bila ada pengganti; kosong berarti PIMPASA sendiri yang terjun.
+**Jangan kirim** `kantor_id`, `dibuat_oleh`. `pegawai_id` wajib PIMPASA yang ditugaskan di desa itu pada `tanggal_kegiatan` (ditolak trigger bila tidak). `petugas_pengganti_nama` (teks bebas, opsional, maks. 150) dikirim hanya bila ada pengganti; kosong berarti PIMPASA sendiri yang terjun.
 
 - Edit: UPT boleh mengubah isi laporan kantornya (desa dan kantor tidak bisa diganti).
 - **Hapus**: UPT hanya bisa jika `created_at` kurang dari N menit lalu (N = `pengaturan.batas_menit_hapus_laporan`, default 10). Lewat itu, hanya admin. Setelah baris terhapus, **server menghapus file** di Storage dengan `service` (akun user tidak punya policy hapus file).
@@ -239,10 +239,10 @@ export type LaporanBaru = Omit<
   'id' | 'kantor_id' | 'kode_pelacakan' | 'status' | 'created_at' | 'updated_at'
 >
 
-/** Isian laporan kegiatan PIMPASA; kantor_id, dibuat_oleh, petugas_pengganti (turunan) diisi database */
+/** Isian laporan kegiatan PIMPASA; kantor_id, dibuat_oleh diisi database */
 export type LaporanPimpasaBaru = Omit<
   TablesInsert<'laporan_pimpasa'>,
-  'id' | 'kantor_id' | 'dibuat_oleh' | 'petugas_pengganti' | 'created_at' | 'updated_at'
+  'id' | 'kantor_id' | 'dibuat_oleh' | 'created_at' | 'updated_at'
 >
 
 /** Isian penugasan PIMPASA; kantor_id diisi trigger dari kantor pegawai */

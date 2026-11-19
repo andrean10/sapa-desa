@@ -15,8 +15,8 @@ export const BATAS_WAKTU_GPS_MS = 15_000
 // Hanya memengaruhi routing; setiap endpoint server tetap memverifikasi sesi dan peran sendiri.
 export const MASA_BERLAKU_PROFIL_MS = 60_000
 
-export const FORMAT_KODE_PELACAKAN = 'SD-XXXX-XXXX'
-export const POLA_KODE_PELACAKAN = '^SD-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$'
+export const FORMAT_KODE_PELACAKAN = 'XXX000'
+export const POLA_KODE_PELACAKAN = '^[A-Z]{3}[0-9]{3}$'
 export const REGEX_KODE_PELACAKAN = new RegExp(POLA_KODE_PELACAKAN)
 
 export type PeranAplikasi = Enums<'peran_pengguna'>

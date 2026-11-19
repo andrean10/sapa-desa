@@ -34,7 +34,7 @@ Dependency dipasang oleh Codex. Pilih versi stabil yang kompatibel dengan Nuxt d
 
 Alur login:
 1. Form login meminta **username** saja. Email dibentuk `${username}@${AUTH_EMAIL_DOMAIN}` (nilai dari konfigurasi global, jangan ditulis di banyak tempat). Tidak ada email asli yang terkirim dan tidak ada "lupa password" mandiri.
-2. Untuk peran `upt`, login langsung masuk dashboard; **tidak ada pemilihan petugas**, karena akun kantor dipakai bersama (termasuk pimpinan, KASI INTELDAKIM). Perubahan status aduan oleh UPT otomatis dicatat sebagai `KASI INTELDAKIM {NAMA UPT}` (kolom `riwayat_status.diproses_oleh`). Petugas baru dipilih saat membuat **laporan kegiatan PIMPASA**, dan hanya dari PIMPASA yang ditugaskan di desa itu. Header `x-bertugas-id` sudah tidak dipakai.
+2. Untuk peran `upt`, login langsung masuk dashboard; **tidak ada pemilihan petugas**, karena akun kantor dipakai bersama (termasuk pimpinan, KASI INTELDAKIM). Perubahan status aduan oleh UPT otomatis dicatat sebagai `Humas Imigrasi {NAMA UPT}` (kolom `riwayat_status.diproses_oleh`). Petugas baru dipilih saat membuat **laporan kegiatan PIMPASA**, dan hanya dari PIMPASA yang ditugaskan di desa itu. Header `x-bertugas-id` sudah tidak dipakai.
 3. Pendaftaran akun publik **dimatikan** (`DISABLE_SIGNUP=true` di Supabase). Akun dibuat admin lewat Admin API dari server.
 
 ## 4. Struktur folder dan pola MVC
@@ -73,7 +73,7 @@ Semua nilai yang dipakai di lebih dari satu file ditaruh di folder `shared/confi
 
 | File | Isi |
 |---|---|
-| `app.ts` | `APP_NAME = 'SAPA DESA'`, tagline, nama instansi, `AUTH_EMAIL_DOMAIN = 'sapadesa.com'`, `TIMEZONE = 'Asia/Jakarta'`, pola kode pelacakan `SD-XXXX-XXXX` (regex `^SD-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$`), `AMBANG_DESA_LAMA_HARI` |
+| `app.ts` | `APP_NAME = 'SAPA DESA'`, tagline, nama instansi, `AUTH_EMAIL_DOMAIN = 'sapadesa.com'`, `TIMEZONE = 'Asia/Jakarta'`, pola kode pelacakan `XXX000` = huruf UPT + 2 huruf acak + 3 digit acak, mis. `PZA512` (regex `^[A-Z]{3}[0-9]{3}$`), `AMBANG_DESA_LAMA_HARI` |
 | `tema.ts` | **Satu-satunya tempat kode warna** (palet, pemetaan variabel shadcn, warna status laporan). Nilainya ada di `docs/PRD.md` bagian 2. Komponen dan CSS tidak boleh menulis ulang hex |
 | `teks.ts` | Label status laporan beserta penjelasan ramah dan urutan timeline (kunci harus sama dengan enum `status_laporan`), label `jenis_terlapor` (WNA/WNI), `peran_pengguna`, `jenis_wilayah_desa`, `alasan_berakhir_penugasan`, pesan galat umum |
 | `batas-file.ts` | Foto 3 MB (`image/jpeg`, `image/png`, `image/webp`), PDF 8 MB (`application/pdf`). Angka ini sama dengan batas bucket di database |

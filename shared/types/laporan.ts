@@ -9,7 +9,7 @@ export type LaporanBaru = Omit<
 /** Isian kegiatan PIMPASA; identitas kantor dan akun dibuat oleh database. */
 export type LaporanPimpasaBaru = Omit<
   TablesInsert<'laporan_pimpasa'>,
-  'id' | 'kantor_id' | 'dibuat_oleh' | 'petugas_pengganti' | 'created_at' | 'updated_at'
+  'id' | 'kantor_id' | 'dibuat_oleh' | 'created_at' | 'updated_at'
 >
 
 /** Isian penugasan PIMPASA; kantor petugas diisi trigger database. */

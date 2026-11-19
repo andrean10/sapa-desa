@@ -188,7 +188,7 @@ export async function ambilNamaPenugasanUpt(client: SupabaseClient<Database>, pe
 
 export async function daftarKegiatanUpt(client: SupabaseClient<Database>) {
   const hasil = await client.from('laporan_pimpasa')
-    .select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, petugas_pengganti_nama, created_at')
+    .select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti_nama, created_at')
     .order('tanggal_kegiatan', { ascending: false })
   const pengaturan = await client.from('pengaturan').select('nilai').eq('kunci', 'batas_menit_hapus_laporan').maybeSingle()
   if (hasil.error || pengaturan.error) return { data: null, error: hasil.error ?? pengaturan.error }
@@ -227,7 +227,7 @@ export async function tambahKegiatanUpt(client: SupabaseClient<Database>, data: 
 }
 
 export async function detailKegiatanUpt(client: SupabaseClient<Database>, id: string) {
-  return await client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, petugas_pengganti_nama, kantor_id')
+  return await client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti_nama, kantor_id')
     .eq('id', id).maybeSingle()
 }
 

@@ -48,6 +48,7 @@ export async function daftarLaporanKanwil(client: SupabaseClient<Database>, hala
   sampai?: string
   cari?: string
   terlambat?: boolean
+  belumDibaca?: boolean
 } = {}) {
   let idsTerlambat: string[] | undefined
   if (filter.terlambat) {
@@ -58,13 +59,14 @@ export async function daftarLaporanKanwil(client: SupabaseClient<Database>, hala
     idsTerlambat = (daftarTerlambat.data ?? []).flatMap(item => item.id ? [item.id] : [])
     if (!idsTerlambat.length) return { data: [], count: 0, error: null }
   }
-  let query = client.from('laporan').select('id, kode_pelacakan, status, jenis_terlapor, created_at, desa_kelurahan_id, kantor_id', { count: 'exact' }).order('created_at', { ascending: false }).range((halaman - 1) * 20, halaman * 20 - 1)
+  let query = client.from('laporan').select('id, kode_pelacakan, status, jenis_terlapor, created_at, desa_kelurahan_id, kantor_id, laporan_dibaca!left(dibaca_pada)', { count: 'exact' }).order('created_at', { ascending: false }).range((halaman - 1) * 20, halaman * 20 - 1)
   if (filter.kantorId) query = query.eq('kantor_id', filter.kantorId)
   if (filter.status?.length) query = query.in('status', filter.status)
   if (filter.jenis) query = query.eq('jenis_terlapor', filter.jenis)
   if (filter.dari) query = query.gte('created_at', `${filter.dari}T00:00:00+07:00`)
   if (filter.sampai) query = query.lte('created_at', `${filter.sampai}T23:59:59.999+07:00`)
   if (idsTerlambat) query = query.in('id', idsTerlambat)
+  if (filter.belumDibaca) query = query.is('laporan_dibaca', null)
   if (filter.cari) {
     const [desaCari, kecamatanCari] = await Promise.all([
       client.from('desa_kelurahan').select('id').ilike('nama', `%${filter.cari}%`),
@@ -90,16 +92,17 @@ export async function daftarLaporanKanwil(client: SupabaseClient<Database>, hala
   return { ...hasil, data: hasil.data.map(item => {
     const lokasiDesa = desa.data?.find(v => v.id === item.desa_kelurahan_id)
     const lokasiKecamatan = kecamatan.data?.find(v => v.id === lokasiDesa?.kecamatan_id)
-    return { ...item, desa: lokasiDesa?.nama ?? 'Desa tidak tersedia', kecamatan: kabupaten.data?.find(v => v.id === lokasiKecamatan?.kabupaten_id)?.nama ?? 'Kabupaten/kota tidak tersedia', kantor: kantor.data?.find(v => v.id === item.kantor_id)?.nama_singkat ?? 'UPT tidak tersedia' }
+    const { laporan_dibaca: dibaca, ...baris } = item
+    return { ...baris, dibaca_pada: dibaca?.dibaca_pada ?? null, desa: lokasiDesa?.nama ?? 'Desa tidak tersedia', kecamatan: kabupaten.data?.find(v => v.id === lokasiKecamatan?.kabupaten_id)?.nama ?? 'Kabupaten/kota tidak tersedia', kantor: kantor.data?.find(v => v.id === item.kantor_id)?.nama_singkat ?? 'UPT tidak tersedia' }
   }) }
 }
 
 export async function daftarKegiatanKanwil(client: SupabaseClient<Database>, halaman: number, filter: {
   kantorId?: string; hanyaDiganti?: boolean; dari?: string; sampai?: string; desaId?: string; jenisId?: string; pegawaiId?: string
 } = {}) {
-  let query = client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti, petugas_pengganti_nama, created_at, kantor_id', { count: 'exact' }).order('tanggal_kegiatan', { ascending: false }).range((halaman - 1) * 20, halaman * 20 - 1)
+  let query = client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti_nama, created_at, kantor_id', { count: 'exact' }).order('tanggal_kegiatan', { ascending: false }).range((halaman - 1) * 20, halaman * 20 - 1)
   if (filter.kantorId) query = query.eq('kantor_id', filter.kantorId)
-  if (filter.hanyaDiganti) query = query.eq('petugas_pengganti', true)
+  if (filter.hanyaDiganti) query = query.not('petugas_pengganti_nama', 'is', null)
   if (filter.dari) query = query.gte('tanggal_kegiatan', filter.dari)
   if (filter.sampai) query = query.lte('tanggal_kegiatan', filter.sampai)
   if (filter.desaId) query = query.eq('desa_id', filter.desaId)
