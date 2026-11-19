@@ -4,7 +4,7 @@ import { profilSesi } from './auth.controller'
 import { ambilDashboardKanwil, ambilPeringkatKanwil, ambilStatusAdmin, buatPenugasanKanwil, daftarDesaBinaanKanwil, daftarFaqKanwil, daftarKegiatanKanwil, daftarKantorKanwil, daftarLaporanKanwil, daftarPengaturanKanwil, daftarPantauanKanwil, daftarPenugasanKanwil, daftarWilayahKerjaKanwil, daftarWilayahPilihanKanwil, hapusFaqKanwil, pilihanFilterKegiatanKanwil, simpanNilaiPengaturanKanwil, simpanValidasiLokasiAdmin, tulisFaqKanwil, tulisJenisKegiatanKanwil, ubahPenugasanKanwil, ubahStatusDbiKanwil, ubahUrutanFaqKanwil, ubahWilayahKanwil } from '../models/kanwil.model'
 import { tanggalHariIniWib } from '../../shared/utils/waktu'
 import { z } from 'zod'
-import { ambilDashboardUpt, ambilWaktuDibaca, buatSignedUrlFotoLaporan, buatSignedUrlLampiranUpt, detailKegiatanUpt, detailLaporanUpt, ubahStatusLaporanUpt } from '../models/upt.model'
+import { ambilDashboardUpt, ambilWaktuDibaca, buatSignedUrlFotoLaporan, hapusKegiatanUpt, buatSignedUrlLampiranUpt, detailKegiatanUpt, detailLaporanUpt, ubahStatusLaporanUpt } from '../models/upt.model'
 import { daftarAkunAdmin, daftarKantorAdmin } from '../models/admin.model'
 import type { Enums } from '../../shared/types/database.types'
 import { JENIS_TERLAPOR, STATUS_LAPORAN } from '../../shared/config/teks'
@@ -121,6 +121,18 @@ export async function detailKegiatanKanwilController(event: H3Event) {
   if (kantor.error || desa.error || pegawai.error || jenis.error) throw createError({ statusCode: 503, statusMessage: 'Rincian kegiatan belum dapat dimuat.' })
   const { foto_paths, pdf_path, ...item } = hasil.data
   return { ...item, kantor: kantor.data?.nama_singkat ?? 'UPT tidak tersedia', desa: desa.data?.nama ?? 'Desa tidak tersedia', pegawai: pegawai.data?.nama ?? 'Pegawai tidak tersedia', jenis: jenis.data?.nama ?? 'Jenis tidak tersedia', foto_urls: foto.map(f => f.data?.signedUrl ?? ''), pdf_url: pdf.data?.signedUrl ?? null }
+}
+
+/** Hanya admin: menghapus laporan kegiatan kapan saja (UPT dibatasi menit sejak dibuat). Policy database ikut menjaga ini. */
+export async function hapusKegiatanAdminController(event: H3Event) {
+  const profil = await profilKanwil(event)
+  if (profil.peran !== 'admin') throw createError({ statusCode: 403, statusMessage: 'Hanya admin yang dapat menghapus laporan kegiatan.' })
+  const id = getRouterParam(event, 'id')
+  if (!id || !z.string().uuid().safeParse(id).success) throw createError({ statusCode: 400, statusMessage: 'ID kegiatan tidak valid.' })
+  const hasil = await hapusKegiatanUpt(buatClientSesiUser(event), id)
+  if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Laporan dihapus, tetapi lampiran belum seluruhnya terhapus.' })
+  if (!hasil.data) throw createError({ statusCode: 404, statusMessage: 'Laporan kegiatan tidak ditemukan.' })
+  return { berhasil: true }
 }
 
 function validasiPeriode(mulai?: string, selesai?: string) {

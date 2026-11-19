@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Building2, CalendarDays, Download, FileText, MapPinned, UserRound, UserRoundCog, Users } from '@lucide/vue'
+import { toast } from 'vue-sonner'
+import { Building2, CalendarDays, Download, FileText, MapPinned, Trash2, UserRound, UserRoundCog, Users } from '@lucide/vue'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import type { Tables } from '~~/shared/types/database.types'
@@ -7,6 +8,14 @@ import { formatTanggalWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Detail kegiatan PIMPASA' })
 const route = useRoute()
+const { profil } = useAuth()
+const sedangHapus = ref(false)
+async function hapus() {
+  sedangHapus.value = true
+  try { await useApi()(`/api/kanwil/kegiatan/${route.params.id}`, { method: 'DELETE' }); toast.success('Laporan kegiatan dihapus.'); await navigateTo('/kanwil/kegiatan') }
+  catch (galat) { toast.error((galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Laporan kegiatan belum dapat dihapus.') }
+  finally { sedangHapus.value = false }
+}
 type DetailKegiatan = Omit<Tables<'laporan_pimpasa'>, 'foto_paths' | 'pdf_path' | 'kantor_id'> & { kantor: string; desa: string; pegawai: string; jenis: string; foto_urls: string[]; pdf_url: string | null }
 const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`kanwil-kegiatan-${route.params.id}`, () => useApi()<DetailKegiatan>(`/api/kanwil/kegiatan/${route.params.id}`), { lazy: true })
 </script>
@@ -46,6 +55,19 @@ const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`ka
             <DashboardGaleriFoto :fotos="data.foto_urls" label="Foto dokumentasi kegiatan" />
             <Button v-if="data.pdf_url" variant="outline" as-child><a :href="data.pdf_url" target="_blank" rel="noopener noreferrer" class="no-underline"><FileText class="size-4" />Buka PDF laporan<Download class="ml-auto size-4" /></a></Button>
             <p v-if="!data.foto_urls.length && !data.pdf_url" class="text-sm text-muted-foreground">Tidak ada lampiran.</p>
+          </div>
+        </section>
+        <section v-if="profil?.peran === 'admin'" class="rounded-xl border border-destructive/30 bg-card shadow-xs">
+          <h2 class="border-b border-destructive/20 px-5 py-4 font-semibold text-destructive">Hapus laporan</h2>
+          <div class="grid gap-3 p-5 text-sm">
+            <p class="text-muted-foreground">Khusus admin. Laporan beserta foto dan PDF-nya dihapus permanen dan tidak dapat dikembalikan.</p>
+            <AlertDialog>
+              <AlertDialogTrigger as-child><Button variant="outline" class="w-fit border-destructive/40 text-destructive hover:bg-bahaya-muda hover:text-destructive" :disabled="sedangHapus"><Trash2 class="size-4" />Hapus laporan kegiatan</Button></AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader><AlertDialogTitle>Hapus laporan kegiatan ini?</AlertDialogTitle><AlertDialogDescription>Kegiatan di {{ data?.desa }} ({{ data ? formatTanggalWib(data.tanggal_kegiatan) : '' }}) akan dihapus permanen bersama lampirannya. Tindakan ini tidak dapat dibatalkan.</AlertDialogDescription></AlertDialogHeader>
+                <AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="hapus">Hapus</AlertDialogAction></AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </section>
       </div>

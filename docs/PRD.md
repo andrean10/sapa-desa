@@ -542,7 +542,7 @@ Sama dengan 7.2 dan 7.3 dengan perbedaan:
 
 ### 8.5 Laporan kegiatan `/kanwil/kegiatan` dan detail
 
-Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, **galeri foto** (hingga 3; kisi gambar kecil, klik membuka penampil layar penuh yang bisa digeser/swipe, tombol panah, atau keyboard, dengan penanda "2 / 3", tanpa pindah halaman; komponen shadcn Carousel di dalam Dialog), dan PDF. **Petugas Pengganti** tampil **di bawah** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
+Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, **galeri foto** (hingga 3; kisi gambar kecil, klik membuka penampil layar penuh yang bisa digeser/swipe, tombol panah, atau keyboard, dengan penanda "2 / 3", tanpa pindah halaman; komponen shadcn Carousel di dalam Dialog), dan PDF. **Petugas Pengganti** tampil **di bawah** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus. **Khusus admin**: kartu "Hapus laporan" di detail (dengan konfirmasi) menghapus laporan beserta foto dan PDF kapan saja, tanpa batas menit seperti UPT; Kanwil tidak melihat kartu ini.
 
 ### 8.6 Desa binaan `/kanwil/desa-binaan`
 
