@@ -4,7 +4,6 @@ import { KeyRound } from '@lucide/vue'
 import { Button } from '~/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '~/components/ui/dialog'
 import { Field, FieldGroup, FieldLabel } from '~/components/ui/field'
-import { Input } from '~/components/ui/input'
 import { Spinner } from '~/components/ui/spinner'
 import { TEKS_UMUM } from '~~/shared/config/teks'
 
@@ -43,9 +42,9 @@ async function simpan() {
       </DialogHeader>
       <form id="form-ganti-password" @submit.prevent="simpan">
         <FieldGroup>
-          <Field><FieldLabel for="password-lama">Password saat ini</FieldLabel><Input id="password-lama" v-model="isian.passwordSaatIni" type="password" autocomplete="current-password" required /></Field>
-          <Field><FieldLabel for="password-baru">Password baru</FieldLabel><Input id="password-baru" v-model="isian.passwordBaru" type="password" autocomplete="new-password" minlength="8" maxlength="128" required /></Field>
-          <Field><FieldLabel for="password-ulang">Ulangi password baru</FieldLabel><Input id="password-ulang" v-model="isian.ulangiPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" required /></Field>
+          <Field><FieldLabel for="password-lama">Password saat ini</FieldLabel><AkunInputPassword id="password-lama" v-model="isian.passwordSaatIni" autocomplete="current-password" required /></Field>
+          <Field><FieldLabel for="password-baru">Password baru</FieldLabel><AkunInputPassword id="password-baru" v-model="isian.passwordBaru" autocomplete="new-password" minlength="8" maxlength="128" required /></Field>
+          <Field><FieldLabel for="password-ulang">Ulangi password baru</FieldLabel><AkunInputPassword id="password-ulang" v-model="isian.ulangiPassword" autocomplete="new-password" minlength="8" maxlength="128" required /></Field>
           <p v-if="pesan" class="rounded-md bg-bahaya-muda px-3 py-2 text-sm text-destructive" role="alert">{{ pesan }}</p>
         </FieldGroup>
       </form>

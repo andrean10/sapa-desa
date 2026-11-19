@@ -130,7 +130,7 @@ async function masukSebagai(akun: Akun) {
           <label class="grid gap-1.5 text-sm font-medium">Nama tampil<Input v-model="baru.nama_tampil" required maxlength="100" /></label>
           <label class="grid gap-1.5 text-sm font-medium">Peran<NativeSelect v-model="baru.peran" class="w-full"><NativeSelectOption v-for="peran in PERAN_PENGGUNA" :key="peran.value" :value="peran.value">{{ peran.label }}</NativeSelectOption></NativeSelect></label>
           <label v-if="baru.peran === 'upt'" class="grid gap-1.5 text-sm font-medium">Kantor<NativeSelect v-model="baru.kantor_id" class="w-full" required><NativeSelectOption value="">Pilih kantor</NativeSelectOption><NativeSelectOption v-for="k in data?.kantor.filter(k => k.aktif)" :key="k.id" :value="k.id">{{ k.nama }}</NativeSelectOption></NativeSelect></label>
-          <label class="grid gap-1.5 text-sm font-medium sm:col-span-2">Password awal<Input v-model="baru.password" type="password" required minlength="8" autocomplete="new-password" /><span class="text-xs font-normal text-muted-foreground">Minimal 8 karakter. Sampaikan langsung ke pemilik akun.</span></label>
+          <label class="grid gap-1.5 text-sm font-medium sm:col-span-2">Password awal<AkunInputPassword v-model="baru.password" required minlength="8" autocomplete="new-password" /><span class="text-xs font-normal text-muted-foreground">Minimal 8 karakter. Sampaikan langsung ke pemilik akun.</span></label>
         </form>
         <DialogFooter><Button variant="outline" @click="dialogBuat = false">Batal</Button><Button type="submit" form="form-akun" :disabled="!!busy">{{ busy === true ? 'Membuat…' : 'Buat akun' }}</Button></DialogFooter>
       </DialogContent>
@@ -142,7 +142,7 @@ async function masukSebagai(akun: Akun) {
           <AlertDialogTitle>{{ tindakanKonfirmasi?.jenis === 'password' ? `Reset password ${tindakanKonfirmasi?.akun.username}?` : tindakanKonfirmasi?.akun.aktif ? 'Nonaktifkan akun?' : 'Aktifkan akun?' }}</AlertDialogTitle>
           <AlertDialogDescription>{{ tindakanKonfirmasi?.jenis === 'password' ? 'Password baru tidak akan ditampilkan kembali.' : tindakanKonfirmasi?.akun.aktif ? `Akun ${tindakanKonfirmasi?.akun.username} akan kehilangan akses SAPA DESA.` : `Akun ${tindakanKonfirmasi?.akun.username} akan dapat mengakses SAPA DESA kembali.` }}</AlertDialogDescription>
         </AlertDialogHeader>
-        <label v-if="tindakanKonfirmasi?.jenis === 'password'" class="grid gap-1.5 text-sm font-medium">Password baru<Input v-model="passwordBaru" type="password" minlength="8" autocomplete="new-password" /></label>
+        <label v-if="tindakanKonfirmasi?.jenis === 'password'" class="grid gap-1.5 text-sm font-medium">Password baru<AkunInputPassword v-model="passwordBaru" minlength="8" autocomplete="new-password" /></label>
         <AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction :disabled="!!busy || (tindakanKonfirmasi?.jenis === 'password' && passwordBaru.length < 8)" :class="tindakanKonfirmasi?.jenis === 'aktif' && tindakanKonfirmasi.akun.aktif ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''" @click.prevent="konfirmasiTindakan">Konfirmasi</AlertDialogAction></AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
