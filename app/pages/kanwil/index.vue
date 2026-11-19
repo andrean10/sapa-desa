@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight, CircleCheckBig, FileInput, Hourglass, Inbox, TriangleAlert } from '@lucide/vue'
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronRight, CircleCheckBig, ClipboardList, FileInput, Hourglass, Inbox, MapPinned, TriangleAlert, UserRoundCog, CircleX } from '@lucide/vue'
 import type { BarisUptKanwil, TrenKanwil } from '~/composables/useKanwil'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
-import { formatAngkaIndonesia } from '~~/shared/utils/angka'
 import type { ModePeriode } from '~~/shared/utils/waktu'
-import { rentangPeriode, tanggalHariIniWib } from '~~/shared/utils/waktu'
+import { formatTanggalWib, rentangPeriode, tanggalHariIniWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Dashboard Kanwil' })
 const router = useRouter()
@@ -18,24 +17,26 @@ const { data, pending, error, refresh } = await useDashboardKanwil(periode)
 const tren = computed(() => data.value?.tren as TrenKanwil | null)
 const memuatAwal = computed(() => pending.value && !data.value?.ringkasan)
 
-const kartuUtama = computed(() => {
+// Dua kelompok angka yang sengaja dipisah: kondisi SAAT INI (tidak ikut filter periode) dan angka DALAM PERIODE terpilih.
+const teksPeriode = computed(() => `Periode ${formatTanggalWib(periode.value.mulai)} – ${formatTanggalWib(periode.value.selesai)}`)
+const kartuSaatIni = computed(() => {
   const r = data.value?.ringkasan
   if (!r) return []
   return [
-    { label: 'Laporan masuk', nilai: r.laporan_masuk, ikon: FileInput, nada: 'netral' as const, keterangan: 'Dalam periode terpilih', ke: `/kanwil/laporan?dari=${periode.value.mulai}&sampai=${periode.value.selesai}` },
-    { label: 'Belum ditanggapi', nilai: r.belum_ditanggapi, ikon: Inbox, nada: 'info' as const, keterangan: 'Status Diterima', ke: '/kanwil/laporan?status=diterima' },
+    { label: 'Belum ditanggapi', nilai: r.belum_ditanggapi, ikon: Inbox, nada: 'info' as const, keterangan: 'Aduan berstatus Diterima', ke: '/kanwil/laporan?status=diterima' },
     { label: 'Terlambat', nilai: r.terlambat, ikon: TriangleAlert, nada: r.terlambat > 0 ? 'bahaya' as const : 'netral' as const, keterangan: `Lebih dari ${r.batas_hari} hari kerja`, ke: '/kanwil/pantauan' },
-    { label: 'Sedang ditangani', nilai: r.sedang_ditangani, ikon: Hourglass, nada: 'netral' as const, keterangan: 'Diverifikasi & ditindaklanjuti', ke: '/kanwil/laporan?status=diverifikasi&status=ditindaklanjuti' }
+    { label: 'Sedang ditangani', nilai: r.sedang_ditangani, ikon: Hourglass, nada: 'netral' as const, keterangan: 'Diverifikasi & ditindaklanjuti', ke: '/kanwil/laporan?status=diverifikasi&status=ditindaklanjuti' },
+    { label: 'PIMPASA aktif', nilai: r.pimpasa_aktif, ikon: UserRoundCog, nada: 'netral' as const, keterangan: 'Petugas yang sedang bertugas', ke: '/kanwil/penugasan' },
+    { label: 'Desa binaan', nilai: r.desa_binaan, ikon: MapPinned, nada: 'emas' as const, keterangan: 'Total DBI saat ini', ke: '/kanwil/desa-binaan' }
   ]
 })
-const statPendukung = computed(() => {
+const statAduanPeriode = computed(() => {
   const r = data.value?.ringkasan
   if (!r) return []
   return [
-    { label: 'Selesai', nilai: formatAngkaIndonesia(r.selesai_periode), warna: 'text-sukses' },
-    { label: 'Ditolak', nilai: formatAngkaIndonesia(r.ditolak_periode), warna: 'text-destructive' },
-    { label: 'Kegiatan PIMPASA', nilai: formatAngkaIndonesia(r.kegiatan_periode), warna: 'text-foreground' },
-    { label: 'PIMPASA aktif', nilai: formatAngkaIndonesia(r.pimpasa_aktif), warna: 'text-foreground' }
+    { label: 'Aduan masuk', nilai: r.laporan_masuk, ikon: FileInput, nada: 'netral' as const, keterangan: 'Dikirim masyarakat', ke: `/kanwil/laporan?dari=${periode.value.mulai}&sampai=${periode.value.selesai}` },
+    { label: 'Selesai', nilai: r.selesai_periode, ikon: CircleCheckBig, nada: 'sukses' as const, keterangan: 'Ditandai selesai' },
+    { label: 'Ditolak', nilai: r.ditolak_periode, ikon: CircleX, nada: 'netral' as const, keterangan: 'Ditandai ditolak' }
   ]
 })
 const persenDesaTanpaKegiatan = computed(() => {
@@ -45,7 +46,7 @@ const persenDesaTanpaKegiatan = computed(() => {
 
 const KOLOM: { key: keyof BarisUptKanwil; label: string; angka: boolean }[] = [
   { key: 'kantor', label: 'UPT', angka: false },
-  { key: 'laporan_masuk', label: 'Laporan masuk', angka: true },
+  { key: 'laporan_masuk', label: 'Aduan masuk', angka: true },
   { key: 'belum_ditanggapi', label: 'Belum ditanggapi', angka: true },
   { key: 'terlambat', label: 'Terlambat', angka: true },
   { key: 'sedang_ditangani', label: 'Ditangani', angka: true },
@@ -83,21 +84,32 @@ const terlambatDari = (item: { hari_kerja_berjalan: number | null; batas_hari: n
     </div>
     <DashboardStateGalat v-else-if="error && !data?.ringkasan" pesan="Dashboard belum dapat dimuat." @coba="refresh()" />
     <div v-else-if="data?.ringkasan" class="grid gap-6 transition-opacity" :class="pending ? 'opacity-60' : ''" :aria-busy="pending">
-      <section class="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4" aria-label="Indikator utama">
-        <DashboardKartuAngka v-for="item in kartuUtama" :key="item.label" v-bind="item" />
-      </section>
+      <DashboardKelompokDashboard judul="Kondisi saat ini" cakupan="Saat ini · tidak terpengaruh filter periode" nada="saatIni">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5 [&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
+          <DashboardKartuAngka v-for="item in kartuSaatIni" :key="item.label" v-bind="item" />
+        </div>
+      </DashboardKelompokDashboard>
 
-      <section class="grid overflow-hidden rounded-xl border bg-card shadow-xs sm:grid-cols-2 lg:grid-cols-5" aria-label="Indikator pendukung">
-        <div v-for="item in statPendukung" :key="item.label" class="border-b px-5 py-4 sm:border-r lg:border-b-0">
-          <p class="text-xs font-medium text-muted-foreground">{{ item.label }}</p>
-          <p class="mt-1 text-2xl font-semibold tabular-nums" :class="item.warna">{{ item.nilai }}</p>
+      <DashboardKelompokDashboard judul="Dalam periode terpilih" :cakupan="teksPeriode" nada="periode">
+        <div class="grid gap-4 lg:grid-cols-[3fr_2fr]">
+          <div class="grid gap-3 rounded-xl border bg-card p-4 shadow-xs sm:p-5">
+            <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Aduan masyarakat</h3>
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-3"><DashboardKartuAngka v-for="item in statAduanPeriode" :key="item.label" v-bind="item" ringkas /></div>
+          </div>
+          <div class="grid gap-3 rounded-xl border bg-card p-4 shadow-xs sm:p-5">
+            <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Kegiatan PIMPASA</h3>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <DashboardKartuAngka label="Kegiatan dilaporkan" :nilai="data.ringkasan.kegiatan_periode" :ikon="ClipboardList" nada="emas" keterangan="Tanggal kegiatan di periode ini" ke="/kanwil/kegiatan" ringkas />
+              <div class="rounded-xl border bg-background p-4">
+                <p class="text-xs font-medium text-muted-foreground">Desa tanpa kegiatan</p>
+                <p class="mt-1 text-2xl font-semibold tabular-nums" :class="data.ringkasan.desa_tanpa_kegiatan ? 'text-peringatan' : 'text-foreground'">{{ data.ringkasan.desa_tanpa_kegiatan }}<span class="text-base font-normal text-muted-foreground"> / {{ data.ringkasan.desa_binaan }}</span></p>
+                <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted" role="img" :aria-label="`${persenDesaTanpaKegiatan} persen desa binaan tanpa kegiatan`"><div class="h-full rounded-full bg-emas" :style="{ width: `${persenDesaTanpaKegiatan}%` }" /></div>
+                <p class="mt-2 text-xs text-muted-foreground">dari {{ data.ringkasan.desa_binaan }} desa binaan saat ini</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="px-5 py-4 sm:col-span-2 lg:col-span-1">
-          <p class="text-xs font-medium text-muted-foreground">Desa tanpa kegiatan</p>
-          <p class="mt-1 text-2xl font-semibold tabular-nums" :class="data.ringkasan.desa_tanpa_kegiatan ? 'text-peringatan' : 'text-foreground'">{{ data.ringkasan.desa_tanpa_kegiatan }}<span class="text-base font-normal text-muted-foreground"> / {{ data.ringkasan.desa_binaan }}</span></p>
-          <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-muted" role="img" :aria-label="`${persenDesaTanpaKegiatan} persen desa binaan tanpa kegiatan`"><div class="h-full rounded-full bg-emas" :style="{ width: `${persenDesaTanpaKegiatan}%` }" /></div>
-        </div>
-      </section>
+      </DashboardKelompokDashboard>
 
       <DashboardKartuBagian judul="Kinerja per UPT" deskripsi="Klik baris untuk membuka dashboard UPT. Klik judul kolom untuk mengurutkan." rapat>
         <DashboardBingkaiTabel polos>

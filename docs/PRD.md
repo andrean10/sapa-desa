@@ -500,7 +500,10 @@ Aturan umum: Kanwil **tidak mengubah status laporan** dan tidak membuat atau men
 
 Di atas: **pemilih periode** yang berlaku untuk semua bagian halaman: Bulan ini (awal), Bulan lalu, Tahun ini, Kustom (pilih bulan atau rentang bebas).
 
-**a. Kartu ringkasan** (`dashboard_kanwil_ringkasan`): Laporan masuk · Belum ditanggapi · **Terlambat** (merah bila > 0) · Sedang ditangani · Selesai · Ditolak · Kegiatan PIMPASA · Desa tanpa kegiatan (dari total desa binaan) · PIMPASA aktif.
+**a. Kartu ringkasan** (`dashboard_kanwil_ringkasan`), dibagi **dua kelompok** agar angka kondisi sekarang tidak tercampur dengan angka periode:
+- **Kondisi saat ini** (tidak ikut filter periode; diberi penanda "Saat ini"): Belum ditanggapi · **Terlambat** (merah bila > 0) · Sedang ditangani · PIMPASA aktif · Desa binaan (total DBI).
+- **Dalam periode terpilih** (penanda berisi rentang tanggal): *Aduan masyarakat*: Aduan masuk · Selesai · Ditolak; *Kegiatan PIMPASA*: Kegiatan dilaporkan · Desa tanpa kegiatan (dari total desa binaan saat ini, dengan bilah).
+- Istilah: **"Aduan"** untuk laporan dari masyarakat dan **"Kegiatan"** untuk laporan kegiatan PIMPASA, supaya kata "laporan" tidak dipakai untuk dua hal.
 
 **b. Tabel per UPT** (`dashboard_kanwil_per_upt`): satu baris per UPT. Kolom: UPT · Laporan masuk · Belum ditanggapi · Terlambat · Sedang ditangani · Direspon · Kegiatan · Desa binaan · Desa tanpa kegiatan. Kolom dapat diurutkan. Sel **Terlambat > 0** diberi warna merah. Klik baris → `/kanwil/upt/[kantorId]`.
 

@@ -48,8 +48,8 @@ const kartu = computed(() => {
     { label: 'Perlu ditanggapi', nilai: r.perlu_ditanggapi, ikon: Inbox, nada: 'info' as const, ke: tautanLaporan('perlu'), keterangan: 'Status Diterima' },
     { label: 'Sedang ditangani', nilai: r.sedang_ditangani, ikon: Hourglass, nada: 'netral' as const, ke: tautanLaporan('ditangani'), keterangan: 'Diverifikasi & ditindaklanjuti' },
     { label: 'Terlambat', nilai: r.terlambat, ikon: TriangleAlert, nada: r.terlambat > 0 ? 'bahaya' as const : 'netral' as const, ke: tautanLaporan('terlambat'), keterangan: `Lebih dari ${r.batas_hari} hari kerja` },
-    { label: 'Selesai atau ditolak', nilai: r.selesai_ditolak_bulan_ini, ikon: CircleCheckBig, nada: 'sukses' as const, ke: tautanLaporan('final'), keterangan: 'Bulan ini' },
-    { label: 'Kegiatan PIMPASA', nilai: r.kegiatan_bulan_ini, ikon: ClipboardList, nada: 'emas' as const, ke: tautanKegiatan.value, keterangan: 'Bulan ini' }
+    { label: 'Aduan selesai atau ditolak', nilai: r.selesai_ditolak_bulan_ini, ikon: CircleCheckBig, nada: 'sukses' as const, ke: tautanLaporan('final'), keterangan: 'Bulan ini' },
+    { label: 'Kegiatan dilaporkan', nilai: r.kegiatan_bulan_ini, ikon: ClipboardList, nada: 'emas' as const, ke: tautanKegiatan.value, keterangan: 'Bulan ini' }
   ]
 })
 
@@ -71,9 +71,17 @@ const jumlahDesaPerluDikunjungi = computed(() => desaUrut.value.filter(item => !
     </div>
     <DashboardStateGalat v-else-if="error && !data?.ringkasan" pesan="Ringkasan dashboard belum dapat dimuat." @coba="$emit('coba')" />
     <template v-else-if="data?.ringkasan">
-      <section class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5 [&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1" aria-label="Ringkasan laporan">
-        <DashboardKartuAngka v-for="item in kartu" :key="item.label" v-bind="item" />
-      </section>
+      <DashboardKelompokDashboard judul="Kondisi saat ini" cakupan="Saat ini" nada="saatIni">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 [&>*:last-child]:col-span-2 lg:[&>*:last-child]:col-span-1">
+          <DashboardKartuAngka v-for="item in kartu.slice(0, 3)" :key="item.label" v-bind="item" />
+        </div>
+      </DashboardKelompokDashboard>
+
+      <DashboardKelompokDashboard judul="Bulan ini" cakupan="Bulan berjalan" nada="periode">
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+          <DashboardKartuAngka v-for="item in kartu.slice(3)" :key="item.label" v-bind="item" />
+        </div>
+      </DashboardKelompokDashboard>
 
       <DashboardKartuBagian judul="Perlu tindakan" deskripsi="Laporan berstatus Diterima, yang paling lama di atas." rapat>
         <template #aksi><Button variant="outline" size="sm" as-child><NuxtLink :to="tautanLaporan('semua')" class="no-underline">Lihat semua</NuxtLink></Button></template>
