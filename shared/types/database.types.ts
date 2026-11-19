@@ -333,7 +333,7 @@ export type Database = {
           created_at: string
           desa_id: string
           dibuat_oleh: string
-          foto_path: string | null
+          foto_paths: string[]
           id: string
           jenis_kegiatan_id: string
           jumlah_peserta: number
@@ -349,7 +349,7 @@ export type Database = {
           created_at?: string
           desa_id: string
           dibuat_oleh: string
-          foto_path?: string | null
+          foto_paths?: string[]
           id?: string
           jenis_kegiatan_id: string
           jumlah_peserta: number
@@ -365,7 +365,7 @@ export type Database = {
           created_at?: string
           desa_id?: string
           dibuat_oleh?: string
-          foto_path?: string | null
+          foto_paths?: string[]
           id?: string
           jenis_kegiatan_id?: string
           jumlah_peserta?: number

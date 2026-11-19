@@ -52,21 +52,20 @@ const isian = reactive({
   jenis_kegiatan_id: "",
   jumlah_peserta: undefined as number | undefined,
   uraian_hasil: "",
-  foto_path: "",
   pdf_path: "",
 });
-const lampiranTersimpan = ref<{
-  foto_url: string | null;
-  pdf_url: string | null;
-}>({ foto_url: null, pdf_url: null });
-const foto = ref<File>();
+const lampiranTersimpan = ref<{ pdf_url: string | null }>({ pdf_url: null });
+const MAKS_FOTO = BATAS_FILE.foto.maksimumJumlahKegiatan;
+// Foto yang sudah tersimpan di laporan (mode ubah) dan foto baru yang menunggu diunggah.
+const fotoTersimpan = ref<{ path: string; url: string }[]>([]);
+const fotoBaru = ref<{ file: File; pratinjau: string }[]>([]);
+const jumlahFoto = computed(() => fotoTersimpan.value.length + fotoBaru.value.length);
 const pdf = ref<File>();
 const inputFoto = ref<HTMLInputElement>();
 const inputPdf = ref<HTMLInputElement>();
 const pesan = ref("");
 const memuat = ref(true);
 const sibuk = ref(false);
-const pratinjauFoto = ref("");
 const progresFoto = ref<number | null>(null);
 const progresPdf = ref<number | null>(null);
 const galatFoto = ref("");
@@ -121,10 +120,11 @@ onMounted(async () => {
       Object.assign(isian, kegiatan);
       isian.petugas_pengganti_nama = kegiatan.petugas_pengganti_nama ?? "";
       pegawaiAsli.value = kegiatan.pegawai_id;
-      lampiranTersimpan.value = {
-        foto_url: kegiatan.foto_url,
-        pdf_url: kegiatan.pdf_url,
-      };
+      lampiranTersimpan.value = { pdf_url: kegiatan.pdf_url };
+      fotoTersimpan.value = kegiatan.foto_paths.map((path, i) => ({
+        path,
+        url: kegiatan.foto_urls[i] ?? "",
+      }));
     }
   } catch {
     pesan.value = "Pilihan form kegiatan belum dapat dimuat.";
@@ -134,7 +134,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value);
+  fotoBaru.value.forEach((item) => URL.revokeObjectURL(item.pratinjau));
   if (pratinjauPdf.value) URL.revokeObjectURL(pratinjauPdf.value);
 });
 
@@ -152,26 +152,32 @@ function tolakLampiran(
 
 async function pilihFoto(event: Event) {
   const input = event.target as HTMLInputElement;
-  const file = input.files?.[0];
+  const dipilih = Array.from(input.files ?? []);
   galatFoto.value = "";
   infoKompres.value = "";
-  if (!file) return;
+  if (!dipilih.length) return;
+  const sisa = MAKS_FOTO - jumlahFoto.value;
+  const diproses = dipilih.slice(0, Math.max(sisa, 0));
+  let dikecilkan = 0;
   try {
-    const hasil = await kompresFoto(file);
-    foto.value = hasil;
-    if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value);
-    pratinjauFoto.value = URL.createObjectURL(hasil);
-    if (hasil.size < file.size)
-      infoKompres.value = `Foto dikecilkan otomatis dari ${ukuranFile(file.size)} menjadi ${ukuranFile(hasil.size)}.`;
+    for (const file of diproses) {
+      const hasil = await kompresFoto(file);
+      if (hasil.size < file.size) dikecilkan++;
+      fotoBaru.value.push({ file: hasil, pratinjau: URL.createObjectURL(hasil) });
+    }
+    if (dikecilkan)
+      infoKompres.value = `${dikecilkan} foto dikecilkan otomatis.`;
+    if (dipilih.length > diproses.length)
+      galatFoto.value = `Maksimal ${MAKS_FOTO} foto. Foto yang melebihi batas tidak ditambahkan.`;
     pesan.value = "";
   } catch (error) {
-    foto.value = undefined;
     tolakLampiran(
       "foto",
       input,
       error instanceof Error ? error.message : "Foto belum dapat diproses.",
     );
   }
+  input.value = "";
 }
 
 function pilihPdf(event: Event) {
@@ -199,13 +205,16 @@ function pilihPdf(event: Event) {
   pesan.value = "";
 }
 
-function hapusFotoPilihan() {
-  foto.value = undefined;
-  if (pratinjauFoto.value) URL.revokeObjectURL(pratinjauFoto.value);
-  pratinjauFoto.value = "";
-  infoKompres.value = "";
+function hapusFotoBaru(indeks: number) {
+  const [dibuang] = fotoBaru.value.splice(indeks, 1);
+  if (dibuang) URL.revokeObjectURL(dibuang.pratinjau);
   galatFoto.value = "";
-  if (inputFoto.value) inputFoto.value.value = "";
+  infoKompres.value = "";
+}
+
+function hapusFotoTersimpan(indeks: number) {
+  fotoTersimpan.value.splice(indeks, 1);
+  galatFoto.value = "";
 }
 
 function hapusPdfPilihan() {
@@ -232,18 +241,16 @@ async function simpan() {
   galatPeserta.value = "";
   sibuk.value = true;
   pesan.value = "";
-  const unggahanBaru: { foto_path?: string; pdf_path?: string } = {};
+  const unggahanBaru: { foto_paths: string[]; pdf_path?: string } = { foto_paths: [] };
   try {
-    if (foto.value) {
-      progresFoto.value = 0;
-      isian.foto_path = (
-        await unggah(
-          foto.value,
-          "foto",
-          (persen) => (progresFoto.value = persen),
-        )
-      ).path;
-      unggahanBaru.foto_path = isian.foto_path;
+    for (const [indeks, item] of fotoBaru.value.entries()) {
+      progresFoto.value = Math.round((indeks / fotoBaru.value.length) * 100);
+      const hasil = await unggah(item.file, "foto", (persen) => {
+        progresFoto.value = Math.round(
+          ((indeks + persen / 100) / fotoBaru.value.length) * 100,
+        );
+      });
+      unggahanBaru.foto_paths.push(hasil.path);
     }
     if (pdf.value) {
       progresPdf.value = 0;
@@ -259,7 +266,12 @@ async function simpan() {
       jumlah_peserta: isian.jumlah_peserta as number,
       uraian_hasil: isian.uraian_hasil,
       petugas_pengganti_nama: isian.petugas_pengganti_nama.trim(),
-      ...(isian.foto_path && { foto_path: isian.foto_path }),
+      ...((modeUbah.value || unggahanBaru.foto_paths.length || fotoTersimpan.value.length) && {
+        foto_paths: [
+          ...fotoTersimpan.value.map((item) => item.path),
+          ...unggahanBaru.foto_paths,
+        ],
+      }),
       ...(isian.pdf_path && { pdf_path: isian.pdf_path }),
     };
     if (props.id) await ubah(props.id, payload);
@@ -271,7 +283,7 @@ async function simpan() {
     );
     emit("tersimpan");
   } catch (error) {
-    if (unggahanBaru.foto_path || unggahanBaru.pdf_path)
+    if (unggahanBaru.foto_paths.length || unggahanBaru.pdf_path)
       await bersihkan(unggahanBaru).catch(() => undefined);
     pesan.value =
       (error as { data?: { statusMessage?: string } })?.data?.statusMessage ??
@@ -504,7 +516,7 @@ async function simpan() {
             <Field class="min-w-0">
               <FieldLabel for="kegiatan-foto"
                 ><ImagePlus class="size-4 text-primary" />Foto
-                kegiatan</FieldLabel
+                kegiatan (maks. 3)</FieldLabel
               >
               <div
                 class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 overflow-hidden rounded-lg border border-dashed bg-muted/30 p-4"
@@ -512,14 +524,17 @@ async function simpan() {
                 <input
                   id="kegiatan-foto"
                   ref="inputFoto"
-                  class="block w-full min-w-0 max-w-full truncate text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
+                  class="block w-full min-w-0 max-w-full truncate text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground disabled:opacity-50"
                   type="file"
+                  multiple
                   accept="image/jpeg,image/png,image/webp"
+                  :disabled="jumlahFoto >= MAKS_FOTO"
                   @change="pilihFoto"
                 />
                 <FieldDescription class="min-w-0"
-                  >JPEG, PNG, atau WebP. Ukuran foto disesuaikan otomatis
-                  saat diunggah.</FieldDescription
+                  >JPEG, PNG, atau WebP. Maksimal {{ MAKS_FOTO }} foto
+                  ({{ jumlahFoto }}/{{ MAKS_FOTO }}). Ukuran foto disesuaikan
+                  otomatis saat diunggah.</FieldDescription
                 >
                 <p
                   v-if="galatFoto"
@@ -539,38 +554,61 @@ async function simpan() {
                   v-if="progresFoto !== null"
                   :model-value="progresFoto"
                 />
-                <div
-                  v-if="pratinjauFoto && foto"
-                  class="flex min-w-0 items-center gap-3"
-                >
-                  <img
-                    :src="pratinjauFoto"
-                    class="size-16 rounded-md border object-cover"
-                    alt="Pratinjau foto kegiatan"
-                  />
-                  <div class="min-w-0 flex-1 text-sm">
-                    <p class="truncate font-medium">{{ foto.name }}</p>
-                    <p class="text-muted-foreground">
-                      {{ ukuranFile(foto.size) }}
-                    </p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Hapus foto yang dipilih"
-                    @click="hapusFotoPilihan"
-                    ><X class="size-4"
-                  /></Button>
-                </div>
-                <a
-                  v-else-if="lampiranTersimpan.foto_url"
-                  class="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-4"
-                  :href="lampiranTersimpan.foto_url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  ><ExternalLink class="size-3.5" />Lihat foto tersimpan</a
-                >
+                <ul v-if="jumlahFoto" class="grid min-w-0 gap-2">
+                  <li
+                    v-for="(item, indeks) in fotoTersimpan"
+                    :key="item.path"
+                    class="flex min-w-0 items-center gap-3"
+                  >
+                    <a
+                      :href="item.url"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="shrink-0"
+                      ><img
+                        :src="item.url"
+                        class="size-16 rounded-md border object-cover"
+                        :alt="`Foto tersimpan ${indeks + 1}`"
+                    /></a>
+                    <div class="min-w-0 flex-1 text-sm">
+                      <p class="truncate font-medium">Foto tersimpan {{ indeks + 1 }}</p>
+                      <p class="text-muted-foreground">Sudah ada di laporan</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      :aria-label="`Hapus foto tersimpan ${indeks + 1}`"
+                      @click="hapusFotoTersimpan(indeks)"
+                      ><X class="size-4"
+                    /></Button>
+                  </li>
+                  <li
+                    v-for="(item, indeks) in fotoBaru"
+                    :key="item.pratinjau"
+                    class="flex min-w-0 items-center gap-3"
+                  >
+                    <img
+                      :src="item.pratinjau"
+                      class="size-16 shrink-0 rounded-md border object-cover"
+                      :alt="`Pratinjau foto baru ${indeks + 1}`"
+                    />
+                    <div class="min-w-0 flex-1 text-sm">
+                      <p class="truncate font-medium">{{ item.file.name }}</p>
+                      <p class="text-muted-foreground">
+                        {{ ukuranFile(item.file.size) }}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      :aria-label="`Hapus foto baru ${indeks + 1}`"
+                      @click="hapusFotoBaru(indeks)"
+                      ><X class="size-4"
+                    /></Button>
+                  </li>
+                </ul>
               </div>
             </Field>
             <Field class="min-w-0">

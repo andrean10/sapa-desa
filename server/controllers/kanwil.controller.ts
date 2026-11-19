@@ -96,7 +96,7 @@ export async function daftarKegiatanKanwilController(event: H3Event) {
   const client = buatClientSesiUser(event)
   const [hasil, kantor, pilihan] = await Promise.all([daftarKegiatanKanwil(client, halaman, { kantorId, hanyaDiganti, dari, sampai, desaId, jenisId, pegawaiId }), daftarKantorKanwil(client), pilihanFilterKegiatanKanwil(client)])
   if (hasil.error || kantor.error || pilihan.desa.error || pilihan.pegawai.error || pilihan.jenis.error) throw createError({ statusCode: 503, statusMessage: 'Daftar kegiatan belum dapat dimuat.' })
-  return { data: (hasil.data ?? []).map(({ foto_path, pdf_path, ...item }) => ({ ...item, ada_foto: Boolean(foto_path), ada_pdf: Boolean(pdf_path) })), total: hasil.count ?? 0, halaman, kantor: kantor.data ?? [], pilihan: { desa: pilihan.desa.data ?? [], pegawai: pilihan.pegawai.data ?? [], jenis: pilihan.jenis.data ?? [] } }
+  return { data: (hasil.data ?? []).map(({ foto_paths, pdf_path, ...item }) => ({ ...item, jumlah_foto: foto_paths.length, ada_pdf: Boolean(pdf_path) })), total: hasil.count ?? 0, halaman, kantor: kantor.data ?? [], pilihan: { desa: pilihan.desa.data ?? [], pegawai: pilihan.pegawai.data ?? [], jenis: pilihan.jenis.data ?? [] } }
 }
 
 export async function detailKegiatanKanwilController(event: H3Event) {
@@ -106,11 +106,12 @@ export async function detailKegiatanKanwilController(event: H3Event) {
   const hasil = await detailKegiatanUpt(buatClientSesiUser(event), id)
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Detail kegiatan belum dapat dimuat.' })
   if (!hasil.data) throw createError({ statusCode: 404, statusMessage: 'Laporan kegiatan tidak ditemukan.' })
+  const kantorId = hasil.data.kantor_id
   const [foto, pdf] = await Promise.all([
-    hasil.data.foto_path ? buatSignedUrlLampiranUpt('foto-kegiatan', hasil.data.foto_path, hasil.data.kantor_id) : Promise.resolve({ data: null, error: null }),
+    Promise.all(hasil.data.foto_paths.map(path => buatSignedUrlLampiranUpt('foto-kegiatan', path, kantorId))),
     hasil.data.pdf_path ? buatSignedUrlLampiranUpt('laporan-pdf', hasil.data.pdf_path, hasil.data.kantor_id) : Promise.resolve({ data: null, error: null })
   ])
-  if (foto.error || pdf.error) throw createError({ statusCode: 503, statusMessage: 'Lampiran kegiatan belum dapat dimuat.' })
+  if (foto.some(item => item.error) || pdf.error) throw createError({ statusCode: 503, statusMessage: 'Lampiran kegiatan belum dapat dimuat.' })
   const kantor = await buatClientSesiUser(event).from('kantor_imigrasi').select('nama_singkat').eq('id', hasil.data.kantor_id).maybeSingle()
   const [desa, pegawai, jenis] = await Promise.all([
     buatClientSesiUser(event).from('desa_kelurahan').select('nama').eq('id', hasil.data.desa_id).maybeSingle(),
@@ -118,8 +119,8 @@ export async function detailKegiatanKanwilController(event: H3Event) {
     buatClientSesiUser(event).from('jenis_kegiatan').select('nama').eq('id', hasil.data.jenis_kegiatan_id).maybeSingle()
   ])
   if (kantor.error || desa.error || pegawai.error || jenis.error) throw createError({ statusCode: 503, statusMessage: 'Rincian kegiatan belum dapat dimuat.' })
-  const { foto_path, pdf_path, ...item } = hasil.data
-  return { ...item, kantor: kantor.data?.nama_singkat ?? 'UPT tidak tersedia', desa: desa.data?.nama ?? 'Desa tidak tersedia', pegawai: pegawai.data?.nama ?? 'Pegawai tidak tersedia', jenis: jenis.data?.nama ?? 'Jenis tidak tersedia', foto_url: foto.data?.signedUrl ?? null, pdf_url: pdf.data?.signedUrl ?? null }
+  const { foto_paths, pdf_path, ...item } = hasil.data
+  return { ...item, kantor: kantor.data?.nama_singkat ?? 'UPT tidak tersedia', desa: desa.data?.nama ?? 'Desa tidak tersedia', pegawai: pegawai.data?.nama ?? 'Pegawai tidak tersedia', jenis: jenis.data?.nama ?? 'Jenis tidak tersedia', foto_urls: foto.map(f => f.data?.signedUrl ?? ''), pdf_url: pdf.data?.signedUrl ?? null }
 }
 
 function validasiPeriode(mulai?: string, selesai?: string) {

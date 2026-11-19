@@ -49,7 +49,7 @@ const terlihat = computed(() => kegiatan.value.filter(item =>
   (!jenisDipilih.value || item.jenis_kegiatan_id === jenisDipilih.value) &&
   (!pegawaiDipilih.value || item.pegawai_id === pegawaiDipilih.value)
 ))
-const totalLampiran = computed(() => terlihat.value.filter(item => item.foto_path || item.pdf_path).length)
+const totalLampiran = computed(() => terlihat.value.filter(item => item.foto_paths.length || item.pdf_path).length)
 const totalPeserta = computed(() => terlihat.value.reduce((jumlah, item) => jumlah + item.jumlah_peserta, 0))
 const adaFilter = computed(() => Boolean(desaDipilih.value || jenisDipilih.value || pegawaiDipilih.value || bulan.value !== tanggalHariIniWib().slice(0, 7)))
 function resetFilter() { bulan.value = tanggalHariIniWib().slice(0, 7); desaDipilih.value = ''; jenisDipilih.value = ''; pegawaiDipilih.value = '' }
@@ -147,7 +147,7 @@ async function konfirmasiHapus(id: string) {
               <TableCell><span class="rounded-md bg-muted px-2 py-0.5 text-xs font-medium">{{ item.jenis }}</span></TableCell>
               <TableCell class="text-right tabular-nums">{{ item.jumlah_peserta }}</TableCell>
               <TableCell><div class="flex flex-wrap items-center gap-2"><span>{{ item.pegawai }}</span><span v-if="item.petugas_pengganti_nama" class="rounded-full bg-peringatan-muda px-2 py-0.5 text-xs font-semibold text-peringatan">Digantikan</span></div><p v-if="item.petugas_pengganti_nama" class="mt-0.5 text-xs text-muted-foreground">Pengganti: {{ item.petugas_pengganti_nama }}</p></TableCell>
-              <TableCell><div class="flex gap-1.5"><span v-if="item.foto_path" class="inline-flex size-7 items-center justify-center rounded-md bg-info-muda text-info" title="Foto dokumentasi"><Image class="size-3.5" /><span class="sr-only">Foto</span></span><span v-if="item.pdf_path" class="inline-flex size-7 items-center justify-center rounded-md bg-bahaya-muda text-destructive" title="Laporan PDF"><FileText class="size-3.5" /><span class="sr-only">PDF</span></span><span v-if="!item.foto_path && !item.pdf_path" class="text-muted-foreground">—</span></div></TableCell>
+              <TableCell><div class="flex gap-1.5"><span v-if="item.foto_paths.length" class="inline-flex size-7 items-center justify-center rounded-md bg-info-muda text-info" :title="`${item.foto_paths.length} foto dokumentasi`"><Image class="size-3.5" /><span class="sr-only">Foto</span></span><span v-if="item.pdf_path" class="inline-flex size-7 items-center justify-center rounded-md bg-bahaya-muda text-destructive" title="Laporan PDF"><FileText class="size-3.5" /><span class="sr-only">PDF</span></span><span v-if="!item.foto_paths.length && !item.pdf_path" class="text-muted-foreground">—</span></div></TableCell>
               <TableCell>
                 <div class="flex items-center justify-end gap-1">
                   <Button size="sm" variant="ghost" @click="bukaUbah(item.id)"><Pencil class="size-3.5" />Ubah</Button>

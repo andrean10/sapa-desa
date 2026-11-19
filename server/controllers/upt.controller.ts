@@ -205,11 +205,11 @@ const skemaKegiatan = z.object({
   desa_id: z.string().min(1),
   pegawai_id: z.string().uuid(),
   jenis_kegiatan_id: z.string().uuid(),
-  jumlah_peserta: z.coerce.number().int().min(0).max(100000),
+  jumlah_peserta: z.coerce.number().int().min(1).max(100000),
   uraian_hasil: z.string().trim().min(10).max(5000),
   // Nama petugas yang menggantikan PIMPASA (atas perintah KASI INTELDAKIM). Kosong = PIMPASA sendiri yang terjun.
   petugas_pengganti_nama: z.string().trim().max(150).optional(),
-  foto_path: z.string().optional(),
+  foto_paths: z.array(z.string()).max(3).optional(),
   pdf_path: z.string().optional()
 }).strict()
 
@@ -222,7 +222,7 @@ export async function tambahKegiatanUptController(event: H3Event) {
   const client = buatClientSesiUser(event)
   const hasil = await tambahKegiatanUpt(client, input.data)
   if (hasil.error) {
-    await bersihkanLampiranKegiatan(input.data.foto_path, input.data.pdf_path)
+    await bersihkanLampiranKegiatan(input.data.foto_paths, input.data.pdf_path)
     throw createError({ statusCode: 422, statusMessage: hasil.error.message })
   }
   return { id: hasil.data.id }
@@ -250,10 +250,10 @@ export async function unggahLampiranKegiatanUptController(event: H3Event) {
 export async function bersihkanLampiranKegiatanUptController(event: H3Event) {
   const profil = await profilSesi(event)
   if (profil.peran !== 'upt' || !profil.kantor_id) throw createError({ statusCode: 403, statusMessage: 'Pembersihan lampiran hanya untuk akun UPT.' })
-  const parsed = z.object({ foto_path: z.string().optional(), pdf_path: z.string().optional() }).strict().safeParse(await readBody(event))
-  if (!parsed.success || (!parsed.data.foto_path && !parsed.data.pdf_path)) throw createError({ statusCode: 400, statusMessage: 'Path lampiran tidak valid.' })
+  const parsed = z.object({ foto_paths: z.array(z.string()).max(3).optional(), pdf_path: z.string().optional() }).strict().safeParse(await readBody(event))
+  if (!parsed.success || (!parsed.data.foto_paths?.length && !parsed.data.pdf_path)) throw createError({ statusCode: 400, statusMessage: 'Path lampiran tidak valid.' })
   validasiPathLampiran(parsed.data, profil.kantor_id)
-  const berhasil = await bersihkanLampiranKegiatan(parsed.data.foto_path, parsed.data.pdf_path)
+  const berhasil = await bersihkanLampiranKegiatan(parsed.data.foto_paths, parsed.data.pdf_path)
   if (!berhasil) throw createError({ statusCode: 503, statusMessage: 'Lampiran sementara belum dapat dibersihkan.' })
   return { berhasil: true }
 }
@@ -277,31 +277,31 @@ export async function ubahKegiatanUptController(event: H3Event) {
   const client = buatClientSesiUser(event)
   const sebelum = await detailKegiatanUpt(client, id)
   if (sebelum.error || !sebelum.data) throw createError({ statusCode: 404, statusMessage: 'Laporan kegiatan tidak ditemukan.' })
+  const fotoSebelum = sebelum.data.foto_paths
+  const fotoSesudah = parsed.data.foto_paths ?? fotoSebelum
+  const fotoBaru = fotoSesudah.filter(path => !fotoSebelum.includes(path))
+  const fotoDibuang = fotoSebelum.filter(path => !fotoSesudah.includes(path))
+  const pdfBaru = parsed.data.pdf_path && parsed.data.pdf_path !== sebelum.data.pdf_path ? parsed.data.pdf_path : null
   const hasil = await ubahKegiatanUpt(client, id, parsed.data)
-  if (hasil.error) {
-    const fotoBaru = parsed.data.foto_path !== sebelum.data.foto_path ? parsed.data.foto_path : null
-    const pdfBaru = parsed.data.pdf_path !== sebelum.data.pdf_path ? parsed.data.pdf_path : null
+  if (hasil.error || !hasil.data) {
     await bersihkanLampiranKegiatan(fotoBaru, pdfBaru)
-    throw createError({ statusCode: 422, statusMessage: hasil.error.message })
-  }
-  if (!hasil.data) {
-    const fotoBaru = parsed.data.foto_path !== sebelum.data.foto_path ? parsed.data.foto_path : null
-    const pdfBaru = parsed.data.pdf_path !== sebelum.data.pdf_path ? parsed.data.pdf_path : null
-    await bersihkanLampiranKegiatan(fotoBaru, pdfBaru)
+    if (hasil.error) throw createError({ statusCode: 422, statusMessage: hasil.error.message })
     throw createError({ statusCode: 404, statusMessage: 'Laporan kegiatan tidak ditemukan.' })
   }
-  if (parsed.data.foto_path && parsed.data.foto_path !== sebelum.data.foto_path) await bersihkanLampiranKegiatan(sebelum.data.foto_path, null)
-  if (parsed.data.pdf_path && parsed.data.pdf_path !== sebelum.data.pdf_path) await bersihkanLampiranKegiatan(null, sebelum.data.pdf_path)
+  await bersihkanLampiranKegiatan(fotoDibuang, pdfBaru ? sebelum.data.pdf_path : null)
   return { berhasil: true }
 }
 
-function validasiPathLampiran(data: { foto_path?: string; pdf_path?: string }, kantorId: string) {
+function validasiPathLampiran(data: { foto_paths?: string[]; pdf_path?: string }, kantorId: string) {
   const pola = new RegExp(`^${kantorId}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.(?:jpg|png|webp|pdf)$`, 'i')
-  for (const path of [data.foto_path, data.pdf_path]) {
+  for (const path of [...(data.foto_paths ?? []), data.pdf_path]) {
     if (path && !pola.test(path)) throw createError({ statusCode: 400, statusMessage: 'Path lampiran tidak valid untuk kantor Anda.' })
   }
-  if (data.foto_path?.endsWith('.pdf') || data.pdf_path && !data.pdf_path.endsWith('.pdf')) {
+  if (data.foto_paths?.some(path => path.endsWith('.pdf')) || data.pdf_path && !data.pdf_path.endsWith('.pdf')) {
     throw createError({ statusCode: 400, statusMessage: 'Jenis path lampiran tidak sesuai.' })
+  }
+  if (data.foto_paths && new Set(data.foto_paths).size !== data.foto_paths.length) {
+    throw createError({ statusCode: 400, statusMessage: 'Foto kegiatan tidak boleh duplikat.' })
   }
 }
 
@@ -313,13 +313,13 @@ export async function detailKegiatanUptController(event: H3Event) {
   const hasil = await detailKegiatanUpt(buatClientSesiUser(event), id)
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Detail kegiatan belum dapat dimuat.' })
   if (!hasil.data) throw createError({ statusCode: 404, statusMessage: 'Laporan kegiatan tidak ditemukan.' })
-  const { foto_path, pdf_path, ...kegiatan } = hasil.data
+  const { foto_paths, pdf_path, ...kegiatan } = hasil.data
   const [foto, pdf] = await Promise.all([
-    foto_path ? buatSignedUrlLampiranUpt('foto-kegiatan', foto_path, profil.kantor_id) : Promise.resolve({ data: null, error: null }),
+    Promise.all(foto_paths.map(path => buatSignedUrlLampiranUpt('foto-kegiatan', path, profil.kantor_id!))),
     pdf_path ? buatSignedUrlLampiranUpt('laporan-pdf', pdf_path, profil.kantor_id) : Promise.resolve({ data: null, error: null })
   ])
-  if (foto.error || pdf.error) throw createError({ statusCode: 503, statusMessage: 'Lampiran kegiatan belum dapat dimuat.' })
-  return { ...kegiatan, foto_path: foto_path ?? null, pdf_path: pdf_path ?? null, foto_url: foto.data?.signedUrl ?? null, pdf_url: pdf.data?.signedUrl ?? null }
+  if (foto.some(item => item.error) || pdf.error) throw createError({ statusCode: 503, statusMessage: 'Lampiran kegiatan belum dapat dimuat.' })
+  return { ...kegiatan, foto_paths, pdf_path: pdf_path ?? null, foto_urls: foto.map(item => item.data?.signedUrl ?? ''), pdf_url: pdf.data?.signedUrl ?? null }
 }
 
 export async function hapusKegiatanUptController(event: H3Event) {

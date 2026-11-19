@@ -460,9 +460,9 @@ Dua kolom di desktop (konten kiri, timeline dan aksi kanan); satu kolom di layar
 | 4 | Petugas PIMPASA | dropdown | wajib; hanya PIMPASA yang ditugaskan di desa terpilih pada tanggal kegiatan (SK Kanwil). Satu petugas: terpilih otomatis dan dropdown dikunci. Dua atau lebih: dipilih. Tidak ada PIMPASA aktif: peringatan "Hubungi Kanwil" dan tombol simpan nonaktif. Aturan yang sama dijaga trigger database |
 | 4a | Petugas Pengganti | teks bebas | opsional, maks. 150 karakter, **tanpa dropdown**. Diisi hanya bila PIMPASA berhalangan (cuti, sakit, dll.) dan kegiatan dilakukan petugas lain atas perintah KASI INTELDAKIM; kosong berarti PIMPASA sendiri yang terjun. Petugas Pengganti tidak harus pegawai kantor |
 | 5 | Jenis kegiatan | dropdown | wajib; hanya jenis aktif |
-| 6 | Jumlah peserta | angka | wajib; bilangan bulat 0–100000 |
+| 6 | Jumlah peserta | angka | wajib; bilangan bulat 1–100000. Kolom kosong dengan contoh "Contoh: 25"; saat simpan bila kosong/kurang dari 1: pesan merah "Jumlah peserta minimal 1 orang." dan halaman menggulir ke kolom itu |
 | 7 | Uraian, hasil, dan tindak lanjut | area teks | wajib; 10–5000 karakter; penghitung |
-| 8 | Foto dokumentasi (opsional) | unggah | maksimal 1; JPEG/PNG/WebP; ≤ 3 MB; kompres otomatis seperti 4.4 |
+| 8 | Foto dokumentasi (opsional) | unggah banyak | **0 sampai 3 foto** (boleh kosong, 1, 2, atau 3); JPEG/PNG/WebP; ≤ 3 MB per foto; kompres otomatis seperti 4.4. Pilihan berhenti aktif bila sudah 3; foto melebihi batas tidak ditambahkan dan muncul pesan. Pada mode ubah, foto tersimpan bisa dihapus dan foto baru ditambahkan (total tetap maks. 3). Wajib atau tidaknya foto menunggu keputusan pimpinan (sementara opsional) |
 | 9 | Laporan PDF (opsional) | unggah | maksimal 1 berkas; PDF; ≤ **8 MB** |
 
 Alur simpan:
@@ -543,7 +543,7 @@ Sama dengan 7.2 dan 7.3 dengan perbedaan:
 
 ### 8.5 Laporan kegiatan `/kanwil/kegiatan` dan detail
 
-Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, foto, dan PDF. **Petugas Pengganti** tampil **di atas** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
+Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, galeri foto (hingga 3), dan PDF. **Petugas Pengganti** tampil **di atas** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
 
 ### 8.6 Desa binaan `/kanwil/desa-binaan`
 

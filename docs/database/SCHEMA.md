@@ -215,9 +215,9 @@ Data awal (7): Deteksi Dini, Lainnya, Konsultasi Masyarakat, Pemantauan Wilayah,
 | desa_id | text | M, FK → desa_kelurahan | harus DBI dan di wilayah kerja kantor itu. **Perhatikan nama kolom: `desa_id`, bukan `desa_kelurahan_id`** |
 | dibuat_oleh | uuid | FK → profiles | **diisi dari akun login** |
 | jenis_kegiatan_id | uuid | M, FK → jenis_kegiatan | |
-| jumlah_peserta | integer | M | 0–100000 |
+| jumlah_peserta | integer | M | 0–100000 di database; aplikasi mewajibkan minimal 1 |
 | uraian_hasil | text | M | 10–5000 karakter (uraian, hasil, tindak lanjut) |
-| foto_path | text | O | path di bucket `foto-kegiatan`, maksimal 1 foto |
+| foto_paths | text[] | M, default `{}` | path di bucket `foto-kegiatan`, **maksimal 3** (check `cardinality <= 3`), tanpa duplikat, tiap path diawali folder kantor (dijaga trigger `laporan_pimpasa_cek`) |
 | pdf_path | text | O | path di bucket `laporan-pdf` |
 | pegawai_id | uuid | FK → pegawai, NOT NULL | **wajib PIMPASA yang ditugaskan di desa itu pada `tanggal_kegiatan`** (dijaga trigger `laporan_pimpasa_cek`), aktif dan satu kantor |
 | petugas_pengganti_nama | text | opsional, maks. 150 | nama petugas yang menggantikan PIMPASA (teks bebas, atas perintah KASI INTELDAKIM). Spasi saja dijadikan NULL. NULL = PIMPASA sendiri yang terjun; UI menyembunyikannya |
@@ -280,7 +280,7 @@ Semua bucket privat.
 | `foto-kegiatan` | 3 MB | jpeg, png, webp | UPT unggah ke folder kantornya `{kantor_id}/…`; UPT membaca kantornya sendiri; Kanwil dan admin membaca semua |
 | `laporan-pdf` | 8 MB | application/pdf | sama dengan `foto-kegiatan` |
 
-Konvensi path: `{kantor_id}/{uuid}.{ext}` dengan nama file **unik**. Tidak ada policy ganti atau hapus untuk akun user; salah unggah diperbaiki dengan mengunggah file baru lalu memperbarui `foto_path`/`pdf_path`. Penghapusan file lama dilakukan server (service role). Di VPS, `FILE_SIZE_LIMIT` global Storage tidak boleh lebih kecil dari 8 MB.
+Konvensi path: `{kantor_id}/{uuid}.{ext}` dengan nama file **unik**. Tidak ada policy ganti atau hapus untuk akun user; salah unggah diperbaiki dengan mengunggah file baru lalu memperbarui `foto_paths`/`pdf_path`. Penghapusan file lama dilakukan server (service role). Di VPS, `FILE_SIZE_LIMIT` global Storage tidak boleh lebih kecil dari 8 MB.
 
 ## 7. Hak akses per tabel (ringkas)
 

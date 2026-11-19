@@ -116,9 +116,9 @@ from('laporan_pimpasa').insert({
   desa_id,                 // desa DBI di wilayah kantornya (NAMA KOLOM: desa_id)
   pegawai_id,              // rekan sekantor, aktif
   jenis_kegiatan_id,
-  jumlah_peserta,          // 0–100000
+  jumlah_peserta,          // 1–100000 (dijaga server; database saat ini masih menerima 0)
   uraian_hasil,            // 10–5000 karakter
-  foto_path,               // opsional
+  foto_paths,              // opsional, array 0–3 path foto (tanpa duplikat), final: dikirim lengkap saat ubah
   pdf_path,                // opsional
 })
 ```

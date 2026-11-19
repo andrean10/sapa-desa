@@ -59,7 +59,9 @@ async function salinKode() {
           <h2 class="flex items-center gap-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"><MapPin class="size-3.5" aria-hidden="true" />Lokasi kejadian</h2>
           <p class="mt-2 font-medium">{{ lokasi }}</p>
           <p class="mt-0.5 font-mono text-xs text-muted-foreground">{{ data.lintang }}, {{ data.bujur }}</p>
-          <a class="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline" :href="`https://www.google.com/maps?q=${data.lintang},${data.bujur}`" target="_blank" rel="noopener noreferrer">Buka lokasi pelapor di peta<ExternalLink class="size-3.5" aria-hidden="true" /></a>
+          <Button class="mt-3 w-full sm:w-auto" variant="outline" as-child>
+            <a :href="`https://www.google.com/maps/search/?api=1&query=${data.lintang},${data.bujur}`" target="_blank" rel="noopener noreferrer" class="no-underline"><MapPin class="size-4" aria-hidden="true" />Buka di Google Maps<ExternalLink class="size-3.5" aria-hidden="true" /></a>
+          </Button>
         </div>
       </section>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Building2, CalendarDays, Download, FileText, ImageIcon, MapPinned, UserRound, UserRoundCog, Users } from '@lucide/vue'
+import { Building2, CalendarDays, Download, FileText, MapPinned, UserRound, UserRoundCog, Users } from '@lucide/vue'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import type { Tables } from '~~/shared/types/database.types'
@@ -7,7 +7,7 @@ import { formatTanggalWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Detail kegiatan PIMPASA' })
 const route = useRoute()
-type DetailKegiatan = Omit<Tables<'laporan_pimpasa'>, 'foto_path' | 'pdf_path' | 'kantor_id'> & { kantor: string; desa: string; pegawai: string; jenis: string; foto_url: string | null; pdf_url: string | null }
+type DetailKegiatan = Omit<Tables<'laporan_pimpasa'>, 'foto_paths' | 'pdf_path' | 'kantor_id'> & { kantor: string; desa: string; pegawai: string; jenis: string; foto_urls: string[]; pdf_url: string | null }
 const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`kanwil-kegiatan-${route.params.id}`, () => useApi()<DetailKegiatan>(`/api/kanwil/kegiatan/${route.params.id}`), { lazy: true })
 </script>
 
@@ -43,10 +43,11 @@ const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`ka
         <section class="rounded-xl border border-border/80 bg-card shadow-xs">
           <h2 class="border-b px-5 py-4 font-semibold">Lampiran</h2>
           <div class="grid gap-3 p-5">
-            <a v-if="data.foto_url" :href="data.foto_url" target="_blank" rel="noopener noreferrer" class="block overflow-hidden rounded-lg border"><img :src="data.foto_url" alt="Foto dokumentasi kegiatan" class="max-h-56 w-full object-cover" loading="lazy"></a>
-            <Button v-if="data.foto_url" variant="outline" as-child><a :href="data.foto_url" target="_blank" rel="noopener noreferrer" class="no-underline"><ImageIcon class="size-4" />Buka foto</a></Button>
+            <div v-if="data.foto_urls.length" class="grid gap-2" :class="data.foto_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'">
+              <a v-for="(url, i) in data.foto_urls" :key="url" :href="url" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-lg border" :aria-label="`Buka foto ${i + 1}`"><img :src="url" :alt="`Foto dokumentasi kegiatan ${i + 1}`" class="aspect-[4/3] w-full object-cover transition group-hover:scale-105" loading="lazy"></a>
+            </div>
             <Button v-if="data.pdf_url" variant="outline" as-child><a :href="data.pdf_url" target="_blank" rel="noopener noreferrer" class="no-underline"><FileText class="size-4" />Buka PDF laporan<Download class="ml-auto size-4" /></a></Button>
-            <p v-if="!data.foto_url && !data.pdf_url" class="text-sm text-muted-foreground">Tidak ada lampiran.</p>
+            <p v-if="!data.foto_urls.length && !data.pdf_url" class="text-sm text-muted-foreground">Tidak ada lampiran.</p>
           </div>
         </section>
       </div>

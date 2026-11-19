@@ -188,7 +188,7 @@ export async function ambilNamaPenugasanUpt(client: SupabaseClient<Database>, pe
 
 export async function daftarKegiatanUpt(client: SupabaseClient<Database>) {
   const hasil = await client.from('laporan_pimpasa')
-    .select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti_nama, created_at')
+    .select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_paths, pdf_path, petugas_pengganti_nama, created_at')
     .order('tanggal_kegiatan', { ascending: false })
   const pengaturan = await client.from('pengaturan').select('nilai').eq('kunci', 'batas_menit_hapus_laporan').maybeSingle()
   if (hasil.error || pengaturan.error) return { data: null, error: hasil.error ?? pengaturan.error }
@@ -227,23 +227,23 @@ export async function tambahKegiatanUpt(client: SupabaseClient<Database>, data: 
 }
 
 export async function detailKegiatanUpt(client: SupabaseClient<Database>, id: string) {
-  return await client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_path, pdf_path, petugas_pengganti_nama, kantor_id')
+  return await client.from('laporan_pimpasa').select('id, tanggal_kegiatan, desa_id, pegawai_id, jenis_kegiatan_id, jumlah_peserta, uraian_hasil, foto_paths, pdf_path, petugas_pengganti_nama, kantor_id')
     .eq('id', id).maybeSingle()
 }
 
 export async function ubahKegiatanUpt(client: SupabaseClient<Database>, id: string, perubahan: {
-  tanggal_kegiatan: string; pegawai_id: string; jenis_kegiatan_id: string; jumlah_peserta: number; uraian_hasil: string; foto_path?: string; pdf_path?: string
+  tanggal_kegiatan: string; pegawai_id: string; jenis_kegiatan_id: string; jumlah_peserta: number; uraian_hasil: string; foto_paths?: string[]; pdf_path?: string
 }) {
   return await client.from('laporan_pimpasa').update(perubahan).eq('id', id).select('id').maybeSingle()
 }
 
 export async function hapusKegiatanUpt(client: SupabaseClient<Database>, id: string) {
-  const hasil = await client.from('laporan_pimpasa').delete().eq('id', id).select('foto_path, pdf_path').maybeSingle()
+  const hasil = await client.from('laporan_pimpasa').delete().eq('id', id).select('foto_paths, pdf_path').maybeSingle()
   if (!hasil.data || hasil.error) return hasil
   const config = useRuntimeConfig()
   const service = createClient<Database>(config.public.supabaseUrl, config.supabaseServiceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
   const cleanup = await Promise.all([
-    hasil.data.foto_path ? service.storage.from('foto-kegiatan').remove([hasil.data.foto_path]) : Promise.resolve({ error: null }),
+    hasil.data.foto_paths.length ? service.storage.from('foto-kegiatan').remove(hasil.data.foto_paths) : Promise.resolve({ error: null }),
     hasil.data.pdf_path ? service.storage.from('laporan-pdf').remove([hasil.data.pdf_path]) : Promise.resolve({ error: null })
   ])
   return { ...hasil, error: cleanup.find(item => item.error)?.error ?? null }
@@ -256,11 +256,11 @@ export async function unggahLampiranKegiatanUpt(client: SupabaseClient<Database>
   return hasil.error ? { error: hasil.error } : { path }
 }
 
-export async function bersihkanLampiranKegiatan(pathFoto?: string | null, pathPdf?: string | null) {
+export async function bersihkanLampiranKegiatan(pathFoto?: string[] | null, pathPdf?: string | null) {
   const config = useRuntimeConfig()
   const service = createClient<Database>(config.public.supabaseUrl, config.supabaseServiceRoleKey, { auth: { persistSession: false, autoRefreshToken: false } })
   const hasil = await Promise.all([
-    pathFoto ? service.storage.from('foto-kegiatan').remove([pathFoto]) : Promise.resolve({ error: null }),
+    pathFoto?.length ? service.storage.from('foto-kegiatan').remove(pathFoto) : Promise.resolve({ error: null }),
     pathPdf ? service.storage.from('laporan-pdf').remove([pathPdf]) : Promise.resolve({ error: null })
   ])
   return hasil.every(item => !item.error)
