@@ -135,7 +135,6 @@ async function konfirmasiHapus(id: string) {
       <div v-else-if="!terlihat.length" class="p-4">
         <DashboardStateKosong :judul="kegiatan.length && adaFilter ? 'Tidak ada laporan yang sesuai filter.' : 'Belum ada laporan kegiatan bulan ini.'" deskripsi="Buat laporan setelah kegiatan di desa binaan selesai." :ikon="kegiatan.length && adaFilter ? FileSearch : CalendarDays">
           <Button v-if="adaFilter" variant="outline" @click="resetFilter">Reset filter</Button>
-          <Button @click="bukaForm()"><Plus class="size-4" />Buat laporan kegiatan</Button>
         </DashboardStateKosong>
       </div>
       <template v-else>
@@ -176,7 +175,7 @@ async function konfirmasiHapus(id: string) {
     <Dialog v-model:open="formTerbuka">
       <DialogContent class="max-h-[calc(100svh-2rem)] max-w-[calc(100%-1rem)] gap-0 overflow-hidden p-0 sm:max-w-5xl">
         <DialogHeader class="border-b border-border px-5 py-5 pr-12 sm:px-7"><DialogTitle class="text-xl text-primary">{{ kegiatanDiubahId ? 'Ubah laporan kegiatan' : 'Buat laporan kegiatan' }}</DialogTitle><DialogDescription>{{ kegiatanDiubahId ? 'Perbarui informasi kegiatan dan lampirannya.' : 'Lengkapi data kegiatan PIMPASA yang telah dilakukan.' }}</DialogDescription></DialogHeader>
-        <div class="max-h-[calc(100svh-11rem)] overflow-y-auto px-5 py-6 sm:px-7"><KegiatanForm :id="kegiatanDiubahId" :desa-id-awal="desaAwal" @tersimpan="selesaiSimpan" @tutup="formTerbuka = false" /></div>
+        <div class="max-h-[calc(100svh-11rem)] min-w-0 overflow-y-auto overflow-x-hidden px-5 py-6 sm:px-7"><KegiatanForm :id="kegiatanDiubahId" :desa-id-awal="desaAwal" @tersimpan="selesaiSimpan" @tutup="formTerbuka = false" /></div>
       </DialogContent>
     </Dialog>
   </div>

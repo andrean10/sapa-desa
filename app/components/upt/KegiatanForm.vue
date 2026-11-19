@@ -50,7 +50,7 @@ const isian = reactive({
   pegawai_id: "",
   petugas_pengganti_nama: "",
   jenis_kegiatan_id: "",
-  jumlah_peserta: 0,
+  jumlah_peserta: null as number | null,
   uraian_hasil: "",
   foto_path: "",
   pdf_path: "",
@@ -70,6 +70,9 @@ const pratinjauFoto = ref("");
 const progresFoto = ref<number | null>(null);
 const progresPdf = ref<number | null>(null);
 const galatFoto = ref("");
+const galatPeserta = ref("");
+const PESAN_PESERTA = "Jumlah peserta minimal 1 orang.";
+const pesertaValid = () => Number.isInteger(isian.jumlah_peserta) && (isian.jumlah_peserta ?? 0) >= 1;
 const galatPdf = ref("");
 const infoKompres = ref("");
 const pratinjauPdf = ref("");
@@ -219,6 +222,14 @@ const ukuranFile = (byte: number) =>
     : `${Math.ceil(byte / 1024)} KB`;
 
 async function simpan() {
+  if (!pesertaValid()) {
+    galatPeserta.value = PESAN_PESERTA;
+    const kolom = document.getElementById("kegiatan-peserta");
+    kolom?.scrollIntoView({ block: "center", behavior: "smooth" });
+    kolom?.focus({ preventScroll: true });
+    return;
+  }
+  galatPeserta.value = "";
   sibuk.value = true;
   pesan.value = "";
   const unggahanBaru: { foto_path?: string; pdf_path?: string } = {};
@@ -245,7 +256,7 @@ async function simpan() {
       tanggal_kegiatan: isian.tanggal_kegiatan,
       pegawai_id: isian.pegawai_id,
       jenis_kegiatan_id: isian.jenis_kegiatan_id,
-      jumlah_peserta: isian.jumlah_peserta,
+      jumlah_peserta: isian.jumlah_peserta as number,
       uraian_hasil: isian.uraian_hasil,
       petugas_pengganti_nama: isian.petugas_pengganti_nama.trim(),
       ...(isian.foto_path && { foto_path: isian.foto_path }),
@@ -409,10 +420,16 @@ async function simpan() {
                   class="h-11"
                   type="number"
                   inputmode="numeric"
-                  min="0"
+                  min="1"
                   max="100000"
+                  step="1"
+                  placeholder="Contoh: 25"
                   required
+                  :aria-invalid="Boolean(galatPeserta)"
+                  @input="galatPeserta = ''"
+                  @invalid.prevent="galatPeserta = PESAN_PESERTA"
                 />
+                <p v-if="galatPeserta" class="text-sm font-medium text-destructive" role="alert">{{ galatPeserta }}</p>
               </Field>
             </div>
             <Alert v-if="tanpaPimpasa" variant="destructive">
@@ -483,24 +500,24 @@ async function simpan() {
               >(opsional)</span
             ></FieldLegend
           >
-          <div class="grid gap-4 md:grid-cols-2">
-            <Field>
+          <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+            <Field class="min-w-0">
               <FieldLabel for="kegiatan-foto"
                 ><ImagePlus class="size-4 text-primary" />Foto
                 kegiatan</FieldLabel
               >
               <div
-                class="grid gap-3 rounded-lg border border-dashed bg-muted/30 p-4"
+                class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 overflow-hidden rounded-lg border border-dashed bg-muted/30 p-4"
               >
                 <input
                   id="kegiatan-foto"
                   ref="inputFoto"
-                  class="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
+                  class="block w-full min-w-0 max-w-full truncate text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
                   @change="pilihFoto"
                 />
-                <FieldDescription
+                <FieldDescription class="min-w-0"
                   >JPEG, PNG, atau WebP. Ukuran foto disesuaikan otomatis
                   saat diunggah.</FieldDescription
                 >
@@ -524,7 +541,7 @@ async function simpan() {
                 />
                 <div
                   v-if="pratinjauFoto && foto"
-                  class="flex items-center gap-3"
+                  class="flex min-w-0 items-center gap-3"
                 >
                   <img
                     :src="pratinjauFoto"
@@ -556,17 +573,17 @@ async function simpan() {
                 >
               </div>
             </Field>
-            <Field>
+            <Field class="min-w-0">
               <FieldLabel for="kegiatan-pdf"
                 ><FileText class="size-4 text-primary" />Laporan PDF</FieldLabel
               >
               <div
-                class="grid gap-3 rounded-lg border border-dashed bg-muted/30 p-4"
+                class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 overflow-hidden rounded-lg border border-dashed bg-muted/30 p-4"
               >
                 <input
                   id="kegiatan-pdf"
                   ref="inputPdf"
-                  class="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
+                  class="block w-full min-w-0 max-w-full truncate text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-primary-foreground"
                   type="file"
                   accept="application/pdf"
                   @change="pilihPdf"
@@ -583,7 +600,7 @@ async function simpan() {
                   v-if="progresPdf !== null"
                   :model-value="progresPdf"
                 />
-                <div v-if="pdf" class="flex items-center gap-3">
+                <div v-if="pdf" class="flex min-w-0 items-center gap-3">
                   <FileText class="size-8 shrink-0 text-muted-foreground" />
                   <div class="min-w-0 flex-1 text-sm">
                     <p class="truncate font-medium">{{ pdf.name }}</p>
@@ -603,13 +620,13 @@ async function simpan() {
                 <iframe
                   v-if="pdf && pratinjauPdf"
                   :src="pratinjauPdf"
-                  class="h-72 w-full rounded-md border bg-background"
+                  class="h-72 w-full max-w-full rounded-md border bg-background"
                   title="Pratinjau laporan PDF"
                 />
                 <template v-else-if="lampiranTersimpan.pdf_url">
                   <iframe
                     :src="lampiranTersimpan.pdf_url"
-                    class="h-72 w-full rounded-md border bg-background"
+                    class="h-72 w-full max-w-full rounded-md border bg-background"
                     title="Pratinjau laporan PDF tersimpan"
                   />
                   <a
