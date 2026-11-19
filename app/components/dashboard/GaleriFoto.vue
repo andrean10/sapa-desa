@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '~/components/ui/carousel'
 import type { CarouselApi } from '~/components/ui/carousel'
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '~/components/ui/dialog'
+import { X } from '@lucide/vue'
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogTitle } from '~/components/ui/dialog'
 
 // Galeri foto seperti di HP: kisi gambar kecil, klik membuka penampil layar penuh yang bisa digeser
 // (swipe, tombol panah, atau tombol keyboard) tanpa berpindah halaman.
@@ -37,13 +38,16 @@ watch(terbuka, (nilai) => { if (!nilai) api.value = undefined })
     </ul>
 
     <Dialog v-model:open="terbuka">
-      <DialogContent class="max-w-[calc(100%-1rem)] gap-0 border-0 bg-black/95 p-0 text-white sm:max-w-4xl" :show-close-button="true">
+      <DialogContent class="max-w-[calc(100%-1rem)] gap-0 border-0 bg-black/95 p-0 text-white sm:max-w-4xl" :show-close-button="false">
         <DialogTitle class="sr-only">{{ nama }}</DialogTitle>
         <DialogDescription class="sr-only">Geser atau gunakan tombol panah untuk melihat foto lainnya.</DialogDescription>
+        <DialogClose class="absolute top-3 right-3 z-10 grid size-11 place-items-center rounded-full bg-white text-black shadow-lg outline-none transition hover:bg-white/90 focus-visible:ring-3 focus-visible:ring-white/60" aria-label="Tutup galeri">
+          <X class="size-6" aria-hidden="true" />
+        </DialogClose>
         <Carousel class="w-full" :opts="{ startIndex: awal, loop: false }" @init-api="siapkan">
           <CarouselContent class="ml-0">
             <CarouselItem v-for="(url, indeks) in fotos" :key="url" class="pl-0">
-              <div class="flex h-[75svh] items-center justify-center">
+              <div class="flex h-[75svh] items-center justify-center pt-12">
                 <img :src="url" :alt="`${nama} ${indeks + 1}`" class="max-h-full max-w-full object-contain">
               </div>
             </CarouselItem>
