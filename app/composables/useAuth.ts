@@ -20,6 +20,8 @@ export function useAuth() {
     if (error) {
       const kode = 'status' in error ? Number(error.status) : 0
       if (kode === 429) throw new Error(TEKS_UMUM.terlaluBanyakPercobaan)
+      // Supabase hanya menjawab user_banned bila password benar, jadi pesan ini tidak membuka username yang tidak ada.
+      if ('code' in error && error.code === 'user_banned') throw new Error(TEKS_UMUM.akunNonaktif)
       throw new Error('Username atau password salah.')
     }
 
