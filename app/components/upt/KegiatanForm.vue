@@ -50,7 +50,7 @@ const isian = reactive({
   pegawai_id: "",
   petugas_pengganti_nama: "",
   jenis_kegiatan_id: "",
-  jumlah_peserta: null as number | null,
+  jumlah_peserta: undefined as number | undefined,
   uraian_hasil: "",
   foto_path: "",
   pdf_path: "",
