@@ -5,6 +5,7 @@ import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import type { ModePeriode } from '~~/shared/utils/waktu'
+import { namaUptUntukJabatan } from '~~/shared/utils/jabatan'
 import { formatTanggalWib, rentangPeriode, tanggalHariIniWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Dashboard Kanwil' })
@@ -45,17 +46,18 @@ const persenDesaTanpaKegiatan = computed(() => {
 })
 
 // Kolom dikelompokkan: kondisi SAAT INI dulu, lalu angka DALAM PERIODE terpilih (sesuai filter di atas).
-const KOLOM: { key: keyof BarisUptKanwil; label: string; angka: boolean }[] = [
-  { key: 'kantor', label: 'UPT', angka: false },
-  { key: 'belum_ditanggapi', label: 'Belum ditanggapi', angka: true },
-  { key: 'terlambat', label: 'Terlambat', angka: true },
-  { key: 'sedang_ditangani', label: 'Ditangani', angka: true },
-  { key: 'desa_binaan', label: 'Desa binaan', angka: true },
-  { key: 'laporan_masuk', label: 'Aduan masuk', angka: true },
-  { key: 'direspon', label: 'Direspon', angka: true },
-  { key: 'kegiatan', label: 'Kegiatan', angka: true },
-  { key: 'desa_tanpa_kegiatan', label: 'Tanpa kegiatan', angka: true }
+const KOLOM: { key: keyof BarisUptKanwil; label: string; penuh: string; angka: boolean }[] = [
+  { key: 'kantor', label: 'UPT', penuh: 'UPT', angka: false },
+  { key: 'belum_ditanggapi', label: 'Belum', penuh: 'Belum ditanggapi', angka: true },
+  { key: 'terlambat', label: 'Terlambat', penuh: 'Terlambat', angka: true },
+  { key: 'sedang_ditangani', label: 'Ditangani', penuh: 'Sedang ditangani', angka: true },
+  { key: 'desa_binaan', label: 'Desa', penuh: 'Desa binaan', angka: true },
+  { key: 'laporan_masuk', label: 'Masuk', penuh: 'Aduan masuk', angka: true },
+  { key: 'direspon', label: 'Direspon', penuh: 'Aduan direspon', angka: true },
+  { key: 'kegiatan', label: 'Kegiatan', penuh: 'Kegiatan dilaporkan', angka: true },
+  { key: 'desa_tanpa_kegiatan', label: 'Tanpa kegiatan', penuh: 'Desa tanpa kegiatan', angka: true }
 ]
+const namaSingkatUpt = (nama: string) => `Kanim ${namaUptUntukJabatan(nama)}`
 const urutKolom = ref<keyof BarisUptKanwil>('terlambat')
 const arahTurun = ref(true)
 function urutkan(kolom: keyof BarisUptKanwil) {
@@ -114,7 +116,7 @@ const terlambatDari = (item: { hari_kerja_berjalan: number | null; batas_hari: n
 
       <DashboardKartuBagian judul="Kinerja per UPT" deskripsi="Klik baris untuk membuka dashboard UPT. Klik judul kolom untuk mengurutkan." rapat>
         <DashboardBingkaiTabel polos>
-          <Table class="min-w-[880px]">
+          <Table class="min-w-[560px] [&_th]:px-2 [&_th]:text-xs [&_td]:px-2 [&_td]:py-2 [&_td]:text-[0.8125rem]">
             <TableHeader>
               <TableRow class="border-b-0 hover:bg-transparent">
                 <TableHead />
@@ -123,20 +125,20 @@ const terlambatDari = (item: { hari_kerja_berjalan: number | null; batas_hari: n
               </TableRow>
               <TableRow>
                 <TableHead v-for="kolom in KOLOM" :key="kolom.key" :class="[kolom.angka ? 'text-right' : '', kolom.key === 'belum_ditanggapi' || kolom.key === 'laporan_masuk' ? 'border-l' : '']" :aria-sort="urutKolom === kolom.key ? (arahTurun ? 'descending' : 'ascending') : 'none'">
-                  <button type="button" class="inline-flex items-center gap-1 rounded-sm hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none" :class="urutKolom === kolom.key ? 'text-foreground' : ''" @click="urutkan(kolom.key)">
-                    {{ kolom.label }}<ArrowDown v-if="urutKolom === kolom.key && arahTurun" class="size-3.5" /><ArrowUp v-else-if="urutKolom === kolom.key" class="size-3.5" /><ArrowUpDown v-else class="size-3.5 opacity-40" />
+                  <button type="button" :title="kolom.penuh" class="inline-flex items-center gap-0.5 rounded-sm hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none" :class="urutKolom === kolom.key ? 'text-foreground' : ''" @click="urutkan(kolom.key)">
+                    {{ kolom.label }}<ArrowDown v-if="urutKolom === kolom.key && arahTurun" class="size-3" /><ArrowUp v-else-if="urutKolom === kolom.key" class="size-3" /><ArrowUpDown v-else class="size-3 opacity-30" />
                   </button>
                 </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow v-for="item in barisUpt" :key="item.kantor_id" class="group cursor-pointer" @click="router.push(`/kanwil/upt/${item.kantor_id}`)">
-                <TableCell><NuxtLink class="inline-flex items-center gap-1 font-medium text-foreground no-underline group-hover:text-primary" :to="`/kanwil/upt/${item.kantor_id}`" @click.stop>{{ item.kantor }}<ChevronRight class="size-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" /></NuxtLink></TableCell>
+                <TableCell><NuxtLink class="inline-flex items-center gap-1 font-medium text-foreground no-underline group-hover:text-primary" :to="`/kanwil/upt/${item.kantor_id}`" @click.stop><span :title="item.kantor">{{ namaSingkatUpt(item.kantor) }}</span><ChevronRight class="size-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" /></NuxtLink></TableCell>
                 <TableCell class="border-l text-right tabular-nums">{{ item.belum_ditanggapi }}</TableCell>
                 <TableCell class="text-right"><span v-if="item.terlambat" class="inline-flex min-w-7 justify-center rounded-full bg-destructive px-2 py-0.5 text-xs font-semibold text-white tabular-nums">{{ item.terlambat }}</span><span v-else class="text-muted-foreground tabular-nums">0</span></TableCell>
                 <TableCell class="text-right tabular-nums">{{ item.sedang_ditangani }}</TableCell>
                 <TableCell class="text-right tabular-nums">{{ item.desa_binaan }}</TableCell>
-                <TableCell class="border-l text-right"><div class="flex items-center justify-end gap-2"><div class="hidden h-1.5 w-16 overflow-hidden rounded-full bg-muted xl:block" aria-hidden="true"><div class="h-full rounded-full bg-chart-2" :style="{ width: `${item.laporan_masuk / maksLaporan * 100}%` }" /></div><span class="w-8 font-semibold tabular-nums">{{ item.laporan_masuk }}</span></div></TableCell>
+                <TableCell class="border-l text-right"><div class="flex items-center justify-end gap-2"><div class="hidden h-1.5 w-10 overflow-hidden rounded-full bg-muted 2xl:block" aria-hidden="true"><div class="h-full rounded-full bg-chart-2" :style="{ width: `${item.laporan_masuk / maksLaporan * 100}%` }" /></div><span class="font-semibold tabular-nums">{{ item.laporan_masuk }}</span></div></TableCell>
                 <TableCell class="text-right tabular-nums">{{ item.direspon }}</TableCell>
                 <TableCell class="text-right tabular-nums">{{ item.kegiatan }}</TableCell>
                 <TableCell class="text-right"><span class="tabular-nums" :class="item.desa_tanpa_kegiatan ? 'font-semibold text-peringatan' : 'text-muted-foreground'">{{ item.desa_tanpa_kegiatan }}</span></TableCell>
