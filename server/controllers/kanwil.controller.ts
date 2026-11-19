@@ -321,8 +321,8 @@ export async function faqKanwil(event: H3Event) {
 
 export async function simpanFaqKanwil(event: H3Event) {
   await profilKanwil(event)
-  const parsed = z.object({ id: z.string().uuid().optional(), pertanyaan: z.string().trim().min(1).max(250), jawaban: z.string().trim().min(1).max(5000), urutan: z.number().int().min(0) }).strict().safeParse(await readBody(event))
-  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Pertanyaan, jawaban, atau urutan FAQ tidak valid.' })
+  const parsed = z.object({ id: z.string().uuid().optional(), pertanyaan: z.string().trim().min(1).max(250), jawaban: z.string().trim().min(1).max(5000) }).strict().safeParse(await readBody(event))
+  if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Pertanyaan atau jawaban FAQ tidak valid.' })
   const hasil = await tulisFaqKanwil(buatClientSesiUser(event), parsed.data)
   pastikanBerhasil(hasil, 'Penyimpanan FAQ')
   return { berhasil: true }

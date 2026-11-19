@@ -244,9 +244,12 @@ export async function daftarFaqKanwil(client: SupabaseClient<Database>) {
   return await client.from('faq').select('id, pertanyaan, jawaban, urutan').order('urutan').order('created_at')
 }
 
-export async function tulisFaqKanwil(client: SupabaseClient<Database>, input: { id?: string; pertanyaan: string; jawaban: string; urutan: number }) {
-  if (input.id) return await client.from('faq').update({ pertanyaan: input.pertanyaan, jawaban: input.jawaban, urutan: input.urutan }).eq('id', input.id).select('id').maybeSingle()
-  return await client.from('faq').insert({ pertanyaan: input.pertanyaan, jawaban: input.jawaban, urutan: input.urutan }).select('id').single()
+export async function tulisFaqKanwil(client: SupabaseClient<Database>, input: { id?: string; pertanyaan: string; jawaban: string }) {
+  // Mengubah isi tidak menyentuh urutan. FAQ baru ditaruh di urutan terakhir (nomor terbesar + 1).
+  if (input.id) return await client.from('faq').update({ pertanyaan: input.pertanyaan, jawaban: input.jawaban }).eq('id', input.id).select('id').maybeSingle()
+  const terakhir = await client.from('faq').select('urutan').order('urutan', { ascending: false }).limit(1).maybeSingle()
+  if (terakhir.error) return { data: null, error: terakhir.error, count: null, status: terakhir.status, statusText: terakhir.statusText }
+  return await client.from('faq').insert({ pertanyaan: input.pertanyaan, jawaban: input.jawaban, urutan: (terakhir.data?.urutan ?? 0) + 1 }).select('id').single()
 }
 
 export async function hapusFaqKanwil(client: SupabaseClient<Database>, id: string) {

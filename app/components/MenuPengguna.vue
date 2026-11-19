@@ -9,6 +9,7 @@ import { PERAN_PENGGUNA, TEKS_UMUM } from '~~/shared/config/teks'
 const properti = withDefaults(defineProps<{ tampilan?: 'header' | 'sidebar' }>(), { tampilan: 'header' })
 defineEmits<{ keluar: [] }>()
 const { profil } = useAuth()
+const { buka: bukaGantiPassword } = useDialogGantiPassword()
 const inisial = computed(() => (profil.value?.nama_tampil ?? APP_NAME).split(/\s+/).slice(0, 2).map(kata => kata[0]).join('').toUpperCase())
 const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === profil.value?.peran)?.label ?? '')
 </script>
@@ -37,7 +38,7 @@ const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === pro
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem as-child><NuxtLink to="/akun/password" class="no-underline"><KeyRound />{{ TEKS_UMUM.gantiPassword }}</NuxtLink></DropdownMenuItem>
+        <DropdownMenuItem @select="bukaGantiPassword"><KeyRound />{{ TEKS_UMUM.gantiPassword }}</DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem class="text-destructive focus:bg-bahaya-muda focus:text-destructive" @select="$emit('keluar')"><LogOut class="text-destructive" />{{ TEKS_UMUM.keluar }}</DropdownMenuItem>

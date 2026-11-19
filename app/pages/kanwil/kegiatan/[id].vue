@@ -35,8 +35,8 @@ const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`ka
             <div class="flex gap-3"><CalendarDays class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Tanggal kegiatan</dt><dd class="font-medium">{{ formatTanggalWib(data.tanggal_kegiatan) }}</dd></div></div>
             <div class="flex gap-3"><Building2 class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">UPT</dt><dd class="font-medium">{{ data.kantor }}</dd></div></div>
             <div class="flex gap-3"><MapPinned class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Desa binaan</dt><dd class="font-medium">{{ data.desa }}</dd></div></div>
-            <div v-if="data.petugas_pengganti_nama" class="flex gap-3"><UserRoundCog class="mt-0.5 size-4 text-peringatan" aria-hidden="true" /><div><dt class="text-muted-foreground">Petugas Pengganti</dt><dd class="font-medium">{{ data.petugas_pengganti_nama }}</dd></div></div>
             <div class="flex gap-3"><UserRound class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Petugas PIMPASA</dt><dd class="font-medium">{{ data.pegawai }}</dd></div></div>
+            <div v-if="data.petugas_pengganti_nama" class="flex gap-3"><UserRoundCog class="mt-0.5 size-4 text-peringatan" aria-hidden="true" /><div><dt class="text-muted-foreground">Petugas Pengganti</dt><dd class="font-medium">{{ data.petugas_pengganti_nama }}</dd></div></div>
             <div class="flex gap-3"><Users class="mt-0.5 size-4 text-muted-foreground" aria-hidden="true" /><div><dt class="text-muted-foreground">Jumlah peserta</dt><dd class="font-medium tabular-nums">{{ data.jumlah_peserta }} orang</dd></div></div>
           </dl>
         </section>

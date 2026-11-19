@@ -143,7 +143,6 @@ Grafik memakai komponen chart bawaan shadcn-vue.
 | Rute | Halaman | Akses |
 |---|---|---|
 | `/masuk` | Login petugas | belum login |
-| `/akun/password` | Ganti password | semua peran login |
 | `/403`, `/404` | Halaman galat | semua |
 
 ### 3.3 UPT (tata letak `dashboard`)
@@ -489,7 +488,7 @@ Tiga kartu (KONTRAK_API 4.7):
 2. **Wilayah kerja**: daftar kabupaten/kota sebagai lencana.
 3. **Petugas PIMPASA**: tabel Pegawai · Desa binaan · Kecamatan · Kabupaten/Kota · Bertugas sejak. Kosong: "Belum ada petugas PIMPASA yang ditetapkan."
 
-Tombol **Ganti password** menuju `/akun/password`.
+Tombol **Ganti password** membuka dialog ganti password (10.1).
 
 ---
 
@@ -543,7 +542,7 @@ Sama dengan 7.2 dan 7.3 dengan perbedaan:
 
 ### 8.5 Laporan kegiatan `/kanwil/kegiatan` dan detail
 
-Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, **galeri foto** (hingga 3; kisi gambar kecil, klik membuka penampil layar penuh yang bisa digeser/swipe, tombol panah, atau keyboard, dengan penanda "2 / 3", tanpa pindah halaman; komponen shadcn Carousel di dalam Dialog), dan PDF. **Petugas Pengganti** tampil **di atas** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
+Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Detail menampilkan semua isian, **galeri foto** (hingga 3; kisi gambar kecil, klik membuka penampil layar penuh yang bisa digeser/swipe, tombol panah, atau keyboard, dengan penanda "2 / 3", tanpa pindah halaman; komponen shadcn Carousel di dalam Dialog), dan PDF. **Petugas Pengganti** tampil **di bawah** Petugas PIMPASA dan **disembunyikan bila kosong** (diunduh lewat signed URL dari server), tanpa tombol ubah dan hapus.
 
 ### 8.6 Desa binaan `/kanwil/desa-binaan`
 
@@ -568,8 +567,8 @@ Sama dengan 7.4, baca saja. Tambahan filter UPT dan "Hanya yang digantikan". Det
 
 ### 8.9 FAQ `/kanwil/faq`
 
-- Daftar FAQ berurutan, dapat diubah urutannya (tombol naik/turun, atau kolom angka urutan).
-- **Tambah/Ubah** (dialog): Pertanyaan (maks 250, penghitung), Jawaban (maks 5000, penghitung; teks biasa, baris baru dipertahankan).
+- Daftar FAQ berurutan; urutan diatur **hanya dengan tombol panah naik/turun** di daftar. Tidak ada kolom nomor urut di form.
+- **Tambah/Ubah** (dialog): Pertanyaan (maks 250, penghitung), Jawaban (maks 5000, penghitung; teks biasa, baris baru dipertahankan). FAQ baru otomatis menempati urutan terakhir (nomor terbesar + 1); mengubah isi tidak mengubah urutan.
 - **Hapus** dengan konfirmasi.
 - **Peringatan permanen** di bagian atas halaman: "Semua FAQ langsung tampil ke publik. Isi hanya setelah siap." Tombol "Lihat halaman publik" membuka `/informasi`.
 - Rencana topik awal: apa itu Timpora, Pimpasa, TPPO/TPPM, paspor, izin tinggal.
@@ -620,9 +619,9 @@ Tabel log (`log_aktivitas`): Waktu · Akun · Peran · Petugas atas nama · Aksi
 
 ## 10. Halaman umum
 
-### 10.1 Ganti password `/akun/password`
+### 10.1 Ganti password (dialog)
 
-Bagi semua peran yang login. Kolom: Password saat ini, Password baru, Ulangi password baru. Aturan: minimal 8 karakter, berbeda dari password saat ini, tidak sama dengan username. Server memverifikasi password saat ini sebelum mengganti (KONTRAK_API 3a). Berhasil: toast "Password diganti." dan sesi tetap berlaku. Himbauan awal "ganti password awal" disampaikan langsung oleh Kanwil kepada UPT; **pemaksaan ganti password di login pertama [DITUNDA]** karena membutuhkan kolom penanda di database.
+Bukan halaman tersendiri: **dialog** yang dibuka dari menu pengguna (semua halaman dashboard) dan dari tombol di Profil Kantor, sehingga pengguna tetap di halaman yang sedang dibuka. Bagi semua peran yang login. Kolom: Password saat ini, Password baru, Ulangi password baru. Aturan: minimal 8 karakter, berbeda dari password saat ini, tidak sama dengan username. Server memverifikasi password saat ini sebelum mengganti (KONTRAK_API 3a). Berhasil: toast "Password diganti." dan sesi tetap berlaku. Himbauan awal "ganti password awal" disampaikan langsung oleh Kanwil kepada UPT; **pemaksaan ganti password di login pertama [DITUNDA]** karena membutuhkan kolom penanda di database.
 
 ### 10.2 Halaman galat
 

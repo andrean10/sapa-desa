@@ -57,15 +57,17 @@ async function reset(akun: Akun) {
   try { await api(`/api/admin/akun/${akun.id}/password`, { method: 'PATCH', body: { password: passwordBaru.value } }); toast.success('Password berhasil direset.') }
   catch { toast.error('Password gagal direset.') } finally { passwordBaru.value = ''; busy.value = false }
 }
+// Data tindakan dipisah dari status buka-tutup dialog: dialog menutup lebih dulu saat tombol ditekan, jadi datanya tidak boleh ikut hilang.
 const tindakanKonfirmasi = ref<{ jenis: 'aktif' | 'password'; akun: Akun } | null>(null)
-function minta(jenis: 'aktif' | 'password', akun: Akun) { passwordBaru.value = ''; tindakanKonfirmasi.value = { jenis, akun } }
+const dialogKonfirmasi = ref(false)
+function minta(jenis: 'aktif' | 'password', akun: Akun) { passwordBaru.value = ''; tindakanKonfirmasi.value = { jenis, akun }; dialogKonfirmasi.value = true }
 async function konfirmasiTindakan() {
   const tindakan = tindakanKonfirmasi.value
   if (!tindakan) return
   if (tindakan.jenis === 'password' && passwordBaru.value.length < 8) { toast.error('Password baru minimal 8 karakter.'); return }
+  dialogKonfirmasi.value = false
   if (tindakan.jenis === 'aktif') await setAktif(tindakan.akun)
   else await reset(tindakan.akun)
-  tindakanKonfirmasi.value = null
 }
 async function masukSebagai(akun: Akun) {
   const tab = window.open('about:blank', '_blank')
@@ -134,7 +136,7 @@ async function masukSebagai(akun: Akun) {
       </DialogContent>
     </Dialog>
 
-    <AlertDialog :open="!!tindakanKonfirmasi" @update:open="(b: boolean) => !b && (tindakanKonfirmasi = null)">
+    <AlertDialog v-model:open="dialogKonfirmasi">
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{{ tindakanKonfirmasi?.jenis === 'password' ? `Reset password ${tindakanKonfirmasi?.akun.username}?` : tindakanKonfirmasi?.akun.aktif ? 'Nonaktifkan akun?' : 'Aktifkan akun?' }}</AlertDialogTitle>

@@ -1,10 +1,9 @@
 import { toast } from 'vue-sonner'
 import { TEKS_UMUM } from '~~/shared/config/teks'
 
-const RUTE_TERLINDUNGI = ['/upt', '/kanwil', '/admin', '/akun']
+const RUTE_TERLINDUNGI = ['/upt', '/kanwil', '/admin']
 
 function peranDiizinkan(jalur: string, peran: 'admin' | 'kanwil' | 'upt'): boolean {
-  if (jalur.startsWith('/akun')) return true
   if (peran === 'admin') return true
   if (jalur.startsWith('/upt')) return peran === 'upt'
   if (jalur.startsWith('/kanwil')) return peran === 'kanwil'

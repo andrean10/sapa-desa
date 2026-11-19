@@ -6,12 +6,13 @@ import { formatTanggalWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Profil Kantor' })
 const { data, pending, error, refresh } = await useProfilUpt()
+const { buka: bukaGantiPassword } = useDialogGantiPassword()
 </script>
 
 <template>
   <div class="grid gap-5">
     <DashboardKepalaHalaman judul="Profil kantor" deskripsi="Informasi kantor, wilayah kerja, dan petugas PIMPASA.">
-      <template #aksi><Button variant="outline" as-child><NuxtLink to="/akun/password" class="no-underline"><KeyRound class="size-4" />Ganti password</NuxtLink></Button></template>
+      <template #aksi><Button variant="outline" @click="bukaGantiPassword"><KeyRound class="size-4" />Ganti password</Button></template>
     </DashboardKepalaHalaman>
     <div v-if="pending"><DashboardStateMemuat :baris="3" tinggi="h-32" /></div>
     <DashboardStateGalat v-else-if="error" pesan="Profil kantor belum dapat dimuat." @coba="refresh()" />

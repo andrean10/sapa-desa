@@ -25,7 +25,7 @@ function tujuanSetelahMasuk(peran: PeranAplikasi) {
   const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
   const path = redirect.split(/[?#]/)[0] ?? ''
   const aman = path.startsWith('/') && !path.startsWith('//') && !path.includes('\\')
-  const sesuaiPeran = peran === 'upt' ? path === '/upt' || path.startsWith('/upt/') || path === '/akun/password' : peran === 'admin' ? path === '/kanwil' || path.startsWith('/kanwil/') || path.startsWith('/admin/') || path === '/akun/password' : path === '/kanwil' || path.startsWith('/kanwil/') || path === '/akun/password'
+  const sesuaiPeran = peran === 'upt' ? path === '/upt' || path.startsWith('/upt/') : peran === 'admin' ? path === '/kanwil' || path.startsWith('/kanwil/') || path.startsWith('/admin/') : path === '/kanwil' || path.startsWith('/kanwil/')
   return aman && sesuaiPeran ? redirect : peran === 'upt' ? '/upt' : '/kanwil'
 }
 onMounted(async () => {

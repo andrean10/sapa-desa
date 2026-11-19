@@ -13,9 +13,10 @@ const bukaDialog = ref(false)
 const idHapus = ref('')
 const sedangSimpan = ref(false)
 const pesan = ref('')
-const isian = reactive({ id: '', pertanyaan: '', jawaban: '', urutan: 0 })
-function tambah() { Object.assign(isian, { id: '', pertanyaan: '', jawaban: '', urutan: Math.max(0, ...(data.value ?? []).map(item => item.urutan)) + 1 }); pesan.value = ''; bukaDialog.value = true }
-function ubah(item: NonNullable<typeof data.value>[number]) { Object.assign(isian, item); pesan.value = ''; bukaDialog.value = true }
+// Urutan tidak diisi manual: FAQ baru otomatis di urutan paling bawah, dan posisinya diatur dengan panah naik/turun.
+const isian = reactive({ id: '', pertanyaan: '', jawaban: '' })
+function tambah() { Object.assign(isian, { id: '', pertanyaan: '', jawaban: '' }); pesan.value = ''; bukaDialog.value = true }
+function ubah(item: NonNullable<typeof data.value>[number]) { Object.assign(isian, { id: item.id, pertanyaan: item.pertanyaan, jawaban: item.jawaban }); pesan.value = ''; bukaDialog.value = true }
 async function simpan() {
   pesan.value = ''; sedangSimpan.value = true
   try { await kelola.simpanFaq({ ...isian, id: isian.id || undefined }); await refresh(); bukaDialog.value = false; toast.success(isian.id ? 'FAQ diperbarui.' : 'FAQ ditambahkan.') }
@@ -33,9 +34,13 @@ async function geser(index: number, arah: -1 | 1) {
   const tujuan = index + arah
   if (tujuan < 0 || tujuan >= items.length) return
   try {
-    // Berurutan (bukan Promise.all) agar bila langkah kedua gagal, kegagalan terdeteksi jelas.
-    await kelola.ubahUrutanFaq(items[index]!.id, items[tujuan]!.urutan)
-    await kelola.ubahUrutanFaq(items[tujuan]!.id, items[index]!.urutan)
+    // Susun ulang lalu beri nomor 1..n hanya pada baris yang nomornya berubah (aman walau ada nomor ganda/lompat dari data lama).
+    // Berurutan (bukan Promise.all) agar kegagalan terdeteksi jelas.
+    const susunan = [...items]
+    susunan.splice(tujuan, 0, susunan.splice(index, 1)[0]!)
+    for (const [i, item] of susunan.entries()) {
+      if (item.urutan !== i + 1) await kelola.ubahUrutanFaq(item.id, i + 1)
+    }
   } catch (galat) { toast.error((galat as { data?: { statusMessage?: string } })?.data?.statusMessage ?? 'Urutan FAQ belum dapat diubah.') }
   finally { await refresh() }
 }
@@ -81,7 +86,6 @@ async function geser(index: number, arah: -1 | 1) {
         <div class="grid gap-4">
           <label class="grid gap-1.5 text-sm font-medium"><span class="flex justify-between">Pertanyaan<span class="font-normal text-muted-foreground tabular-nums">{{ isian.pertanyaan.length }}/250</span></span><Input v-model="isian.pertanyaan" maxlength="250" required /></label>
           <label class="grid gap-1.5 text-sm font-medium"><span class="flex justify-between">Jawaban<span class="font-normal text-muted-foreground tabular-nums">{{ isian.jawaban.length }}/5000</span></span><Textarea v-model="isian.jawaban" maxlength="5000" rows="8" required /></label>
-          <label class="grid max-w-40 gap-1.5 text-sm font-medium">Urutan<Input v-model.number="isian.urutan" type="number" min="0" step="1" required /></label>
           <p v-if="pesan" class="rounded-md bg-bahaya-muda px-3 py-2 text-sm text-destructive" role="alert">{{ pesan }}</p>
         </div>
         <DialogFooter><Button variant="outline" @click="bukaDialog = false">Batal</Button><Button :disabled="sedangSimpan" @click="simpan">{{ sedangSimpan ? 'Menyimpan…' : 'Simpan FAQ' }}</Button></DialogFooter>

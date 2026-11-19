@@ -2,7 +2,7 @@ import type { Database } from '~~/shared/types/database.types'
 
 type InputPenugasan = { desa_id: string; pegawai_id: string; tanggal_mulai?: string }
 type PerubahanPenugasan = { tanggal_mulai?: string; tanggal_selesai?: string | null; alasan_berakhir?: Database['public']['Enums']['alasan_berakhir_penugasan'] | null }
-type InputFaq = { id?: string; pertanyaan: string; jawaban: string; urutan: number }
+type InputFaq = { id?: string; pertanyaan: string; jawaban: string }
 
 export function useKelolaKanwil() {
   const api = useApi()
