@@ -26,6 +26,7 @@
   --color-surface: var(--card);
   --color-emas: var(--emas);
   --color-emas-foreground: var(--emas-foreground);
+  --color-emas-teks: var(--emas-teks);
   --color-sukses: var(--sukses);
   --color-sukses-muda: var(--sukses-muda);
   --color-peringatan: var(--peringatan);

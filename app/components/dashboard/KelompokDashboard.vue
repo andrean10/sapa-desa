@@ -8,7 +8,7 @@ defineProps<{ judul: string; cakupan: string; nada?: 'saatIni' | 'periode' }>()
   <section class="grid gap-3" :aria-label="judul">
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
       <h2 class="text-sm font-semibold text-foreground">{{ judul }}</h2>
-      <span class="rounded-full px-2.5 py-0.5 text-xs font-medium" :class="nada === 'saatIni' ? 'bg-primary/8 text-primary' : 'bg-emas/15 text-emas-foreground'">{{ cakupan }}</span>
+      <span class="rounded-full px-2.5 py-0.5 text-xs font-medium" :class="nada === 'saatIni' ? 'bg-primary/8 text-primary' : 'bg-emas/15 text-emas-teks'">{{ cakupan }}</span>
     </div>
     <slot />
   </section>

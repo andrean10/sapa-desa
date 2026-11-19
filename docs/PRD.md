@@ -38,6 +38,8 @@ Prinsip produk:
 
 ### 2.1 Token warna (satu sumber)
 
+**Mode gelap** berlaku untuk area dashboard (admin, Kanwil, UPT); halaman publik dan login tetap terang. Dipilih lewat tombol bulan/matahari di bilah atas (layar lebar) atau item **Mode gelap/Mode terang** di menu pengguna; pilihan tersimpan di cookie `tema` agar tidak berkedip saat dimuat. Palet gelap (`WARNA_GELAP`, `VARIABEL_TEMA_GELAP`) juga hanya ada di `shared/config/tema.ts`.
+
 Semua nilai warna ditulis **satu kali** di `shared/config/tema.ts`. File CSS (`app/assets/css/tailwind.css`) dan komponen **tidak boleh** menulis ulang kode hex. Nilai dari config disuntikkan sebagai variabel CSS saat render (SSR) agar tidak ada kedipan warna, lalu `tailwind.css` hanya memetakan nama variabel ke utilitas Tailwind (pola standar shadcn). `tailwind.css` menerapkan latar dan teks halaman lewat `--background` dan `--foreground`.
 
 Palet utama dari pemilik project:

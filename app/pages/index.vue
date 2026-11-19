@@ -55,7 +55,7 @@ useHead({
     <section v-if="!faqKosong" class="bg-background px-5 py-16 sm:px-8 sm:py-24" aria-labelledby="judul-faq-pintas">
       <div class="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-16">
         <div class="lg:sticky lg:top-28 lg:self-start">
-          <p class="inline-flex rounded-full bg-emas/20 px-3.5 py-1.5 text-sm font-bold text-emas-foreground">{{ TEKS_LANDING.faqLabel }}</p>
+          <p class="inline-flex rounded-full bg-emas/20 px-3.5 py-1.5 text-sm font-bold text-emas-teks">{{ TEKS_LANDING.faqLabel }}</p>
           <h2 id="judul-faq-pintas" class="mt-5 text-3xl leading-tight font-extrabold text-primary sm:text-4xl">{{ TEKS_LANDING.faqJudul }}</h2>
           <p class="mt-4 max-w-md text-base leading-7 text-muted-foreground sm:text-lg">{{ TEKS_LANDING.faqPengantar }}</p>
           <NuxtLink class="group mt-7 inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-primary px-6 font-extrabold text-primary no-underline transition hover:bg-primary hover:text-primary-foreground" to="/informasi">{{ TEKS_LANDING.faqLihatSemua }}<ArrowRight class="size-4 transition-transform group-hover:translate-x-1" aria-hidden="true" /></NuxtLink>

@@ -71,7 +71,7 @@ async function gantiAktif(item: PegawaiUpt) {
           <TableRow v-for="item in terlihat" :key="item.id" :class="item.aktif ? '' : 'text-muted-foreground'">
             <TableCell class="font-medium">{{ item.nama }}</TableCell>
             <TableCell class="font-mono text-xs">{{ item.nip || '—' }}</TableCell>
-            <TableCell><div v-if="item.desa_binaan.length" class="flex flex-wrap gap-1"><span v-for="desa in item.desa_binaan" :key="desa" class="rounded-md bg-emas/15 px-2 py-0.5 text-xs font-medium text-emas-foreground">{{ desa }}</span></div><span v-else class="text-muted-foreground">—</span></TableCell>
+            <TableCell><div v-if="item.desa_binaan.length" class="flex flex-wrap gap-1"><span v-for="desa in item.desa_binaan" :key="desa" class="rounded-md bg-emas/15 px-2 py-0.5 text-xs font-medium text-emas-teks">{{ desa }}</span></div><span v-else class="text-muted-foreground">—</span></TableCell>
             <TableCell><label class="inline-flex items-center gap-2 text-sm"><Switch :model-value="item.aktif" :disabled="sedangUbahStatus === item.id" @update:model-value="gantiAktif(item)" /><span :class="item.aktif ? 'font-medium text-sukses' : ''">{{ item.aktif ? 'Aktif' : 'Nonaktif' }}</span></label></TableCell>
             <TableCell class="text-right"><Button variant="ghost" size="sm" @click="bukaDialog(item)"><Pencil class="size-3.5" />Ubah</Button></TableCell>
           </TableRow>

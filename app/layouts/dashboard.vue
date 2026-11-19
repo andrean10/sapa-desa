@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Eye, ShieldAlert } from '@lucide/vue'
+import { Eye, Moon, ShieldAlert, Sun } from '@lucide/vue'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '~/components/ui/sidebar'
 import { Separator } from '~/components/ui/separator'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '~/components/ui/breadcrumb'
@@ -34,10 +34,11 @@ async function logout() {
   konfirmasiLogoutTerbuka.value = false
   await keluar()
 }
+const { gelap, ganti: gantiTema } = useTemaGelap()
 useHead({
   titleTemplate: title => title ? `${title} · ${APP_NAME}` : APP_NAME,
   meta: [{ name: 'robots', content: 'noindex, nofollow' }],
-  bodyAttrs: { style: buatGayaTemaDashboard() }
+  bodyAttrs: { class: computed(() => gelap.value ? 'dark' : ''), style: computed(() => `${buatGayaTemaDashboard(gelap.value)}${gelap.value ? '; color-scheme: dark' : ''}`) }
 })
 </script>
 
@@ -68,6 +69,7 @@ useHead({
             <NativeSelectOption v-for="kantor in opsiKantor" :key="kantor.id" :value="kantor.id">{{ kantor.nama_singkat }}</NativeSelectOption>
           </NativeSelect>
         </div>
+        <Button variant="ghost" size="icon" class="hidden size-8 shrink-0 sm:inline-flex" :aria-label="gelap ? 'Ganti ke mode terang' : 'Ganti ke mode gelap'" :title="gelap ? 'Mode terang' : 'Mode gelap'" @click="gantiTema"><Sun v-if="gelap" class="size-4" aria-hidden="true" /><Moon v-else class="size-4" aria-hidden="true" /></Button>
         <MenuPengguna @keluar="konfirmasiLogoutTerbuka = true" />
       </header>
       <AlertDialog v-model:open="konfirmasiLogoutTerbuka">

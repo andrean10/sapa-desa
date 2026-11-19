@@ -113,7 +113,7 @@ async function masukSebagai(akun: Akun) {
         <TableBody>
           <TableRow v-for="akun in terlihat" :key="akun.id">
             <TableCell><p class="font-medium">{{ akun.nama_tampil }}</p><p class="font-mono text-xs text-muted-foreground">{{ akun.username }}</p></TableCell>
-            <TableCell><span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="akun.peran === 'admin' ? 'bg-primary text-primary-foreground' : akun.peran === 'kanwil' ? 'bg-emas/20 text-emas-foreground' : 'bg-info-muda text-info'">{{ labelPeran(akun.peran) }}</span></TableCell>
+            <TableCell><span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="akun.peran === 'admin' ? 'bg-primary text-primary-foreground' : akun.peran === 'kanwil' ? 'bg-emas/20 text-emas-teks' : 'bg-info-muda text-info'">{{ labelPeran(akun.peran) }}</span></TableCell>
             <TableCell class="text-muted-foreground">{{ akun.kantor_id ? namaKantor[akun.kantor_id] ?? '—' : '—' }}</TableCell>
             <TableCell>
               <div class="flex items-center gap-2.5">

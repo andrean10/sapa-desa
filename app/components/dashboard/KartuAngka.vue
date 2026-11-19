@@ -23,7 +23,7 @@ const kelasIkon: Record<NadaKartu, string> = {
   sukses: 'bg-sukses-muda text-sukses',
   peringatan: 'bg-peringatan-muda text-peringatan',
   bahaya: 'bg-bahaya-muda text-destructive',
-  emas: 'bg-emas/15 text-emas-foreground'
+  emas: 'bg-emas/15 text-emas-teks'
 }
 </script>
 

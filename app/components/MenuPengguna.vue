@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronsUpDown, KeyRound, LogOut } from '@lucide/vue'
+import { ChevronsUpDown, KeyRound, LogOut, Moon, Sun } from '@lucide/vue'
 import { Avatar, AvatarFallback } from '~/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '~/components/ui/dropdown-menu'
 import { SidebarMenuButton } from '~/components/ui/sidebar'
@@ -10,6 +10,7 @@ const properti = withDefaults(defineProps<{ tampilan?: 'header' | 'sidebar' }>()
 defineEmits<{ keluar: [] }>()
 const { profil } = useAuth()
 const { buka: bukaGantiPassword } = useDialogGantiPassword()
+const { gelap, ganti: gantiTema } = useTemaGelap()
 const inisial = computed(() => (profil.value?.nama_tampil ?? APP_NAME).split(/\s+/).slice(0, 2).map(kata => kata[0]).join('').toUpperCase())
 const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === profil.value?.peran)?.label ?? '')
 </script>
@@ -39,6 +40,7 @@ const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === pro
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
         <DropdownMenuItem @select="bukaGantiPassword"><KeyRound />{{ TEKS_UMUM.gantiPassword }}</DropdownMenuItem>
+        <DropdownMenuItem @select="gantiTema"><Sun v-if="gelap" /><Moon v-else />{{ gelap ? 'Mode terang' : 'Mode gelap' }}</DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />
       <DropdownMenuItem class="text-destructive focus:bg-bahaya-muda focus:text-destructive" @select="$emit('keluar')"><LogOut class="text-destructive" />{{ TEKS_UMUM.keluar }}</DropdownMenuItem>

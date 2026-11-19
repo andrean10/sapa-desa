@@ -47,7 +47,7 @@ const { data: statistik } = useStatistikPublik()
             </ul>
           </div>
           <div v-if="statistik" class="absolute bottom-[10%] left-[-3%] flex animate-melayang items-center gap-3 rounded-2xl border border-border/60 bg-card/95 py-3 pr-5 pl-3 shadow-xl shadow-primary/10 backdrop-blur [animation-delay:2.4s] motion-reduce:animate-none sm:left-[-8%] lg:left-[-12%]">
-            <span class="grid size-10 place-items-center rounded-xl bg-emas/20 text-emas-foreground" aria-hidden="true"><Landmark class="size-5" /></span>
+            <span class="grid size-10 place-items-center rounded-xl bg-emas/20 text-emas-teks" aria-hidden="true"><Landmark class="size-5" /></span>
             <p class="leading-tight"><span class="block text-xl font-extrabold text-primary tabular-nums">{{ statistik.kantor }} <span class="text-sm font-semibold text-muted-foreground">Kantor Imigrasi</span></span><span class="block text-xs text-muted-foreground">melayani {{ statistik.kabupaten }} kabupaten/kota</span></p>
           </div>
         </div>

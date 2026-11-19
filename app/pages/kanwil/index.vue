@@ -119,7 +119,7 @@ const terlambatDari = (item: { hari_kerja_berjalan: number | null; batas_hari: n
               <TableRow class="border-b-0 hover:bg-transparent">
                 <TableHead />
                 <TableHead colspan="4" class="border-l text-center text-xs font-semibold tracking-wide text-primary uppercase">Kondisi saat ini</TableHead>
-                <TableHead colspan="4" class="border-l text-center text-xs font-semibold tracking-wide text-emas-foreground uppercase">Dalam periode terpilih</TableHead>
+                <TableHead colspan="4" class="border-l text-center text-xs font-semibold tracking-wide text-emas-teks uppercase">Dalam periode terpilih</TableHead>
               </TableRow>
               <TableRow>
                 <TableHead v-for="kolom in KOLOM" :key="kolom.key" :class="[kolom.angka ? 'text-right' : '', kolom.key === 'belum_ditanggapi' || kolom.key === 'laporan_masuk' ? 'border-l' : '']" :aria-sort="urutKolom === kolom.key ? (arahTurun ? 'descending' : 'ascending') : 'none'">
