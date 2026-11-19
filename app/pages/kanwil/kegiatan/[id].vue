@@ -43,9 +43,7 @@ const { data, pending, error, refresh } = await useAsyncData<DetailKegiatan>(`ka
         <section class="rounded-xl border border-border/80 bg-card shadow-xs">
           <h2 class="border-b px-5 py-4 font-semibold">Lampiran</h2>
           <div class="grid gap-3 p-5">
-            <div v-if="data.foto_urls.length" class="grid gap-2" :class="data.foto_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'">
-              <a v-for="(url, i) in data.foto_urls" :key="url" :href="url" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-lg border" :aria-label="`Buka foto ${i + 1}`"><img :src="url" :alt="`Foto dokumentasi kegiatan ${i + 1}`" class="aspect-[4/3] w-full object-cover transition group-hover:scale-105" loading="lazy"></a>
-            </div>
+            <DashboardGaleriFoto :fotos="data.foto_urls" label="Foto dokumentasi kegiatan" />
             <Button v-if="data.pdf_url" variant="outline" as-child><a :href="data.pdf_url" target="_blank" rel="noopener noreferrer" class="no-underline"><FileText class="size-4" />Buka PDF laporan<Download class="ml-auto size-4" /></a></Button>
             <p v-if="!data.foto_urls.length && !data.pdf_url" class="text-sm text-muted-foreground">Tidak ada lampiran.</p>
           </div>
