@@ -2,12 +2,16 @@
 import { Activity, BookOpenText, Building2, ChartNoAxesCombined, ClipboardList, FileText, LayoutDashboard, Map as IkonPeta, MapPinned, Settings, ShieldCheck, UserRoundCog, Users } from '@lucide/vue'
 import type { LucideIcon } from '@lucide/vue'
 import { APP_NAME } from '~~/shared/config/app'
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail } from '~/components/ui/sidebar'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar } from '~/components/ui/sidebar'
 
 const props = withDefaults(defineProps<{ collapsible?: 'offcanvas' | 'icon' | 'none'; side?: 'left' | 'right'; variant?: 'sidebar' | 'floating' | 'inset' }>(), { collapsible: 'icon', side: 'left', variant: 'sidebar' })
 defineEmits<{ keluar: [] }>()
 const { profil } = useAuth()
 const route = useRoute()
+// Di HP sidebar berupa panel geser: tutup otomatis setelah memilih menu, juga saat memilih halaman yang sedang aktif.
+const { setOpenMobile } = useSidebar()
+const tutupDiHp = () => setOpenMobile(false)
+watch(() => route.path, tutupDiHp)
 const IKON: Record<string, LucideIcon> = {
   '/upt': LayoutDashboard, '/kanwil': LayoutDashboard, '/upt/laporan': FileText, '/kanwil/laporan': FileText, '/upt/kegiatan': ClipboardList, '/kanwil/kegiatan': ClipboardList,
   '/upt/pegawai': Users, '/upt/profil': Building2, '/kanwil/peringkat': ChartNoAxesCombined, '/kanwil/pantauan': Activity, '/kanwil/desa-binaan': MapPinned,
@@ -23,7 +27,7 @@ const sidebarProps = computed(() => ({ collapsible: props.collapsible, side: pro
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" as-child class="hover:bg-sidebar-foreground/8">
-            <NuxtLink :to="profil?.peran === 'upt' ? '/upt' : '/kanwil'" class="min-w-0 no-underline">
+            <NuxtLink :to="profil?.peran === 'upt' ? '/upt' : '/kanwil'" class="min-w-0 no-underline" @click="tutupDiHp">
               <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-white/95 p-1 shadow-sm ring-1 ring-sidebar-primary/60"><img class="size-full object-contain" src="/images/logo.webp" alt="" width="36" height="36"></span>
               <span class="grid min-w-0 flex-1 text-left leading-tight"><span class="truncate text-sm font-bold tracking-wide">{{ APP_NAME }}</span><span class="truncate text-xs text-sidebar-foreground/65">Keimigrasian Riau</span></span>
             </NuxtLink>
@@ -43,7 +47,7 @@ const sidebarProps = computed(() => ({ collapsible: props.collapsible, side: pro
               :tooltip="menu.label"
               class="relative h-9 text-sidebar-foreground/80 hover:bg-sidebar-foreground/8 hover:text-sidebar-foreground data-[active=true]:bg-sidebar-foreground/12 data-[active=true]:text-sidebar-foreground data-[active=true]:before:absolute data-[active=true]:before:inset-y-1.5 data-[active=true]:before:left-0 data-[active=true]:before:w-[3px] data-[active=true]:before:rounded-full data-[active=true]:before:bg-sidebar-primary [&[data-active=true]>svg]:text-sidebar-primary"
             >
-              <NuxtLink :to="menu.href" class="no-underline"><component :is="IKON[menu.href] ?? FileText" /><span>{{ menu.label }}</span></NuxtLink>
+              <NuxtLink :to="menu.href" class="no-underline" @click="tutupDiHp"><component :is="IKON[menu.href] ?? FileText" /><span>{{ menu.label }}</span></NuxtLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
