@@ -10,7 +10,7 @@ import { buatGayaTemaDashboard } from '~~/shared/config/tema'
 
 const { profil, keluar } = useAuth()
 const akunImpersonasi = useCookie<string | null>('sapa-impersonasi')
-const konfigurasi = useRuntimeConfig()
+// const konfigurasi = useRuntimeConfig() // dipakai banner MODE UJI COBA (sedang dinonaktifkan, lihat komentar di template)
 const route = useRoute()
 const router = useRouter()
 const { data: statusAdmin } = await useAsyncData('admin-status', () => profil.value?.peran === 'admin' ? useApi()<{ validasi_lokasi_aktif: boolean; akun_admin: number; akun_kanwil: number; akun_upt: number; akun_nonaktif: number }>('/api/admin/status') : Promise.resolve(null), { lazy: true, watch: [() => profil.value?.peran], default: () => null })
@@ -78,8 +78,8 @@ useHead({
           <AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction class="bg-destructive text-destructive-foreground hover:bg-destructive/90" @click="logout">Logout</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      <div v-if="konfigurasi.public.appMode === 'test' || akunImpersonasi || (profil?.peran === 'admin' && statusAdmin && !statusAdmin.validasi_lokasi_aktif) || $slots.banner" class="grid gap-2 px-4 pt-4 lg:px-8">
-        <BannerGlobal :mode-uji="konfigurasi.public.appMode === 'test'" />
+      <div v-if="akunImpersonasi || (profil?.peran === 'admin' && statusAdmin && !statusAdmin.validasi_lokasi_aktif) || $slots.banner" class="grid gap-2 px-4 pt-4 lg:px-8">
+        <!-- Banner MODE UJI COBA dinonaktifkan sementara. Aktifkan lagi dengan: <BannerGlobal :mode-uji="konfigurasi.public.appMode === 'test'" /> , kembalikan kondisi `konfigurasi.public.appMode === 'test' ||` di <div> pembungkus, dan buka komentar `const konfigurasi` di script. -->
         <div v-if="profil?.peran === 'admin' && statusAdmin && !statusAdmin.validasi_lokasi_aktif" class="flex items-center gap-2 rounded-lg border border-destructive bg-destructive px-4 py-2.5 text-sm font-semibold text-destructive-foreground" role="alert"><ShieldAlert class="size-4 shrink-0" aria-hidden="true" />Validasi lokasi dimatikan. Laporan dari luar Riau dapat masuk. Hidupkan kembali setelah pengujian.</div>
         <div v-if="akunImpersonasi" class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/40 bg-bahaya-muda px-4 py-2 text-sm font-semibold text-destructive" role="status"><span>Anda masuk sebagai {{ akunImpersonasi }}</span><Button size="sm" variant="outline" class="bg-card" @click="konfirmasiLogoutTerbuka = true">Logout</Button></div>
         <slot name="banner" />
