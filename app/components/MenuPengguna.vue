@@ -39,7 +39,7 @@ const labelPeran = computed(() => PERAN_PENGGUNA.find(item => item.value === pro
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuGroup>
-        <DropdownMenuItem @select="bukaGantiPassword"><KeyRound />{{ TEKS_UMUM.gantiPassword }}</DropdownMenuItem>
+        <DropdownMenuItem v-if="profil?.peran === 'admin'" @select="bukaGantiPassword"><KeyRound />{{ TEKS_UMUM.gantiPassword }}</DropdownMenuItem>
         <DropdownMenuItem @select="gantiTema"><Sun v-if="gelap" /><Moon v-else />{{ gelap ? 'Mode terang' : 'Mode gelap' }}</DropdownMenuItem>
       </DropdownMenuGroup>
       <DropdownMenuSeparator />

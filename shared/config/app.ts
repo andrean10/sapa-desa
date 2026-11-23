@@ -34,12 +34,8 @@ export const MENU_PERAN: Record<PeranAplikasi, readonly { label: string; href: s
     { label: LABEL_MENU.peringkat, href: '/kanwil/peringkat' },
     { label: LABEL_MENU.pantauan, href: '/kanwil/pantauan' },
     { label: LABEL_MENU.laporan, href: '/kanwil/laporan' },
-    { label: LABEL_MENU.kegiatan, href: '/kanwil/kegiatan' },
-    { label: LABEL_MENU.desaBinaan, href: '/kanwil/desa-binaan' },
-    { label: LABEL_MENU.penugasan, href: '/kanwil/penugasan' },
-    { label: LABEL_MENU.wilayahKerja, href: '/kanwil/wilayah-kerja' },
-    { label: LABEL_MENU.faq, href: '/kanwil/faq' },
-    { label: LABEL_MENU.pengaturan, href: '/kanwil/pengaturan' }
+    { label: LABEL_MENU.kegiatan, href: '/kanwil/kegiatan' }
+    // Menu "Pengelolaan" (desa binaan, penugasan, wilayah kerja, FAQ, pengaturan) disembunyikan dari sidebar Kanwil; hanya admin yang melihatnya.
   ],
   admin: [
     { label: LABEL_MENU.dashboard, href: '/kanwil' },

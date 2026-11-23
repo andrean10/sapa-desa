@@ -24,6 +24,8 @@ export async function profilSesi(event: H3Event): Promise<ProfilSesi> {
 
 export async function gantiPassword(event: H3Event) {
   const profil = await profilSesi(event)
+  // Kanwil dan UPT tidak punya fitur ganti password mandiri: perubahan lewat admin (reset password).
+  if (profil.peran !== 'admin') throw createError({ statusCode: 403, statusMessage: 'Ganti password dilakukan melalui admin.' })
   const input = z.object({ passwordSaatIni: z.string().min(1), passwordBaru: z.string().min(8).max(128) }).strict().safeParse(await readBody(event))
   if (!input.success) throw createError({ statusCode: 400, statusMessage: 'Password baru minimal 8 karakter.' })
   if (input.data.passwordSaatIni === input.data.passwordBaru) throw createError({ statusCode: 400, statusMessage: 'Password baru harus berbeda dari password saat ini.' })

@@ -86,6 +86,6 @@ useHead({
       </div>
       <main class="mx-auto w-full max-w-screen-2xl min-w-0 flex-1 px-4 py-5 sm:py-6 lg:px-8"><slot /></main>
     </SidebarInset>
-    <AkunDialogGantiPassword />
+    <AkunDialogGantiPassword v-if="profil?.peran === 'admin'" />
   </SidebarProvider>
 </template>

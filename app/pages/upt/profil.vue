@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import { Building2, KeyRound, MapPinned, UserRoundCog } from '@lucide/vue'
-import { Button } from '~/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { formatTanggalWib } from '~~/shared/utils/waktu'
 
 definePageMeta({ layout: 'dashboard', title: 'Profil Kantor' })
 const { data, pending, error, refresh } = await useProfilUpt()
-const { buka: bukaGantiPassword } = useDialogGantiPassword()
 </script>
 
 <template>
   <div class="grid gap-5">
     <DashboardKepalaHalaman judul="Profil kantor" deskripsi="Informasi kantor, wilayah kerja, dan petugas PIMPASA.">
-      <template #aksi><Button variant="outline" @click="bukaGantiPassword"><KeyRound class="size-4" />Ganti password</Button></template>
+      <template #aksi><p class="flex items-center gap-1.5 text-xs text-muted-foreground"><KeyRound class="size-3.5 shrink-0" aria-hidden="true" />Untuk mengganti password, hubungi admin.</p></template>
     </DashboardKepalaHalaman>
     <div v-if="pending"><DashboardStateMemuat :baris="3" tinggi="h-32" /></div>
     <DashboardStateGalat v-else-if="error" pesan="Profil kantor belum dapat dimuat." @coba="refresh()" />

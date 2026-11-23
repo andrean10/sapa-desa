@@ -345,7 +345,7 @@ Akun UPT dipakai bersama oleh pimpinan (KASI INTELDAKIM) dan staf, jadi **tidak 
 Tampilan desktop-first (shadcn), tetap dapat dipakai di tablet.
 
 - **Sidebar** biru tua (kolaps menjadi ikon; di HP menjadi panel geser). Nama aplikasi di atas, menu sesuai peran, item aktif diberi penanda emas.
-- **Bilah atas**: judul halaman, remah roti (breadcrumb), dan menu pengguna: nama tampil, lencana peran, nama kantor (UPT), **Ganti password**, **Keluar**.
+- **Bilah atas**: judul halaman, remah roti (breadcrumb), dan menu pengguna: nama tampil, lencana peran, nama kantor (UPT), **Ganti password** (hanya admin), **Keluar**.
 - **Area banner global** di bawah bilah atas:
   - **Saklar lokasi mati** (khusus tampilan admin): banner merah "Validasi lokasi dimatikan. Laporan dari luar Riau dapat masuk. Hidupkan kembali setelah pengujian." Data dari `dashboard_admin_status` (KONTRAK_API 5.1).
   - **Mode uji coba**: bila `NUXT_PUBLIC_APP_MODE = test`, banner kuning "MODE UJI COBA". Env ini hanya memunculkan banner, tidak mengubah hak akses.
@@ -361,13 +361,8 @@ Tampilan desktop-first (shadcn), tetap dapat dipakai di tablet.
 | Laporan Kegiatan | Pantauan | Log aktivitas *(tahap akhir)* |
 | Pegawai | Laporan Masyarakat | |
 | Profil Kantor | Laporan Kegiatan | |
-| | Desa Binaan | |
-| | Penugasan PIMPASA | |
-| | Wilayah Kerja | |
-| | FAQ | |
-| | Pengaturan | |
 
-Admin melihat semua menu Kanwil ditambah kelompok Admin. Pada setiap halaman Kanwil/admin tersedia pemilih "Lihat sebagai UPT" (dropdown 7 kantor) yang membuka `/kanwil/upt/[kantorId]` (dashboard UPT untuk kantor itu, hanya baca).
+**Menu Kanwil tidak memuat kelompok Pengelolaan** (Desa Binaan, Penugasan PIMPASA, Wilayah Kerja, FAQ, Pengaturan disembunyikan dari sidebar). Menu itu hanya tampil untuk **admin**, yang melihat semua menu Kanwil ditambah Pengelolaan dan kelompok Admin. Pada setiap halaman Kanwil/admin tersedia pemilih "Lihat sebagai UPT" (dropdown 7 kantor) yang membuka `/kanwil/upt/[kantorId]` (dashboard UPT untuk kantor itu, hanya baca).
 
 ---
 
@@ -490,7 +485,7 @@ Tiga kartu (KONTRAK_API 4.7):
 2. **Wilayah kerja**: daftar kabupaten/kota sebagai lencana.
 3. **Petugas PIMPASA**: tabel Pegawai · Desa binaan · Kecamatan · Kabupaten/Kota · Bertugas sejak. Kosong: "Belum ada petugas PIMPASA yang ditetapkan."
 
-Tombol **Ganti password** membuka dialog ganti password (10.1).
+UPT tidak punya tombol ganti password; tertulis "Untuk mengganti password, hubungi admin." (10.1).
 
 ---
 
@@ -624,9 +619,9 @@ Tabel log (`log_aktivitas`): Waktu · Akun · Peran · Petugas atas nama · Aksi
 
 ## 10. Halaman umum
 
-### 10.1 Ganti password (dialog)
+### 10.1 Ganti password (dialog) — hanya admin
 
-Bukan halaman tersendiri: **dialog** yang dibuka dari menu pengguna (semua halaman dashboard) dan dari tombol di Profil Kantor, sehingga pengguna tetap di halaman yang sedang dibuka. Bagi semua peran yang login. Kolom: Password saat ini, Password baru, Ulangi password baru. Aturan: minimal 8 karakter, berbeda dari password saat ini, tidak sama dengan username. Server memverifikasi password saat ini sebelum mengganti (KONTRAK_API 3a). Berhasil: toast "Password diganti."; sesi di perangkat ini tetap berlaku, sedangkan **perangkat lain otomatis keluar** (sesi dicabut di server; berlaku penuh saat token akses perangkat itu habis, sekitar 1 jam). Tidak ada dialog konfirmasi tambahan: pengguna sudah memasukkan password saat ini dan mengetik password baru dua kali. **Reset password oleh admin** mencabut semua sesi akun itu (semua perangkat) dan dialog konfirmasinya menyebutkan hal tersebut. Himbauan awal "ganti password awal" disampaikan langsung oleh Kanwil kepada UPT; **pemaksaan ganti password di login pertama [DITUNDA]** karena membutuhkan kolom penanda di database.
+**Kanwil dan UPT tidak punya fitur ganti password**: mereka meminta admin (reset password di Kelola akun) secara manual. Menu "Ganti password" tidak tampil untuk mereka, Profil Kantor UPT hanya memuat catatan "Untuk mengganti password, hubungi admin.", dan server menolak permintaan ganti password dari selain admin (403). Untuk **admin**, ini berupa **dialog** dari menu pengguna sehingga admin tetap di halaman yang sedang dibuka. Kolom: Password saat ini, Password baru, Ulangi password baru. Aturan: minimal 8 karakter, berbeda dari password saat ini, tidak sama dengan username. Server memverifikasi password saat ini sebelum mengganti (KONTRAK_API 3a). Berhasil: toast "Password diganti."; sesi di perangkat ini tetap berlaku, sedangkan **perangkat lain otomatis keluar** (sesi dicabut di server; berlaku penuh saat token akses perangkat itu habis, sekitar 1 jam). Tidak ada dialog konfirmasi tambahan: pengguna sudah memasukkan password saat ini dan mengetik password baru dua kali. **Reset password oleh admin** mencabut semua sesi akun itu (semua perangkat) dan dialog konfirmasinya menyebutkan hal tersebut. Himbauan awal "ganti password awal" disampaikan langsung oleh Kanwil kepada UPT; **pemaksaan ganti password di login pertama [DITUNDA]** karena membutuhkan kolom penanda di database.
 
 ### 10.2 Halaman galat
 
