@@ -129,6 +129,13 @@ Aturan:
 
 Jika dokumen dan database berbeda, **database yang benar**. Laporkan selisihnya ke pemilik project. Urutan baca untuk fitur baru: `PRD.md` (apa yang dibangun), lalu `KONTRAK_API.md` (panggilan databasenya), lalu `SCHEMA.md` bila butuh detail tabel.
 
+## 9a. Pengingat untuk pemilik project (sampaikan di awal setiap sesi baru)
+
+Hal-hal yang masih tertunda dan **harus diingatkan ke pemilik project di awal sesi**, sampai dinyatakan selesai:
+1. **Policy database pengelolaan masih mengizinkan Kanwil.** Menu, rute, dan endpoint pengelolaan (desa binaan, penugasan, wilayah kerja, FAQ, jenis kegiatan, pengaturan) sudah khusus admin di aplikasi, tetapi RLS di tabelnya belum dibatasi. Akun Kanwil yang menembak API Supabase langsung masih bisa menulis. Perlu migrasi policy (keputusan pemilik project dan pimpinan) sebelum production.
+2. Leaked password protection Supabase Auth diaktifkan saat production (self-hosted: pakai password acak panjang dari admin).
+3. Migrasi staging ke VPS dijalankan berurutan (`migrasi-master-lengkap.sql`) sebelum kode baru dideploy, lalu generate ulang `database.types.ts` dari master.
+
 ## 10. Cara kerja
 
 - Kerjakan bertahap (satu fitur per langkah), jelaskan penalaran untuk keputusan yang kompleks, dan tanyakan bila ada pilihan yang memengaruhi desain.
