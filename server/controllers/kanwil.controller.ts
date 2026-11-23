@@ -149,6 +149,13 @@ function validasiPeriode(mulai?: string, selesai?: string) {
   }
 }
 
+/** Menu Pengelolaan (desa binaan, penugasan, wilayah kerja, FAQ, pengaturan) khusus admin; Kanwil hanya memantau. */
+async function profilAdmin(event: H3Event) {
+  const profil = await profilSesi(event)
+  if (profil.peran !== 'admin') throw createError({ statusCode: 403, statusMessage: 'Fitur pengelolaan ini hanya untuk admin.' })
+  return profil
+}
+
 async function profilKanwil(event: H3Event) {
   const profil = await profilSesi(event)
   if (profil.peran !== 'kanwil' && profil.peran !== 'admin') throw createError({ statusCode: 403, statusMessage: 'Halaman ini hanya untuk Kanwil dan admin.' })
@@ -242,14 +249,14 @@ function pastikanBerhasil<T extends { error: { message: string } | null; data?: 
 }
 
 export async function desaBinaanKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const hasil = await daftarDesaBinaanKanwil(buatClientSesiUser(event))
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Daftar desa binaan belum dapat dimuat.' })
   return hasil.data
 }
 
 export async function pilihanWilayahKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const query = getQuery(event)
   const kabupatenId = typeof query.kabupatenId === 'string' ? query.kabupatenId : undefined
   const kecamatanId = typeof query.kecamatanId === 'string' ? query.kecamatanId : undefined
@@ -259,7 +266,7 @@ export async function pilihanWilayahKanwil(event: H3Event) {
 }
 
 export async function ubahDbiKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const parsed = z.object({ desa_id: z.string().min(1), dbi: z.boolean() }).strict().safeParse(await readBody(event))
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Desa yang dipilih tidak valid.' })
   const hasil = await ubahStatusDbiKanwil(buatClientSesiUser(event), parsed.data.desa_id, parsed.data.dbi)
@@ -268,7 +275,7 @@ export async function ubahDbiKanwil(event: H3Event) {
 }
 
 export async function penugasanKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const query = getQuery(event)
   const aktif = query.aktif === 'true' ? true : query.aktif === 'false' ? false : undefined
   const kantorId = typeof query.kantorId === 'string' ? query.kantorId : undefined
@@ -281,14 +288,14 @@ export async function penugasanKanwil(event: H3Event) {
 }
 
 export async function pilihanPenugasanKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const hasil = await import('../models/kanwil.model').then(mod => mod.pilihanPenugasanKanwil(buatClientSesiUser(event)))
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Pilihan penugasan belum dapat dimuat.' })
   return hasil
 }
 
 export async function buatPenugasanKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const parsed = z.object({ desa_id: z.string().min(1), pegawai_id: z.string().uuid(), tanggal_mulai: z.string().optional() }).strict().safeParse(await readBody(event))
   if (!parsed.success || parsed.data.tanggal_mulai && !/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.tanggal_mulai)) throw createError({ statusCode: 400, statusMessage: 'Isian penugasan tidak valid.' })
   const hasil = await buatPenugasanKanwil(buatClientSesiUser(event), parsed.data)
@@ -297,7 +304,7 @@ export async function buatPenugasanKanwilHandler(event: H3Event) {
 }
 
 export async function ubahPenugasanKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const id = event.context.params?.id
   if (!id || !/^[0-9a-f-]{36}$/i.test(id)) throw createError({ statusCode: 400, statusMessage: 'ID penugasan tidak valid.' })
   const parsed = z.object({ tanggal_mulai: z.string().optional(), tanggal_selesai: z.string().nullable().optional(), alasan_berakhir: z.enum(['rotasi', 'mutasi', 'desa_dicabut', 'lainnya']).nullable().optional() }).strict().refine(input => input.tanggal_mulai !== undefined || input.tanggal_selesai !== undefined || input.alasan_berakhir !== undefined).safeParse(await readBody(event))
@@ -309,14 +316,14 @@ export async function ubahPenugasanKanwilHandler(event: H3Event) {
 }
 
 export async function wilayahKerjaKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const hasil = await daftarWilayahKerjaKanwil(buatClientSesiUser(event))
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Wilayah kerja belum dapat dimuat.' })
   return { kabupaten: hasil.kabupaten, kantor: hasil.kantor }
 }
 
 export async function ubahWilayahKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const parsed = z.object({ kabupaten_id: z.string().min(1), kantor_id: z.string().uuid() }).strict().safeParse(await readBody(event))
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Kabupaten/kota atau kantor tujuan tidak valid.' })
   const hasil = await ubahWilayahKanwil(buatClientSesiUser(event), parsed.data.kabupaten_id, parsed.data.kantor_id)
@@ -325,14 +332,14 @@ export async function ubahWilayahKanwilHandler(event: H3Event) {
 }
 
 export async function faqKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const hasil = await daftarFaqKanwil(buatClientSesiUser(event))
   if (hasil.error) throw createError({ statusCode: 503, statusMessage: 'Daftar FAQ belum dapat dimuat.' })
   return hasil.data ?? []
 }
 
 export async function simpanFaqKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const parsed = z.object({ id: z.string().uuid().optional(), pertanyaan: z.string().trim().min(1).max(250), jawaban: z.string().trim().min(1).max(5000) }).strict().safeParse(await readBody(event))
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Pertanyaan atau jawaban FAQ tidak valid.' })
   const hasil = await tulisFaqKanwil(buatClientSesiUser(event), parsed.data)
@@ -341,7 +348,7 @@ export async function simpanFaqKanwil(event: H3Event) {
 }
 
 export async function hapusFaqKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const id = event.context.params?.id
   if (!id || !z.string().uuid().safeParse(id).success) throw createError({ statusCode: 400, statusMessage: 'ID FAQ tidak valid.' })
   pastikanBerhasil(await hapusFaqKanwil(buatClientSesiUser(event), id), 'Penghapusan FAQ')
@@ -349,7 +356,7 @@ export async function hapusFaqKanwilHandler(event: H3Event) {
 }
 
 export async function ubahUrutanFaqKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const id = event.context.params?.id
   const parsed = z.object({ urutan: z.number().int().min(0) }).strict().safeParse(await readBody(event))
   if (!id || !z.string().uuid().safeParse(id).success || !parsed.success) throw createError({ statusCode: 400, statusMessage: 'Urutan FAQ tidak valid.' })
@@ -358,14 +365,14 @@ export async function ubahUrutanFaqKanwilHandler(event: H3Event) {
 }
 
 export async function pengaturanKanwil(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const hasil = await daftarPengaturanKanwil(buatClientSesiUser(event))
   if (hasil.pengaturan.error || hasil.jenis.error) throw createError({ statusCode: 503, statusMessage: 'Pengaturan belum dapat dimuat.' })
   return { pengaturan: hasil.pengaturan.data ?? [], jenis: hasil.jenis.data ?? [] }
 }
 
 export async function simpanNilaiPengaturanKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const parsed = z.object({ kunci: z.enum(['batas_hari_tanggap', 'batas_menit_hapus_laporan', 'toleransi_batas_meter']), nilai: z.coerce.number().int().min(0).max(99999) }).strict().safeParse(await readBody(event))
   if (!parsed.success || parsed.success && parsed.data.kunci !== 'toleransi_batas_meter' && parsed.data.nilai < 1) throw createError({ statusCode: 400, statusMessage: 'Nilai pengaturan di luar batas yang diizinkan.' })
   pastikanBerhasil(await simpanNilaiPengaturanKanwil(buatClientSesiUser(event), parsed.data.kunci, String(parsed.data.nilai)), 'Penyimpanan pengaturan')
@@ -373,7 +380,7 @@ export async function simpanNilaiPengaturanKanwilHandler(event: H3Event) {
 }
 
 export async function simpanJenisKegiatanKanwilHandler(event: H3Event) {
-  await profilKanwil(event)
+  await profilAdmin(event)
   const parsed = z.object({ id: z.string().uuid().optional(), nama: z.string().trim().min(1).max(100), aktif: z.boolean().optional() }).strict().safeParse(await readBody(event))
   if (!parsed.success) throw createError({ statusCode: 400, statusMessage: 'Nama atau status jenis kegiatan tidak valid.' })
   const hasil = await tulisJenisKegiatanKanwil(buatClientSesiUser(event), parsed.data)

@@ -29,8 +29,8 @@ Dependency dipasang oleh Codex. Pilih versi stabil yang kompatibel dengan Nuxt d
 |---|---|---|---|
 | masyarakat | tidak ada (anonim) | HyperUI | kirim laporan, lacak laporan dengan kode, baca FAQ |
 | `upt` | username + password | shadcn | laporan kantornya sendiri, ubah status, laporan kegiatan PIMPASA, kelola pegawai kantornya, profil kantor |
-| `kanwil` | username + password | shadcn | baca semua, dashboard dan peringkat, kelola desa binaan/penugasan/wilayah kerja/FAQ/jenis kegiatan/hari libur/pengaturan (kecuali saklar lokasi). **Tidak bisa** mengubah status laporan |
-| `admin` | username + password | shadcn | semua hak Kanwil + **ubah status laporan** (database mengizinkan; `p_pegawai_id` kosong), saklar lokasi, mutasi pegawai, hapus laporan kegiatan, lihat log, status sistem |
+| `kanwil` | username + password | shadcn | hanya **memantau**: baca semua, dashboard, peringkat, pantauan. Menu dan endpoint pengelolaan (desa binaan, penugasan, wilayah kerja, FAQ, jenis kegiatan, pengaturan) **khusus admin** (disembunyikan dari sidebar, dijaga penjaga rute dan endpoint server; database masih mengizinkan Kanwil, jadi jangan dilonggarkan di aplikasi). **Tidak bisa** mengubah status laporan dan tidak punya ganti password mandiri (lewat admin) |
+| `admin` | username + password | shadcn | semua hak Kanwil + **seluruh pengelolaan di atas** + **ubah status laporan** (database mengizinkan; `p_pegawai_id` kosong), saklar lokasi, mutasi pegawai, hapus laporan kegiatan, lihat log, status sistem |
 
 Alur login:
 1. Form login meminta **username** saja. Email dibentuk `${username}@${AUTH_EMAIL_DOMAIN}` (nilai dari konfigurasi global, jangan ditulis di banyak tempat). Tidak ada email asli yang terkirim dan tidak ada "lupa password" mandiri.

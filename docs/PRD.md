@@ -169,11 +169,11 @@ Grafik memakai komponen chart bawaan shadcn-vue.
 | `/kanwil/laporan`, `/kanwil/laporan/[id]` | Laporan masyarakat (baca saja untuk Kanwil; admin dapat ubah status) | ya | ya |
 | `/kanwil/kegiatan`, `/kanwil/kegiatan/[id]` | Laporan kegiatan PIMPASA (baca saja) | ya | ya |
 | `/kanwil/upt/[kantorId]` | Lihat dashboard sebagai UPT | ya | ya |
-| `/kanwil/desa-binaan` | Kelola desa binaan | ya | ya |
-| `/kanwil/penugasan` | Penugasan PIMPASA | ya | ya |
-| `/kanwil/wilayah-kerja` | Wilayah kerja UPT | ya | ya |
-| `/kanwil/faq` | Kelola FAQ | ya | ya |
-| `/kanwil/pengaturan` | Pengaturan dan jenis kegiatan | ya | ya |
+| `/kanwil/desa-binaan` | Kelola desa binaan | ya | **tidak** |
+| `/kanwil/penugasan` | Penugasan PIMPASA | ya | **tidak** |
+| `/kanwil/wilayah-kerja` | Wilayah kerja UPT | ya | **tidak** |
+| `/kanwil/faq` | Kelola FAQ | ya | **tidak** |
+| `/kanwil/pengaturan` | Pengaturan dan jenis kegiatan | ya | **tidak** |
 | `/admin/status` | Status sistem dan saklar lokasi | ya | tidak |
 | `/admin/akun` | Kelola akun | ya | tidak |
 | `/admin/log` | Log aktivitas | ya | tidak |
@@ -362,7 +362,7 @@ Tampilan desktop-first (shadcn), tetap dapat dipakai di tablet.
 | Pegawai | Laporan Masyarakat | |
 | Profil Kantor | Laporan Kegiatan | |
 
-**Menu Kanwil tidak memuat kelompok Pengelolaan** (Desa Binaan, Penugasan PIMPASA, Wilayah Kerja, FAQ, Pengaturan disembunyikan dari sidebar). Menu itu hanya tampil untuk **admin**, yang melihat semua menu Kanwil ditambah Pengelolaan dan kelompok Admin. Pada setiap halaman Kanwil/admin tersedia pemilih "Lihat sebagai UPT" (dropdown 7 kantor) yang membuka `/kanwil/upt/[kantorId]` (dashboard UPT untuk kantor itu, hanya baca).
+**Menu Kanwil tidak memuat kelompok Pengelolaan** (rute itu juga dijaga: Kanwil yang membuka alamatnya dialihkan ke dashboard dengan pesan akses ditolak, dan endpoint `/api/kanwil/{desa-binaan,penugasan,wilayah-kerja,faq,pengaturan,jenis-kegiatan}` menjawab 403 selain admin) (Desa Binaan, Penugasan PIMPASA, Wilayah Kerja, FAQ, Pengaturan disembunyikan dari sidebar). Menu itu hanya tampil untuk **admin**, yang melihat semua menu Kanwil ditambah Pengelolaan dan kelompok Admin. Pada setiap halaman Kanwil/admin tersedia pemilih "Lihat sebagai UPT" (dropdown 7 kantor) yang membuka `/kanwil/upt/[kantorId]` (dashboard UPT untuk kantor itu, hanya baca).
 
 ---
 

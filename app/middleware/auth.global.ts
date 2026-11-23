@@ -1,10 +1,12 @@
 import { toast } from 'vue-sonner'
+import { RUTE_KHUSUS_ADMIN } from '~~/shared/config/app'
 import { TEKS_UMUM } from '~~/shared/config/teks'
 
 const RUTE_TERLINDUNGI = ['/upt', '/kanwil', '/admin']
 
 function peranDiizinkan(jalur: string, peran: 'admin' | 'kanwil' | 'upt'): boolean {
   if (peran === 'admin') return true
+  if (RUTE_KHUSUS_ADMIN.some(rute => jalur === rute || jalur.startsWith(`${rute}/`))) return false
   if (jalur.startsWith('/upt')) return peran === 'upt'
   if (jalur.startsWith('/kanwil')) return peran === 'kanwil'
   if (jalur.startsWith('/admin')) return false

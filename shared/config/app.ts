@@ -53,6 +53,9 @@ export const MENU_PERAN: Record<PeranAplikasi, readonly { label: string; href: s
   ]
 }
 
+/** Rute pengelolaan yang hanya boleh dibuka admin (Kanwil hanya memantau). Dipakai penjaga rute; endpoint server punya penjaga sendiri. */
+export const RUTE_KHUSUS_ADMIN = ['/kanwil/desa-binaan', '/kanwil/penugasan', '/kanwil/wilayah-kerja', '/kanwil/faq', '/kanwil/pengaturan'] as const
+
 /** Kontak resmi instansi (footer landing). */
 export const KONTAK_INSTANSI = {
   alamat: 'Jl. Jend. Sudirman No.233, Pekanbaru, Riau 28111',
